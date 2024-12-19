@@ -1,2 +1,2 @@
 # FinishLine_BE
-FinishLine Front-End Repository
+FinishLine Back-End Repository
