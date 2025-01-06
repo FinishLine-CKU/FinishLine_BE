@@ -87,8 +87,12 @@ WSGI_APPLICATION = 'Django_ws.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': 'FinishLine_DB',
+        'USER': 'FinishLine',
+        'PASSWORD': 'finishline',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
 }
 
