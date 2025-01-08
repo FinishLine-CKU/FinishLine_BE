@@ -7,8 +7,8 @@ def scraping(studentId, studentPW):
     try:
         options = webdriver.ChromeOptions()
         
-        # options.add_argument('headless')
-        # options.add_argument('--disable-gpu')
+        options.add_argument('headless')
+        options.add_argument('--disable-gpu')
         options.add_experimental_option("detach", True)
         options.add_experimental_option('excludeSwitches', ['disable-popup-blocking'])
 
