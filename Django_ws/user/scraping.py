@@ -41,5 +41,5 @@ def scraping(studentId, studentPW):
         return errorMessage
     except:
         driver.quit()
-        errorMessage = '잠시 후 다시 시도해주세요. 문제가 지속될 시 관리자에게 문의바랍니다.'
+        errorMessage = '회원 정보를 확인할 수 없습니다. 잠시 후 다시 시도해주세요.'
         return errorMessage
