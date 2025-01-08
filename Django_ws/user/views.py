@@ -5,15 +5,15 @@ from rest_framework.response import Response
 @api_view(['POST'])
 def student_auth(request):
     if request.method == 'POST':
-        try:
-            data = request.data
-            studentId = data.get('studentId')
-            studentPW = data.get('studentPW')
-            student_id, name, major = scraping(studentId, studentPW)
-            print(student_id, name, major)
+        data = request.data
+        studentId = data.get('studentId')
+        studentPW = data.get('studentPW')
+        result = scraping(studentId, studentPW)
+        if isinstance(result, tuple):
+            student_id, name, major = result
             data = {'student_id': student_id, 'name' : name, 'major' : major}
-        except:
-            fault = scraping(studentId, studentPW)
-            print(fault)
-            data = {'fault' : fault}
+        else:
+            error = result
+            data = {'error' : error}
+        print(data)
     return Response (data)

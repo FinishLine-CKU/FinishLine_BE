@@ -7,8 +7,8 @@ def scraping(studentId, studentPW):
     try:
         options = webdriver.ChromeOptions()
         
-        options.add_argument('headless')
-        options.add_argument('--disable-gpu')
+        # options.add_argument('headless')
+        # options.add_argument('--disable-gpu')
         options.add_experimental_option("detach", True)
         options.add_experimental_option('excludeSwitches', ['disable-popup-blocking'])
 
@@ -36,6 +36,10 @@ def scraping(studentId, studentPW):
 
         return student_id, name, major
     except UnexpectedAlertPresentException:
-        return '아이디 또는 비밀번호가 올바르지 않습니다.'
+        driver.quit()
+        errorMessage = '아이디 또는 비밀번호가 올바르지 않습니다.'
+        return errorMessage
     except:
-        return '시스템 오류 : 관리자에게 문의 부탁드립니다.'
+        driver.quit()
+        errorMessage = '잠시 후 다시 시도해주세요. 문제가 지속될 시 관리자에게 문의바랍니다.'
+        return errorMessage
