@@ -12,7 +12,11 @@ def student_auth(request):
     result = scraping(studentId, studentPW)
     if isinstance(result, tuple):
         student_id, name, major = result
-        data = {'student_id': student_id, 'name' : name, 'major' : major}
+        if User.objects.filter(student_id = student_id, name = name).exists():
+            error = '이미 가입된 회원입니다.'
+            data = {'error' : error}          
+        else:
+            data = {'student_id': student_id, 'name' : name, 'major' : major}
     else:
         error = result
         data = {'error' : error}
