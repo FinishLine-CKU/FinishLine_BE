@@ -51,3 +51,7 @@ def register_info(request):
             return Response (False)
     print('회원가입 필수 데이터 누락')
     return Response (False)
+
+@api_view(['POST'])
+def check_register(request):
+    return 0
