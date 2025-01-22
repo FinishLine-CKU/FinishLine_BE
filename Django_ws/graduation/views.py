@@ -1,15 +1,13 @@
+from django.shortcuts import render
+from django.http import HttpResponse
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
 from io import BytesIO
 from .extract import extract_from_pdf_table
 from .extract import save_pdf_data_to_db
-from rest_framework import viewsets
-from .models import MyDoneLecture
-from .serializers import MyDoneLectureSerializer
+import logging
 
-class MyDoneLectureViewSet(viewsets.ModelViewSet):
-    queryset = MyDoneLecture.objects.all() 
-    serializer_class = MyDoneLectureSerializer
+logger = logging.getLogger(__name__)
 
 @api_view(['POST'])
 def upload_pdf(request):
@@ -39,8 +37,9 @@ def upload_pdf(request):
                     duplicate_files.append(uploaded_file.name)
 
             except Exception as e:
+                logger.error(f"Error processing file {uploaded_file.name}: {str(e)}")
                 return Response({'error': f'Error processing file {uploaded_file.name}: {str(e)}'}, status=500)
-
+    logger.info("File processing completed.")
     return Response({
         'message': 'Files processed successfully',
         'data': result_data,
