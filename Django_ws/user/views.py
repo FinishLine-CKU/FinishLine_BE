@@ -1,4 +1,4 @@
-from django.contrib.auth.hashers import make_password
+from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.decorators import api_view
 from .scraping import scraping
 from .models import User
@@ -51,3 +51,25 @@ def register_info(request):
             return Response (False)
     print('회원가입 필수 데이터 누락')
     return Response (False)
+
+@api_view(['POST'])
+def check_register(request):
+    data = request.data
+    student_id = data.get('studentId')
+    password = data.get('password')
+    if student_id and password:
+        if User.objects.filter(student_id = student_id).exists():
+            user = User.objects.filter(student_id = student_id).first()
+            if check_password(password, user.password):
+                data = {'name' : user.name}
+            else:
+                error = '학번 또는 비밀번호가 올바르지 않습니다.'
+                data = {'error' : error}
+        else:
+            error = '학번 또는 비밀번호가 올바르지 않습니다.'
+            data = {'error' : error}
+    else:
+        error = '서버가 원활하지 않습니다. 잠시 후 다시 시도해주세요.'
+        data = {'error' : error}
+    print(data)
+    return Response (data)
