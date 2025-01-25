@@ -94,3 +94,15 @@ def my_info(request):
         data = {'error' : error}
     print(data)
     return Response (data)
+
+@api_view(['POST'])
+def remove_membership(request):
+    data = request.data
+    name = data.get('name')
+    if User.objects.filter(name = name).exists():
+        User.objects.filter(name = name).first().delete()
+        data = { 'result' : True }
+    else:
+        data = { 'result' : False }
+    print(data)
+    return Response (data)
