@@ -73,3 +73,36 @@ def check_register(request):
         data = {'error' : error}
     print(data)
     return Response (data)
+
+@api_view(['POST'])
+def my_info(request):
+    data = request.data
+    name = data.get('name')
+    if User.objects.filter(name = name).exists():
+        user = User.objects.filter(name = name).first()
+        data = {
+            'major' : user.major,
+            'student_id' : user.student_id,
+        }
+        if user.sub_major_type and user.sub_major:
+            data['sub_major_type'] = user.sub_major_type
+            data['sub_major'] = user.sub_major
+        if user.micro_degree:
+            data['micro_degree'] = user.micro_degree
+    else:
+        error = '해당 없음',
+        data = {'error' : error}
+    print(data)
+    return Response (data)
+
+@api_view(['POST'])
+def remove_membership(request):
+    data = request.data
+    name = data.get('name')
+    if User.objects.filter(name = name).exists():
+        User.objects.filter(name = name).first().delete()
+        data = { 'result' : True }
+    else:
+        data = { 'result' : False }
+    print(data)
+    return Response (data)
