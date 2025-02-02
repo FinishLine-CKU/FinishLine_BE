@@ -122,3 +122,24 @@ def change_pw(request):
         data = {'error' : error}
     print(data)
     return Response (data)
+
+@api_view(['POST'])
+def change_info(request):
+    data = request.data
+    student_id = data.get('studentId')
+    sub_major_type = data.get('sub_major_type')
+    sub_major = data.get('sub_major')
+    micro_degree = data.get('micro_degree')
+    if student_id:
+        user = User.objects.filter(student_id = student_id).first()
+        user.sub_major_type = sub_major_type
+        user.sub_major = sub_major
+        user.micro_degree = micro_degree
+        user.save()
+        data = {'success' : 'success'}
+    else:
+        error = '회원정보 변경에 실패했습니다. 잠시 후 다시 시도해주세요.'
+        data = {'error' : error}
+    print(data)
+    return Response (data)
+
