@@ -4,7 +4,6 @@ import pdfplumber
 import re
 from .models import MyDoneLecture
 from .models import AllLectureData
-from user.models import User
 
 def extract_from_pdf_title(pdf_stream):
     with pdfplumber.open(pdf_stream) as pdf:
