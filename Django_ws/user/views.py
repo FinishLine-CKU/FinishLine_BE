@@ -106,3 +106,19 @@ def remove_membership(request):
         data = { 'result' : False }
     print(data)
     return Response (data)
+
+@api_view(['POST'])
+def change_pw(request):
+    data = request.data
+    student_id = data.get('studentId')
+    password = data.get('password')
+    if student_id and password:
+        user = User.objects.filter(student_id = student_id).first()
+        user.password = make_password(password)
+        user.save()
+        data = {'success' : 'success'}
+    else:
+        error = '비밀번호 변경에 실패했습니다. 잠시 후 다시 시도해주세요.'
+        data = {'error' : error}
+    print(data)
+    return Response (data)
