@@ -4,7 +4,7 @@ import pdfplumber
 import re
 from .models import MyDoneLecture
 from .models import AllLectureData
-import math
+from user.models import User
 
 def extract_from_pdf_title(pdf_stream):
     with pdfplumber.open(pdf_stream) as pdf:
@@ -18,6 +18,125 @@ def extract_from_pdf_title(pdf_stream):
             return year, semester
         else:
             return None, None
+        
+MAJOR_MAP = {
+    '의예과': '030501*',
+    '간호학과': '030502*',
+    '의학과': '030503*',
+    '국어교육과': '030701*',
+    '지리교육과': '030702*',
+    '수학교육과': '030704*',
+    '체육교육과': '030705*',
+    '컴퓨터교육과': '030707*',
+    '영어교육과': '030709*',
+    '역사교육과': '030710*',
+    '관광경영학과': '031103*',
+    '스포츠건강관리학과': '03300111',
+    '호텔경영학과': '03300108',
+    '스포츠레저학과': '03300110',
+    '스포츠지도학과': '03300112',
+    '스포테인먼트전공(F)': '031191*',
+    '조리외식경영학과': '03300109',
+    '건축학부-건축공학': '03300118',
+    '건축학부-건축학': '03300117',
+    '토목공학과': '031214*',
+    '전자공학과': '031224*',
+    '소프트웨어학과': '031230*',
+    '기술창업학과': '031241*',
+    'AI융합전공(C)': '031295*',
+    'AI융합전공(F)': '031297*',
+    '항만물류시스템전공': '031298*',
+    '반도체융합전공': '031299*',
+    '사회복지학과': '03300105',
+    '경영학과': '03300106',
+    '광고홍보학과': '03300107',
+    '경찰행정학부-경찰행정학': '03301001',
+    '경찰행정학부-해양경찰': '03301002',
+    '행정학과': '03300104',
+    '스타트업콘텐츠마케팅전공(F)-스타트업콘텐츠마케팅': '032391*',
+    '의료공학과': '032401*',
+    '의료IT학과': '032402*',
+    '의생명과학과': '032403*',
+    '의료경영학과': '03300101',
+    '바이오융합공학과': '032408*',
+    '안경광학과': '032415*',
+    '정밀의료융합전공': '032490*',
+    '디지털헬스케어융합전공': '03300103',
+    '스마트수소에너지융합전공': '032492*',
+    '항공운항서비스학과': '032501*',
+    '항공교통물류학과': '032506*',
+    '항공운항학과': '03300114',
+    '무인항공학과': '032515*',
+    '항공정비학과': '03300115',
+    '항공설계전공(F-C)': '032591*',
+    '공연예술학부-실용음악': '03260103',
+    '공연예술학부-연기예술': '03260104',
+    '뷰티디자인학과-뷰티디자인': '032603*',
+    '콘텐츠제작학과': '032608*',
+    'CG디자인학과': '032609*',
+    '치매전문재활학과': '032702*',
+    '산림치유학과': '032703*',
+    '언어재활학과': '032705*',
+    '복지상담학과': '032708*',
+    '스마트통합치유학과': '032709*',
+    '해양치유레저학과': '032710*',
+    '임상병리학과': '032801*',
+    '치위생학과': '032802*',
+    '트리니티자유-반려동물학': '03290112',
+    '트리니티자유-군사학': '03290113',
+    '트리니티융합-의료경영학': '03300101',
+    '트리니티융합-바이오메디컬': '03300102',
+    '트리니티융합-디지털헬스케어': '03300103',
+    '트리니티융합-행정학': '03300104',
+    '트리니티융합-사회복지학': '03300105',
+    '트리니티융합-경영학': '03300106',
+    '트리니티융합-광고홍보학': '03300107',
+    '트리니티융합-호텔경영학': '03300108',
+    '트리니티융합-조리외식경영학': '03300109',
+    '트리니티융합-스포츠레저학': '03300110',
+    '트리니티융합-스포츠건강관리학': '03300111',
+    '트리니티융합-스포츠지도학': '03300112',
+    '트리니티융합-항공교통물류': '032506*',
+    '트리니티융합-항공운항': '03300114',
+    '트리니티융합-항공정비학': '03300115',
+    '트리니티융합-스마트항만공학': '03300116',
+    '트리니티융합-건축학': '03300117',
+    '트리니티융합-건축공학': '03300118',
+    '트리니티융합-실용음악': '03260103',
+    '트리니티융합-콘텐츠제작': '032608*',
+    '트리니티융합-CG디자인': '03300121',
+    '경찰학부-경찰행정학': '03301001',
+    '경찰학부-해양경찰': '03301002',
+    '자율전공학부': '033020',
+    '트리니티융합-호텔관광경영학': '03300122',
+    '트리니티융합-스포츠재활의학': '03300123',
+    }
+
+def get_major_code(major_name):
+    return MAJOR_MAP.get(major_name, None)
+
+def extract_major_from_pdf_table(pdf_stream):
+    pdf_stream.seek(0)  
+    with pdfplumber.open(pdf_stream) as pdf:
+        major_data = None  
+        for page in pdf.pages:
+            table = page.extract_table()
+            if table:
+                for row in table:
+                    if "학과/전공" in row:
+                        for cell in row:
+                            if cell and "학과/전공" not in cell:
+                                major_data = cell.strip()
+                                break
+                    if major_data:
+                        break
+            if major_data:
+                break
+
+    major_code = get_major_code(major_data)
+
+    print(f"추출된 학과: {major_data} → 변환된 코드: {major_code}")
+    return major_code
 
 def extract_from_pdf_table(pdf_stream):
     year, semester = extract_from_pdf_title(pdf_stream)
@@ -30,7 +149,9 @@ def extract_from_pdf_table(pdf_stream):
             table = page.extract_table()
             if table:
                 for row in table:
-                    if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "교필", "교선", "전공선택", "전공필수"]):
+                    if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "교필", "교선", "전공선택", "전공필수",
+                                                                    "전공", "전심", "기전", "일선", "일반선택", "공전", "공통전공", "전공기본",
+                                                                    "전공심화", "기초전공",]):
                         subject_data = {
                             '이수년도': year,
                             '학기': semester,
@@ -44,67 +165,53 @@ def extract_from_pdf_table(pdf_stream):
                         print(subject_data)
     return table_data
 
-def save_pdf_data_to_db(subjects_data):
+def save_pdf_data_to_db(subjects_data, major=None):
     saved_subjects = []
-
-    lecture_type_mapping = {
-        '교선': '교선',  # 예시로 교양을 교선으로 매핑
-        '교필': '교필',
-        '교양': '교양',
-        '전공': '전공',
-        '공전': '공통전공',
-        '전선': '전공선택',
-        '전필': '전공필수',
-        '전심': '전공심화',
-        '기전': '기초전공',
-        '전기': '전공기본',
-        '소전': '소단위전공',
-        '일선': '일반선택',
-        # 추가적인 매핑이 필요하면 여기에 추가
-    }
+    print(f"확인용: {major}")
 
     for subject in subjects_data:
-        mapped_lecture_type = lecture_type_mapping.get(subject['이수구분'], subject['이수구분'])
-        # 중복된 과목이 MyDoneLecture에 있는지 확인
-        print(f"Mapped Lecture Type: {mapped_lecture_type}")
         if MyDoneLecture.objects.filter(
             year=subject['이수년도'],
             semester=subject['학기'],
             lecture_name=subject['교과목명'],
-            lecture_type=mapped_lecture_type
+            lecture_type=subject['이수구분'],
         ).exists():
-            continue
-        else:
-            # AllLectureData에서 해당 과목명, 이수구분, 이수영역이 일치하는 과목을 찾음
+            continue 
+
+        if "사제동행세미나" in subject['교과목명'] and major:
+            change_major_code = major[0] if isinstance(major, list) else major 
+
             matching_alllecture = AllLectureData.objects.filter(
                 year=subject['이수년도'],
                 semester=subject['학기'],
-                lecture_type=mapped_lecture_type,
-                lecture_topic=subject['주제'],
+                lecture_name=subject['교과목명'],
+                major_code=change_major_code
+            ).first()
+        else:
+            matching_alllecture = AllLectureData.objects.filter(
+                year=subject['이수년도'],
+                semester=subject['학기'],
+                lecture_type=subject['이수구분'],
                 lecture_name=subject['교과목명'],
                 credit=subject['학점'],
             ).first()
 
-            # 일치하는 과목이 있을 경우
-            if matching_alllecture:
-                subject_instance = MyDoneLecture(
-                    year=subject['이수년도'],
-                    semester=subject['학기'],
-                    lecture_type=mapped_lecture_type,
-                    lecture_topic=subject['주제'],
-                    lecture_name=subject['교과목명'],
-                    credit=subject['학점'],
-                    grade=subject['등급'],
-                    # AllLectureData에서 과목코드를 가져와서 MyDoneLecture에 저장
-                    lecture_code=matching_alllecture.lecture_code,
-                    alllecture=matching_alllecture
-                )
-            else:
-                print(f"No matching AllLectureData found for: {subject['교과목명']}")
-                continue
-
-            # MyDoneLecture에 저장
+        if matching_alllecture:
+            subject_instance = MyDoneLecture(
+                year=subject['이수년도'],
+                semester=subject['학기'],
+                lecture_type=subject['이수구분'],
+                lecture_topic=subject['주제'],
+                lecture_name=subject['교과목명'],
+                credit=subject['학점'],
+                grade=subject['등급'],
+                lecture_code=matching_alllecture.lecture_code,
+                alllecture=matching_alllecture,
+            )
             subject_instance.save()
             saved_subjects.append(subject_instance)
+        else:
+            print(f"No matching AllLectureData found for: {subject['교과목명']} (전공: {major[0] if major else '미확인'})")
+            continue
 
     return saved_subjects
