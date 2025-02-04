@@ -61,7 +61,10 @@ def check_register(request):
         if User.objects.filter(student_id = student_id).exists():
             user = User.objects.filter(student_id = student_id).first()
             if check_password(password, user.password):
-                data = {'name' : user.name}
+                data = {
+                    'idToken' : user.student_id,
+                    'name' : user.name
+                }
             else:
                 error = '학번 또는 비밀번호가 올바르지 않습니다.'
                 data = {'error' : error}
@@ -77,9 +80,9 @@ def check_register(request):
 @api_view(['POST'])
 def my_info(request):
     data = request.data
-    name = data.get('name')
-    if User.objects.filter(name = name).exists():
-        user = User.objects.filter(name = name).first()
+    student_id = data.get('idToken')
+    if User.objects.filter(student_id = student_id).exists():
+        user = User.objects.filter(student_id = student_id).first()
         data = {
             'major' : user.major,
             'student_id' : user.student_id,
@@ -98,9 +101,9 @@ def my_info(request):
 @api_view(['POST'])
 def remove_membership(request):
     data = request.data
-    name = data.get('name')
-    if User.objects.filter(name = name).exists():
-        User.objects.filter(name = name).first().delete()
+    student_id = data.get('idToken')
+    if User.objects.filter(student_id = student_id).exists():
+        User.objects.filter(student_id = student_id).first().delete()
         data = { 'result' : True }
     else:
         data = { 'result' : False }
