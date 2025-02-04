@@ -61,7 +61,10 @@ def check_register(request):
         if User.objects.filter(student_id = student_id).exists():
             user = User.objects.filter(student_id = student_id).first()
             if check_password(password, user.password):
-                data = {'name' : user.name}
+                data = {
+                    'idToken' : user.student_id,
+                    'name' : user.name
+                }
             else:
                 error = '학번 또는 비밀번호가 올바르지 않습니다.'
                 data = {'error' : error}
@@ -77,9 +80,9 @@ def check_register(request):
 @api_view(['POST'])
 def my_info(request):
     data = request.data
-    name = data.get('name')
-    if User.objects.filter(name = name).exists():
-        user = User.objects.filter(name = name).first()
+    student_id = data.get('idToken')
+    if User.objects.filter(student_id = student_id).exists():
+        user = User.objects.filter(student_id = student_id).first()
         data = {
             'major' : user.major,
             'student_id' : user.student_id,
@@ -98,11 +101,48 @@ def my_info(request):
 @api_view(['POST'])
 def remove_membership(request):
     data = request.data
-    name = data.get('name')
-    if User.objects.filter(name = name).exists():
-        User.objects.filter(name = name).first().delete()
+    student_id = data.get('idToken')
+    if User.objects.filter(student_id = student_id).exists():
+        User.objects.filter(student_id = student_id).first().delete()
         data = { 'result' : True }
     else:
         data = { 'result' : False }
     print(data)
     return Response (data)
+
+@api_view(['POST'])
+def change_pw(request):
+    data = request.data
+    student_id = data.get('studentId')
+    password = data.get('password')
+    if student_id and password:
+        user = User.objects.filter(student_id = student_id).first()
+        user.password = make_password(password)
+        user.save()
+        data = {'success' : 'success'}
+    else:
+        error = '비밀번호 변경에 실패했습니다. 잠시 후 다시 시도해주세요.'
+        data = {'error' : error}
+    print(data)
+    return Response (data)
+
+@api_view(['POST'])
+def change_info(request):
+    data = request.data
+    student_id = data.get('studentId')
+    sub_major_type = data.get('sub_major_type')
+    sub_major = data.get('sub_major')
+    micro_degree = data.get('micro_degree')
+    if student_id:
+        user = User.objects.filter(student_id = student_id).first()
+        user.sub_major_type = sub_major_type
+        user.sub_major = sub_major
+        user.micro_degree = micro_degree
+        user.save()
+        data = {'success' : 'success'}
+    else:
+        error = '회원정보 변경에 실패했습니다. 잠시 후 다시 시도해주세요.'
+        data = {'error' : error}
+    print(data)
+    return Response (data)
+
