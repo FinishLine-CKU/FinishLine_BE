@@ -151,6 +151,11 @@ def extract_from_pdf_table(pdf_stream):
                     if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "교필", "교선", "전공선택", "전공필수",
                                                                     "전공", "전심", "기전", "일선", "일반선택", "공전", "공통전공", "전공기본",
                                                                     "전공심화", "기초전공",]):
+                        grade = row[9].strip() if row[9] else "" 
+
+                        if grade in ["N", "F"]:
+                            continue  
+                        
                         subject_data = {
                             '이수년도': year,
                             '학기': semester,
@@ -158,7 +163,7 @@ def extract_from_pdf_table(pdf_stream):
                             '주제': row[1] if row[1].strip() else ' ',
                             '교과목명': row[4],
                             '학점': row[7],
-                            '등급': row[9],
+                            '등급': grade,
                         }
                         table_data.append(subject_data)
                         print(subject_data)
