@@ -7,6 +7,7 @@ from io import BytesIO
 from .extract import extract_from_pdf_table
 from .extract import save_pdf_data_to_db
 from .extract import extract_major_from_pdf_table
+from .liberCheck import check_db_mydone_liber
 import logging
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
@@ -51,6 +52,7 @@ def upload_pdf(request):
     if 'files' not in request.FILES:
         return Response({'error': 'No file uploaded'}, status=400)
 
+    user_id = request.data.get('user_id')
     files = request.FILES.getlist('files')
     result_data = []
     duplicate_files = []
@@ -64,7 +66,7 @@ def upload_pdf(request):
 
                 extracted_table = extract_from_pdf_table(pdf_bytes)
 
-                saved_subjects = save_pdf_data_to_db(extracted_table, extracted_major)
+                saved_subjects = save_pdf_data_to_db(user_id, extracted_table, extracted_major)
 
                 if saved_subjects: 
                     result_data.append({
@@ -83,4 +85,18 @@ def upload_pdf(request):
         'message': 'Files processed successfully',
         'data': result_data,
         'duplicate_files': duplicate_files,
+    })
+
+
+
+@api_view(['POST'])
+def general_check(request):
+    user_id = request.data.get('user_id')
+
+    print(f"Received user_id: {user_id}")
+    general_data = check_db_mydone_liber(user_id)
+
+    return Response({
+        'message': 'Files processed successfully',
+        'general_data': general_data
     })

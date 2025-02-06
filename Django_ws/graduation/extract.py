@@ -149,8 +149,13 @@ def extract_from_pdf_table(pdf_stream):
             if table:
                 for row in table:
                     if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "교필", "교선", "전공선택", "전공필수",
-                                                                    "전공", "전심", "기전", "일선", "일반선택", "공전", "공통전공", "전공기본",
-                                                                    "전공심화", "기초전공",]):
+                                                                    "전공", "전심", "기초", "일선", "일반선택", "공통", "공통전공", "전공기본",
+                                                                    "전공심화", "기초전공", "전기"]):
+                        grade = row[9].strip() if row[9] else "" 
+
+                        if grade in ["NP", "F"]:
+                            continue
+                        
                         subject_data = {
                             '이수년도': year,
                             '학기': semester,
@@ -164,7 +169,7 @@ def extract_from_pdf_table(pdf_stream):
                         print(subject_data)
     return table_data
 
-def save_pdf_data_to_db(subjects_data, major=None):
+def save_pdf_data_to_db(user_id, subjects_data, major=None):
     saved_subjects = []
     print(f"확인용: {major}")
 
@@ -196,6 +201,22 @@ def save_pdf_data_to_db(subjects_data, major=None):
             ).first()
 
         if matching_alllecture:
+            if subject['이수구분'] in ['교양', '교선', '교필'] and subject['주제'] == ' ':
+                lecture_name = subject['교과목명']
+                
+                if '영어' in lecture_name or '중국어' in lecture_name or '일본어' in lecture_name:
+                    subject['주제'] = '외국어'
+                elif '인간' in lecture_name and ':' in lecture_name:
+                    subject['주제'] = '인간학'
+                elif 'VERUM' in lecture_name:
+                    subject['주제'] = 'VERUM캠프'
+                elif '논리적사고와글쓰기' in lecture_name:
+                    subject['주제'] = '논리적사고와글쓰기'
+                elif '창의적사고와코딩' in lecture_name:
+                    subject['주제'] = '창의적사고와코딩'
+                elif '봉사와실천' in lecture_name:
+                    subject['주제'] = '봉사활동'
+
             subject_instance = MyDoneLecture(
                 year=subject['이수년도'],
                 semester=subject['학기'],
@@ -206,6 +227,7 @@ def save_pdf_data_to_db(subjects_data, major=None):
                 grade=subject['등급'],
                 lecture_code=matching_alllecture.lecture_code,
                 alllecture=matching_alllecture,
+                user_id=user_id
             )
             subject_instance.save()
             saved_subjects.append(subject_instance)
