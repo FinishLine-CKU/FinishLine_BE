@@ -151,6 +151,11 @@ def extract_from_pdf_table(pdf_stream):
                     if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "교필", "교선", "전공선택", "전공필수",
                                                                     "전공", "전심", "기전", "일선", "일반선택", "공전", "공통전공", "전공기본",
                                                                     "전공심화", "기초전공",]):
+                        
+                        grade = row[9].strip() if row[9] else ""
+                        if grade in ["NP", "F"]:
+                            continue
+
                         subject_data = {
                             '이수년도': year,
                             '학기': semester,
@@ -164,7 +169,7 @@ def extract_from_pdf_table(pdf_stream):
                         print(subject_data)
     return table_data
 
-def save_pdf_data_to_db(subjects_data, major=None):
+def save_pdf_data_to_db(user_id, subjects_data, major=None):
     saved_subjects = []
     print(f"확인용: {major}")
 
@@ -204,6 +209,7 @@ def save_pdf_data_to_db(subjects_data, major=None):
                 lecture_name=subject['교과목명'],
                 credit=subject['학점'],
                 grade=subject['등급'],
+                user_id=user_id,
                 lecture_code=matching_alllecture.lecture_code,
                 alllecture=matching_alllecture,
             )

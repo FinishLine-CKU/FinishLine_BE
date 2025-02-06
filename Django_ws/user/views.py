@@ -2,6 +2,7 @@ from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.decorators import api_view
 from .scraping import scraping
 from .models import User
+from graduation.models import MyDoneLecture
 from rest_framework.response import Response
 
 @api_view(['POST'])
@@ -104,6 +105,7 @@ def remove_membership(request):
     student_id = data.get('idToken')
     if User.objects.filter(student_id = student_id).exists():
         User.objects.filter(student_id = student_id).first().delete()
+        MyDoneLecture.objects.filter(user_id = student_id).delete()
         data = { 'result' : True }
     else:
         data = { 'result' : False }
