@@ -1,3 +1,4 @@
+from user.models import User
 from django.shortcuts import render
 from django.http import HttpResponse
 from rest_framework.decorators import api_view
@@ -12,11 +13,13 @@ import logging
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
 from .models import MyDoneLecture
+from .models import Standard
 from .models import AllLectureData
 from .models import NowLectureData
 from .serializers import MyDoneLectureSerializer
 from .serializers import AllLectureDataSerializer
 from .serializers import NowLectureDataSerializer
+from .major_calculate import pop_user_major, user_graduation_standard, need_credit
 
 logger = logging.getLogger(__name__)
 
@@ -119,3 +122,36 @@ def general_check(request):
             '일반선택_부족_학점': result.get("일반선택 부족 학점", []), 
         }
     })
+@api_view(['POST'])
+def test_major(request):
+    data = request.data
+    student_id = data.get('student_id')
+    need_major, user_major, id = need_credit(student_id)
+    major = User.objects.filter(student_id = student_id).values_list('major', flat=True)
+    gradu = Standard.objects.filter(index = id).first()
+
+    if gradu.rest_credit == None:
+        data = {
+            'major_info' : major[0], # 전공
+            'need_major' : need_major, # 부족학점
+            'user_major' : user_major, # 이수한 학점
+            'total_credit' : gradu.total_credit, # 졸업 총 학점
+            'major_credit' : gradu.major_credit, # 전공 총 학점
+            'general_essential_credit' : gradu.general_essential_credit, # 교양필수 총 학점
+            'general_selection_credit' : gradu.general_selection_credit, # 교양필수 총 학점
+            'rest_credit' : 0,
+        },
+    else:
+        data = {
+            'major_info' : major[0], # 전공
+            'need_major' : need_major, # 부족학점
+            'user_major' : user_major, # 이수한 학점
+            'total_credit' : gradu.total_credit, # 졸업 총 학점
+            'major_credit' : gradu.major_credit, # 전공 총 학점
+            'general_essential_credit' : gradu.general_essential_credit, # 교양필수 총 학점
+            'general_selection_credit' : gradu.general_selection_credit, # 교양필수 총 학점
+            'rest_credit' : gradu.rest_credit
+        }
+    print(data)
+    return Response (data)
+
