@@ -24,6 +24,15 @@ class MyDoneLectureModelViewSet(ModelViewSet):
     queryset = MyDoneLecture.objects.all()
     serializer_class = MyDoneLectureSerializer
     
+    def list(self, request, *args, **kwargs):
+        user_id = request.GET.get('user_id')  # 쿼리 파라미터에서 user_id 가져오기
+        if not user_id:
+            return Response({"detail": "user_id is required"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        queryset = MyDoneLecture.objects.filter(user_id=user_id)
+        serializer = MyDoneLectureSerializer(queryset, many=True)
+        return Response(serializer.data)
+    
     def create(self, request, *args, **kwargs):
         if isinstance(request.data, list):
             serializer = self.get_serializer(data=request.data, many=True)
@@ -94,9 +103,19 @@ def general_check(request):
     user_id = request.data.get('user_id')
 
     print(f"Received user_id: {user_id}")
-    general_data = check_db_mydone_liber(user_id)
+    result = check_db_mydone_liber(user_id) 
+    print(result)
 
     return Response({
         'message': 'Files processed successfully',
-        'general_data': general_data
+        'general_data': {
+            '교양필수_부족_학점': result.get("교양필수 부족 학점", []), 
+            '교양선택_부족_학점': result.get("교양선택 부족 학점", []),  
+            '교양필수_부족_영역': result.get("교양필수 부족 영역", []), 
+            '교양선택_부족_영역': result.get("교양선택 부족 영역", []), 
+            '교양필수_이수_학점': result.get("교양필수 이수 학점", []), 
+            '교양선택_이수_학점': result.get("교양선택 이수 학점", []), 
+            '일반선택_이수_학점': result.get("일반선택 이수 학점", []), 
+            '일반선택_부족_학점': result.get("일반선택 부족 학점", []), 
+        }
     })
