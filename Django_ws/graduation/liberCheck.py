@@ -11,6 +11,7 @@ from user.models import User
 from django.db import IntegrityError
 
 def check_db_mydone_liber(user_id):
+    student_id = user_id
     year = user_id[:4] 
 
 
@@ -441,7 +442,7 @@ def check_db_mydone_liber(user_id):
     complete_liber_total_credit = complete_general_esse_credit + complete_general_choice_credit #이수한 교양 영역
     need_liber_total_credit = need_general_esse_credit + need_general_choice_credit #부족한 교양 영역
 
-    # calculate_and_save_standard(complete_liber_total_credit, need_liber_total_credit, total__normal_credit, need_normal_credit, year)
+    calculate_and_save_standard(complete_liber_total_credit, need_liber_total_credit, total__normal_credit, need_normal_credit, student_id)
 
     result = {
         "교양필수 부족 학점": need_general_esse_credit, #필수 부족학점
@@ -458,27 +459,27 @@ def check_db_mydone_liber(user_id):
     }
     return result
 
-# def calculate_and_save_standard(complete_liber, need_liber, complete_normal, need_normal, user_id):
-#     try:
-#         user = User.objects.get(id=user_id)
+def calculate_and_save_standard(complete_liber, need_liber, complete_normal, need_normal, student_id):
+    try:
+        user = User.objects.get(student_id=student_id)
         
-#         if user.student_id != user_id:
-#             raise ValueError("user_id와 student_id가 일치하지 않습니다.")
+        if user.student_id != student_id:
+            raise ValueError("user_id와 student_id가 일치하지 않습니다.")
         
-#         user.done_general = complete_liber
-#         user.need_general = need_liber
-#         user.done_rest = complete_normal
-#         user.need_rest = need_normal
+        user.done_general = complete_liber
+        user.need_general = need_liber
+        user.done_rest = complete_normal
+        user.need_rest = need_normal
         
-#         user.save()
+        user.save()
 
-#     except User.DoesNotExist:
-#         print(f"사용자를 찾을 수 없습니다: {user_id}")
-#     except ValueError as ve:
-#         print(str(ve))
-#     except IntegrityError as ie:
-#         print(f"DB에 저장 중 오류 발생: {str(ie)}")
-#     except Exception as e:
-#         print(f"알 수 없는 오류 발생: {str(e)}")
+    except User.DoesNotExist:
+        print(f"사용자를 찾을 수 없습니다: {student_id}")
+    except ValueError as ve:
+        print(str(ve))
+    except IntegrityError as ie:
+        print(f"DB에 저장 중 오류 발생: {str(ie)}")
+    except Exception as e:
+        print(f"알 수 없는 오류 발생: {str(e)}")
         
 
