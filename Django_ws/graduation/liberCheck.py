@@ -384,7 +384,7 @@ def check_db_mydone_liber(user_id):
 
     total_esse_credit = Decimal('16.0')    # 교양필수 학점 총합
     total_choice_credit = Decimal('20.0')    # 교양필수 학점 총합
-    total_total_normal_credit = Decimal('20.0')    # 교양필수 학점 총합
+    total_total_normal_credit = Decimal('25.0')    # 일반선택 학점 총합
 
     need_general_esse_credit = ness_result[0].pop('총합') #교양필수 부족 학점
     need_general_esse_area = ness_result[0] #교양필수 부족 영역
