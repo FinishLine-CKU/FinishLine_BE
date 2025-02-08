@@ -12,11 +12,11 @@ from django.db import IntegrityError
 
 def check_db_mydone_liber(user_id):
     student_id = user_id
-    year = user_id[:4] 
+    year = student_id[:4]
 
 
     #기이수 과목에서 비교할 과목데이터 가져옴
-    mydone_lecture_list = MyDoneLecture.objects.filter(user_id=user_id, lecture_type__in=['교양', '교선', '교필'])
+    mydone_lecture_list = MyDoneLecture.objects.filter(user_id=student_id, lecture_type__in=['교양', '교선', '교필'])
     lectures_dict = []
     for lecture in mydone_lecture_list:
         lecture_data = {

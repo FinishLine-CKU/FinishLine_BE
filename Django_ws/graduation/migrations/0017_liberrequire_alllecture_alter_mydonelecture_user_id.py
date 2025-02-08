@@ -7,7 +7,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('graduation', '0016_merge_20250208_0509'),
+        ('graduation', '0015_rename_봉사와실천_liberrequire_봉사활동'),
     ]
 
     operations = [

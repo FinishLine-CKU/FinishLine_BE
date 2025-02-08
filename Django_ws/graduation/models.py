@@ -29,7 +29,6 @@ class NowLectureData(models.Model):
     def __str__(self):
         return f"{self.lecture_name} ({self.year}-{self.semester})"
     
-
 class MyDoneLecture(models.Model):
     mydone_id = models.AutoField(primary_key=True)
     year = models.CharField(max_length=5)
@@ -69,8 +68,6 @@ class liberRequire(models.Model):
     계열기초 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
     철학적인간학 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
     신학적인간학 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
-    
-    alllecture = models.ForeignKey(AllLectureData, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return f"{self.lecture_name} ({self.year}-{self.semester} {self.lecture_type})"

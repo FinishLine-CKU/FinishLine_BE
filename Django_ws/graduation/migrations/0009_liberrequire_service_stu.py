@@ -6,7 +6,7 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('graduation', '0008_liberrequire'),
+        ('graduation', '0006_alter_mydonelecture_grade'),
     ]
 
     operations = [

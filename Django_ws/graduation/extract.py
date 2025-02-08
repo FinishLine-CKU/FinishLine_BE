@@ -261,7 +261,7 @@ def save_pdf_data_to_db(user_id, subjects_data, major=None):
         if matching_alllecture:
             if subject['이수구분'] in ['교양', '교선', '교필'] and subject['주제'] == ' ':
                 lecture_name = subject['교과목명']
-                
+
                 if '영어' in lecture_name or '중국어' in lecture_name or '일본어' in lecture_name:
                     subject['주제'] = '외국어'
                 elif '인간' in lecture_name and ':' in lecture_name:
@@ -270,12 +270,15 @@ def save_pdf_data_to_db(user_id, subjects_data, major=None):
                     subject['주제'] = 'VERUM캠프'
                 elif '논리적사고와글쓰기' in lecture_name:
                     subject['주제'] = '논리적사고와글쓰기'
-                elif '창의적사고와코딩' in lecture_name:
-                    subject['주제'] = 'MSC교과군'
                 elif '봉사와실천' in lecture_name:
                     subject['주제'] = '봉사활동'
-                elif Science_Base in lecture_name:
-                    subject['주제'] = '계열기초'
+            
+
+            if (subject['이수구분'] in ['교필'] and subject['주제'] == ' '):
+                lecture_name = subject['교과목명']
+                
+                if any(sub in lecture_name for sub in Science_Base):
+                    subject['주제'] = 'MSC교과군'
 
             subject_instance = MyDoneLecture(
                 year=subject['이수년도'],
