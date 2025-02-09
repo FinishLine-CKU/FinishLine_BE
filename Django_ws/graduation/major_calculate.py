@@ -34,7 +34,20 @@ def pop_user_major(student_id):
 
     user_credit = sum(user_major_lectures)
 
-    print('전공 교과목 이수학점: ', user_credit)
+    print('전공 과목 총 이수학점: ', user_credit)
+
+    return user_credit
+
+
+def pop_user_sub_major(student_id):
+    user_sub_major_lectures = list(MyDoneLecture.objects.filter(
+    lecture_type__in = ['복전', '부전', '연전', '연계'],
+    user_id = student_id
+    ).values_list('credit', flat=True))
+
+    user_credit = sum(user_sub_major_lectures)
+
+    print('추가 전공 과목 총 이수학점: ', user_credit)
 
     return user_credit
 
@@ -64,8 +77,8 @@ def user_graduation_standard(student_id):
         sub_major_type = None
         major_standard = list(Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values_list('major_credit', flat=True))
         standard_id = list(Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values_list('index', flat=True))
-        print('기준: ', major_standard[0])
-        print('인덱스: ', standard_id[0])
+        # print('전공 기준: ', major_standard[0])
+        # print('인덱스: ', standard_id[0])
 
         return major_standard[0], standard_id[0]
 
@@ -74,23 +87,39 @@ def user_graduation_standard(student_id):
         standard_id = list(Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values_list('index', flat=True))
         major_standard = standard[0]['major_credit']
         sub_major_standard = standard[0]['sub_major_credit']
-        print(major_standard, sub_major_standard, standard_id[0])
+        # print('전공 기준: ', major_standard)
+        # print('추가전공 기준: ', sub_major_standard)
+        # print('인덱스: ', standard_id[0])
+        # print(major_standard, sub_major_standard, standard_id[0])
 
         return major_standard, sub_major_standard, standard_id[0]
 
-    # Standard.objects.filter()
-
 def need_credit(student_id):
-    user_major = pop_user_major(student_id)
     standard = user_graduation_standard(student_id)
-    if len(standard) == 2:
+    if len(standard) == 2: # 추가 전공 해당 없을 시
+        user_major = pop_user_major(student_id)
         major_standard = standard[0]
         std_id = standard[1]
         need_major = major_standard - user_major
-        User.objects.filter(student_id = student_id).update(need_major = need_major, done_major = user_major)
-        return need_major, user_major, std_id
+        if need_major < 0:
+            done_major_rest = abs(need_major)
+            User.objects.filter(student_id = student_id).update(need_major = need_major, done_major = user_major, done_major_rest = done_major_rest)
+        else:
+            User.objects.filter(student_id = student_id).update(need_major = need_major, done_major = user_major)
+        return need_major, user_major, std_id # 전공부족학점, 전공이수학점, 졸업 요건 인덱스
     else:
+        user_major = pop_user_major(student_id)
+        user_sub_major = pop_user_sub_major(student_id)
         major_standard = standard[0]
         sub_major_standard = standard[1]
         std_id = standard[2]
-        return major_standard, sub_major_standard, std_id
+        need_major = major_standard - user_major
+        need_sub_major = sub_major_standard - user_sub_major # 추가 전공 학점 반영
+        if need_major < 0:
+            done_major_rest = abs(need_major)
+            if need_sub_major < 0:
+                done_major_rest += abs(need_sub_major)
+            User.objects.filter(student_id = student_id).update(need_major = need_major, done_major = user_major, done_major_rest = done_major_rest, need_sub_major = need_sub_major, done_sub_major = user_sub_major)
+        else:
+            User.objects.filter(student_id = student_id).update(need_major = need_major, done_major = user_major, need_sub_major = need_sub_major, done_sub_major = user_sub_major)
+        return need_major, user_major, std_id, need_sub_major, user_sub_major # 전공부족학점, 전공이수학점, 졸업 요건 인덱스

@@ -8,12 +8,35 @@ from .models import liberRequire
 from decimal import Decimal
 import pprint
 from user.models import User
+from graduation.models import Standard
 from django.db import IntegrityError
 
 def check_db_mydone_liber(user_id):
     student_id = user_id
     year = student_id[:4]
 
+    user_info = User.objects.filter(student_id = student_id).values('major', 'sub_major_type')
+    major = user_info[0]['major']
+    if (user_info[0]['major'] == '030501*') or (user_info[0]['major'] == '030503*'):
+        major = '의학과'
+    elif (user_info[0]['major'] == '030502*'):
+        major = '간호학과'
+    elif (user_info[0]['major'] == '03300118'):
+        major = '건축공학'
+    elif (user_info[0]['major'] == '03300117'):
+        major = '건축학'
+    else :
+        major = '일반학과'
+
+    sub_major_type = user_info[0]['sub_major_type']
+
+    if sub_major_type == '':
+        sub_major_type = None
+
+    standard = Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values('general_essential_credit', 'general_selection_credit', 'rest_credit')
+    general_essential_credit = standard[0]['general_essential_credit'] # 전공 졸업 기준 학점
+    general_selection_credit = standard[0]['general_selection_credit'] # 추가 전공 졸업 기준 학점
+    rest_credit = standard[0]['rest_credit'] # 일반 선택 졸업 기준 학점
 
     #기이수 과목에서 비교할 과목데이터 가져옴
     mydone_lecture_list = MyDoneLecture.objects.filter(user_id=student_id, lecture_type__in=['교양', '교선', '교필'])
@@ -26,7 +49,7 @@ def check_db_mydone_liber(user_id):
         }
         lectures_dict.append(lecture_data)
 
-    print(f"사용자 {user_id}의 {year}년도 과목데이터:")
+    print(f" {user_id}의 {year}년도 과목데이터:")
 
     print("넣기전 과목데이터:")
     pprint.pprint(lectures_dict, width=80, sort_dicts=False)
@@ -35,7 +58,7 @@ def check_db_mydone_liber(user_id):
     #교양요건 테이블에서 비교할 연도 데이터 가져옴
     filtered_data = liberRequire.objects.filter(연도=year).values()
     ness_data = {'인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', '창의적사고와코딩', '외국어', 'MSC교과군', '철학적인간학', '신학적인간학'}
-    choice_data = {'고전탐구', '사유와지혜', '가치와실천', '상상력과표현', '인문융합', '균형1', '균형2', '균형3', '균형4'}
+    choice_data = {'고전탐구', '사유와지혜', '가치와실천', '상상력과표현', '인문융합', '균형1', '균형2', '균형3', '균형4', '계열기초'}
     cleaned_data = [
         {key: value for key, value in item.items() if key not in ['liber_id', '연도'] and value != 0}
         for item in filtered_data
@@ -56,6 +79,9 @@ def check_db_mydone_liber(user_id):
     for item in choice_result:
         total_sum = sum(Decimal(value) for value in item.values()) 
         item['총합'] = total_sum 
+
+    print("교양필수리스트:")
+    pprint.pprint(ness_result, width=80, sort_dicts=False)
     print("교양선택리스트:")
     pprint.pprint(choice_result, width=80, sort_dicts=False)
 
@@ -65,6 +91,7 @@ def check_db_mydone_liber(user_id):
 ###############################################교양선택, 교양필수 계산 1차###############################################
 
     delete_items = []
+    tmp = []
 
     for needcheck in lectures_dict[:]:
         lecture_topic = needcheck['주제']
@@ -83,7 +110,13 @@ def check_db_mydone_liber(user_id):
                     ness_item['총합'] -= lecture_credit
 
                 elif lecture_credit > ness_credit:
-                    break
+                    del ness_item[lecture_topic]
+                    missing_credit = ness_credit - lecture_credit
+                    normal_later = abs(missing_credit)
+
+                    delete_items.append(needcheck)
+
+                    ness_item['총합'] -= lecture_credit
 
                 elif lecture_credit == ness_credit:
                     del ness_item[lecture_topic]
@@ -99,6 +132,9 @@ def check_db_mydone_liber(user_id):
                 choice_credit = choice_item[lecture_topic]
 
                 if lecture_credit < choice_credit:
+                    if lecture_credit != 2:
+                        tmp.append(needcheck)
+                        break
                     missing_credit = choice_credit - lecture_credit
                     choice_item[lecture_topic] = missing_credit
 
@@ -108,9 +144,18 @@ def check_db_mydone_liber(user_id):
                     choice_item['총합'] -= lecture_credit
 
                 elif lecture_credit > choice_credit:
-                    break
+                    del choice_item[lecture_topic]
+                    missing_credit = choice_credit - lecture_credit
+                    normal_later += abs(missing_credit)
+
+                    delete_items.append(needcheck)
+
+                    ness_item['총합'] -= lecture_credit
 
                 elif lecture_credit == choice_credit:
+                    if lecture_credit != 2:
+                        tmp.append(needcheck)
+                        break
                     del choice_item[lecture_topic]
                     choice_item['총합'] -= choice_credit
 
@@ -220,7 +265,8 @@ def check_db_mydone_liber(user_id):
 
     delete_items = []
 
-
+    
+    
     for needcheck in lectures_dict[:]:
         lecture_topic = needcheck['주제']
         lecture_credit = Decimal(needcheck['학점'])
@@ -230,8 +276,8 @@ def check_db_mydone_liber(user_id):
                 if "고전탐구" in choice_item and choice_item["고전탐구"] == lecture_credit:
                     del choice_item["고전탐구"] 
                     choice_item["총합"] -= lecture_credit  
-
-                    delete_items.append(needcheck) 
+                    if needcheck not in delete_items:
+                        delete_items.append(needcheck) 
                 break
 
         if lecture_topic in ["인간과문학", "역사와사회", "철학과예술"]:
@@ -239,17 +285,18 @@ def check_db_mydone_liber(user_id):
                 if "사유와지혜" in choice_item and choice_item["사유와지혜"] == lecture_credit:
                     del choice_item["사유와지혜"] 
                     choice_item["총합"] -= lecture_credit 
-
-                    delete_items.append(needcheck)
+                    if needcheck not in delete_items:
+                        delete_items.append(needcheck)
                 break
 
         if lecture_topic in ["인간과문학", "역사와사회", "철학과예술"]:
             for choice_item in choice_result:
                 if "가치와실천" in choice_item and choice_item["가치와실천"] == lecture_credit:
                     del choice_item["가치와실천"] 
-                    choice_item["총합"] -= lecture_credit 
+                    choice_item["총합"] -= lecture_credit
+                    if needcheck not in delete_items:
 
-                    delete_items.append(needcheck) 
+                        delete_items.append(needcheck) 
                 break
 
         if lecture_topic in ["인간과문학", "역사와사회", "철학과예술"]: 
@@ -257,9 +304,13 @@ def check_db_mydone_liber(user_id):
                 if "상상력과표현" in choice_item and choice_item["상상력과표현"] == lecture_credit:
                     del choice_item["상상력과표현"]
                     choice_item["총합"] -= lecture_credit
-
-                    delete_items.append(needcheck)
+                    if needcheck not in delete_items:
+                        delete_items.append(needcheck)
                 break
+
+    print('#############################################################################################################')
+    print(delete_items)
+    print('#############################################################################################################')
 
     for item in delete_items:
         if item in lectures_dict:
@@ -355,9 +406,89 @@ def check_db_mydone_liber(user_id):
                         delete_items.append(needcheck) 
                     break
 
+########################################################
+    for needcheck in tmp[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+# ness_result : 기준 주제
+# lecture_topic : 기이수과목 주제
+        for ness_item in ness_result:
+            if lecture_topic in ness_item:
+                ness_credit = ness_item[lecture_topic]
+
+                if lecture_credit < ness_credit:
+                    missing_credit = ness_credit - lecture_credit
+                    ness_item[lecture_topic] = missing_credit
+
+                    delete_items.append(needcheck)
+
+                    ness_item['총합'] -= lecture_credit
+
+                elif lecture_credit > ness_credit:
+                    del ness_item[lecture_topic]
+                    missing_credit = ness_credit - lecture_credit
+                    normal_later = abs(missing_credit)
+
+                    delete_items.append(needcheck)
+
+                    ness_item['총합'] -= lecture_credit
+
+                elif lecture_credit == ness_credit:
+                    del ness_item[lecture_topic]
+                    ness_item['총합'] -= ness_credit
+
+                    delete_items.append(needcheck)
+
+                else:
+                    break
+
+        for choice_item in choice_result:
+            if lecture_topic in choice_item:
+                choice_credit = choice_item[lecture_topic]
+
+                if lecture_credit < choice_credit:
+                    missing_credit = choice_credit - lecture_credit
+                    choice_item[lecture_topic] = missing_credit
+
+
+                    delete_items.append(needcheck)
+
+                    choice_item['총합'] -= lecture_credit
+
+                elif lecture_credit > choice_credit:
+                    del choice_item[lecture_topic]
+                    missing_credit = choice_credit - lecture_credit
+                    normal_later += abs(missing_credit)
+
+                    delete_items.append(needcheck)
+
+                    ness_item['총합'] -= lecture_credit
+
+                elif lecture_credit == choice_credit:
+                    del choice_item[lecture_topic]
+                    choice_item['총합'] -= choice_credit
+
+                    delete_items.append(needcheck)
+
+                else:
+                    break
+
     for item in delete_items:
         if item in lectures_dict:
             lectures_dict.remove(item)
+    for item in tmp:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+
+    print('(******************************************************************lectures_dict********************************************************************)')
+    for i in lectures_dict:
+        print(i)
+    print('(********************************************************************************************************************************************)')
+    print('(**********************************************************************tmp***************************************************************)')
+    for i in tmp:
+        print(i)
+    print('(********************************************************************************************************************************************)')
 
     normal_total = {"일반선택": [], "총합": Decimal(0.0)}
 
@@ -370,6 +501,7 @@ def check_db_mydone_liber(user_id):
             
             normal_total["총합"] += lecture_credit
 
+        normal_total["총합"] += normal_later
         lectures_dict.clear()
 
     print("남은 기이수 과목:")
@@ -382,9 +514,10 @@ def check_db_mydone_liber(user_id):
     print("일반선택 과목:")
     pprint.pprint(normal_total, width=80, sort_dicts=False)
 
-    total_esse_credit = Decimal('16.0')    # 교양필수 학점 총합
-    total_choice_credit = Decimal('20.0')    # 교양필수 학점 총합
-    total_total_normal_credit = Decimal('25.0')    # 일반선택 학점 총합
+
+    total_esse_credit = general_essential_credit    # 교양필수 학점 총합
+    total_choice_credit = general_selection_credit    # 교양필수 학점 총합
+    total_total_normal_credit = rest_credit    # 일반선택 학점 총합
 
     need_general_esse_credit = ness_result[0].pop('총합') #교양필수 부족 학점
     need_general_esse_area = ness_result[0] #교양필수 부족 영역
@@ -398,8 +531,9 @@ def check_db_mydone_liber(user_id):
     complete_general_choice_credit = total_choice_credit - need_general_choice_credit #교양선택 이수학점
     need_normal_credit = total_total_normal_credit - total__normal_credit #교양선택 이수학점
 
-
-
+    print('**************************dkdkdkdkdk**************************')
+    print(need_general_choice_area)
+    print('**************************dkdkdkdkdk**************************')
     choice_keys_to_merge = ['고전탐구', '사유와지혜', '가치와실천', '상상력과표현', '인문융합']
     choice_new_key = '인간과문학, 역사와사회, 철학과예술'
 
@@ -483,3 +617,9 @@ def calculate_and_save_standard(complete_liber, need_liber, complete_normal, nee
         print(f"알 수 없는 오류 발생: {str(e)}")
         
 
+
+# 1. 기이수과목에서 교양과목 (교필, 교선, 교양)
+''' => 교양 총 이수 학점 (합계)  // DB에 저장
+=> 교필 총 이수 학점, 교선 총 이수 학점 (확인용)
+''' 
+# 2. 
