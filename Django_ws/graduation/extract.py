@@ -208,10 +208,10 @@ def extract_from_pdf_table(pdf_stream):
                 for row in table:
                     if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "교필", "교선", "전공선택", "전공필수",
                                                                     "전공", "전심", "기초", "일선", "일반선택", "공통", "공통전공", "전공기본",
-                                                                    "전공심화", "기초전공", "전기"]):
+                                                                    "전공심화", "기초전공", "전기", "복전"]):
                         grade = row[9].strip() if row[9] else "" 
 
-                        if grade in ["NP", "F"]:
+                        if grade in ["N", "F"]:
                             continue
                         
                         subject_data = {
@@ -221,10 +221,9 @@ def extract_from_pdf_table(pdf_stream):
                             '주제': row[1] if row[1].strip() else ' ',
                             '교과목명': row[4],
                             '학점': row[7],
-                            '등급': row[9],
                         }
                         table_data.append(subject_data)
-                        print(subject_data)
+        
     return table_data
 
 def save_pdf_data_to_db(user_id, subjects_data, major=None):
@@ -240,59 +239,66 @@ def save_pdf_data_to_db(user_id, subjects_data, major=None):
         ).exists():
             continue 
 
-        if "사제동행세미나" in subject['교과목명'] and major:
-            change_major_code = major[0] if isinstance(major, list) else major 
-
-            matching_alllecture = AllLectureData.objects.filter(
-                year=subject['이수년도'],
-                semester=subject['학기'],
-                lecture_name=subject['교과목명'],
-                major_code=change_major_code
-            ).first()
         else:
-            matching_alllecture = AllLectureData.objects.filter(
-                year=subject['이수년도'],
-                semester=subject['학기'],
-                lecture_type=subject['이수구분'],
-                lecture_name=subject['교과목명'],
-                credit=subject['학점'],
-            ).first()
 
-        if matching_alllecture:
+            if "사제동행세미나" in subject['교과목명'] and major:
+                change_major_code = major[0] if isinstance(major, list) else major 
+
+                matching_alllecture = AllLectureData.objects.filter(
+                    year=subject['이수년도'],
+                    semester=subject['학기'],
+                    lecture_name=subject['교과목명'],
+                    major_code=change_major_code
+                ).first()
+            else:
+                matching_alllecture = AllLectureData.objects.filter(
+                    year=subject['이수년도'],
+                    semester=subject['학기'],
+                    lecture_type=subject['이수구분'],
+                    lecture_name=subject['교과목명'],
+                    credit=subject['학점'],
+                ).first()
+
             if subject['이수구분'] in ['교양', '교선', '교필'] and subject['주제'] == ' ':
                 lecture_name = subject['교과목명']
-                
+                    
                 if '영어' in lecture_name or '중국어' in lecture_name or '일본어' in lecture_name:
-                    subject['주제'] = '외국어'
+                        subject['주제'] = '외국어'
                 elif '인간' in lecture_name and ':' in lecture_name:
-                    subject['주제'] = '인간학'
+                        subject['주제'] = '인간학'
                 elif 'VERUM' in lecture_name:
-                    subject['주제'] = 'VERUM캠프'
+                        subject['주제'] = 'VERUM캠프'
                 elif '논리적사고와글쓰기' in lecture_name:
-                    subject['주제'] = '논리적사고와글쓰기'
+                        subject['주제'] = '논리적사고와글쓰기'
                 elif '창의적사고와코딩' in lecture_name:
-                    subject['주제'] = 'MSC교과군'
+                        subject['주제'] = 'MSC교과군'
                 elif '봉사와실천' in lecture_name:
-                    subject['주제'] = '봉사활동'
-                elif Science_Base in lecture_name:
-                    subject['주제'] = '계열기초'
+                        subject['주제'] = '봉사활동'
+                elif '사회봉사' in lecture_name:
+                        subject['주제'] = '균형1'
 
-            subject_instance = MyDoneLecture(
-                year=subject['이수년도'],
-                semester=subject['학기'],
-                lecture_type=subject['이수구분'],
-                lecture_topic=subject['주제'],
-                lecture_name=subject['교과목명'],
-                credit=subject['학점'],
-                grade=subject['등급'],
-                lecture_code=matching_alllecture.lecture_code,
-                alllecture=matching_alllecture,
-                user_id=user_id
-            )
-            subject_instance.save()
-            saved_subjects.append(subject_instance)
-        else:
-            print(f"No matching AllLectureData found for: {subject['교과목명']} (전공: {major[0] if major else '미확인'})")
-            continue
+                if (subject['이수구분'] in ['교필'] and subject['주제'] == ' '):
+                    lecture_name = subject['교과목명']
+                    if any(sub in lecture_name for sub in Science_Base):
+                        subject['주제'] = 'MSC교과군'
+
+            if matching_alllecture:
+                subject_instance = MyDoneLecture(
+                    year=subject['이수년도'],
+                    semester=subject['학기'],
+                    lecture_type=subject['이수구분'],
+                    lecture_topic=subject['주제'],
+                    lecture_name=subject['교과목명'],
+                    credit=subject['학점'],
+                    # grade=subject['등급'],
+                    lecture_code=matching_alllecture.lecture_code,
+                    alllecture=matching_alllecture,
+                    user_id=user_id
+                )
+                subject_instance.save()
+                saved_subjects.append(subject_instance)
+            else:
+                print(f"No matching AllLectureData found for: {subject['교과목명']} (전공: {major[0] if major else '미확인'})")
+                continue
 
     return saved_subjects
