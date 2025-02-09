@@ -13,5 +13,7 @@ router.register(r'nowLectureData', NowLectureModelViewSet)
 
 urlpatterns = [
     path('upload_pdf/', views.upload_pdf),
+    path('general_check/', views.general_check),
     path('api/', include(router.urls)),
+    path('test_major/', views.test_major, name='test_major'),
 ]

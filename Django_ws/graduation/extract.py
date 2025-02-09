@@ -111,6 +111,64 @@ MAJOR_MAP = {
     '트리니티융합-스포츠재활의학': '03300123',
     }
 
+Science_Base = [
+  '4차산업혁명과융합기술의이해',
+  'Art&HomoLudens',
+  '경제학의이해',
+  '미술의이해와비평',
+  '언론학개론-인간과미디어',
+  '언론학개론-인간과소통',
+  '일반물리학',
+  '일반생물학',
+  '창의적디자인발상과표현',
+  '한국사회의이해',
+  '현대사회와법',
+  '경영학기초',
+  '기초체력의이해',
+  '문학의이해',
+  '문화관광콘텐츠스토리텔링의이해',
+  '물리학의이해',
+  '생활속의생명과학I',
+  '예비교사를위한데이터활용과보고서작성',
+  '정치학의이해',
+  '창의적컴퓨팅사고를위한파이썬',
+  '창의적사고와디자인',
+  '알기쉬운재활의이해',
+  '동양문화의이해',
+  '일반수학1',
+  '수리융합적사고와문제해결',
+  '웹프로그래밍기초',
+  '인문학적건강관리',
+  '문학적표현과언어학적원리Ⅰ',
+  '일반화학',
+  '생활속의화학',
+  '알기쉬운시장경제',
+  '예술과과학의융합',
+  '간호와생명과학',
+  '현대사회의심리이해',
+  '달콤한식음료이야기',
+  '생활속의생명과학II',
+  '서비스산업의이해',
+  '현대스포츠의세계',
+  '인공지능활용을위한데이터과학',
+  '서양문화의이해',
+  '삶과화법과교육',
+  'ICT와교육',
+  '컴퓨팅사고력',
+  '재미있는스포츠통계',
+  '국가경제의이해',
+  '생활속의물리',
+  '인간과환경',
+  '메타버스와일상생활',
+  'AcademicEnglish:Reading&Writing1',
+  '기초생명과학',
+  '동아시아문화의이해',
+  '인체생명과학Ⅰ',
+  '인체생명과학Ⅱ',
+  '전생애인간발달과건강증진',
+  '디지털시민교육'
+]
+
 def get_major_code(major_name):
     return MAJOR_MAP.get(major_name, None)
 
@@ -148,9 +206,14 @@ def extract_from_pdf_table(pdf_stream):
             table = page.extract_table()
             if table:
                 for row in table:
-                    if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "교필", "교선", "전공선택", "전공필수",
-                                                                    "전공", "전심", "기전", "일선", "일반선택", "공전", "공통전공", "전공기본",
-                                                                    "전공심화", "기초전공",]):
+                    if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "복전", "부전", "연전", "연계", "교필", "교선", "전공선택", "전공필수",
+                                                                    "전공", "전심", "기초", "일선", "일반선택", "공통", "공통전공", "전공기본",
+                                                                    "전공심화", "기초전공", "전기"]):
+                        grade = row[9].strip() if row[9] else "" 
+
+                        if grade in ["NP", "F"]:
+                            continue
+                        
                         subject_data = {
                             '이수년도': year,
                             '학기': semester,
@@ -164,7 +227,7 @@ def extract_from_pdf_table(pdf_stream):
                         print(subject_data)
     return table_data
 
-def save_pdf_data_to_db(subjects_data, major=None):
+def save_pdf_data_to_db(user_id, subjects_data, major=None):
     saved_subjects = []
     print(f"확인용: {major}")
 
@@ -196,6 +259,27 @@ def save_pdf_data_to_db(subjects_data, major=None):
             ).first()
 
         if matching_alllecture:
+            if subject['이수구분'] in ['교양', '교선', '교필'] and subject['주제'] == ' ':
+                lecture_name = subject['교과목명']
+
+                if '영어' in lecture_name or '중국어' in lecture_name or '일본어' in lecture_name:
+                    subject['주제'] = '외국어'
+                elif '인간' in lecture_name and ':' in lecture_name:
+                    subject['주제'] = '인간학'
+                elif 'VERUM' in lecture_name:
+                    subject['주제'] = 'VERUM캠프'
+                elif '논리적사고와글쓰기' in lecture_name:
+                    subject['주제'] = '논리적사고와글쓰기'
+                elif '봉사와실천' in lecture_name:
+                    subject['주제'] = '봉사활동'
+            
+
+            if (subject['이수구분'] in ['교필'] and subject['주제'] == ' '):
+                lecture_name = subject['교과목명']
+                
+                if any(sub in lecture_name for sub in Science_Base):
+                    subject['주제'] = 'MSC교과군'
+
             subject_instance = MyDoneLecture(
                 year=subject['이수년도'],
                 semester=subject['학기'],
@@ -206,6 +290,7 @@ def save_pdf_data_to_db(subjects_data, major=None):
                 grade=subject['등급'],
                 lecture_code=matching_alllecture.lecture_code,
                 alllecture=matching_alllecture,
+                user_id=user_id
             )
             subject_instance.save()
             saved_subjects.append(subject_instance)
