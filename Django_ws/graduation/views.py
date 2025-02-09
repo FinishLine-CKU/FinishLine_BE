@@ -19,7 +19,7 @@ from .models import NowLectureData
 from .serializers import MyDoneLectureSerializer
 from .serializers import AllLectureDataSerializer
 from .serializers import NowLectureDataSerializer
-from .major_calculate import pop_user_major, user_graduation_standard, need_credit
+from .major_calculate import need_credit
 
 logger = logging.getLogger(__name__)
 
@@ -99,8 +99,6 @@ def upload_pdf(request):
         'duplicate_files': duplicate_files,
     })
 
-
-
 @api_view(['POST'])
 def general_check(request):
     user_id = request.data.get('user_id')
@@ -121,6 +119,7 @@ def general_check(request):
             '일반선택_이수_학점': result.get("일반선택 이수 학점", []), 
         }
     })
+
 @api_view(['POST'])
 def test_major(request):
     data = request.data
