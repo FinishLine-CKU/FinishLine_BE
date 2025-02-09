@@ -206,7 +206,7 @@ def extract_from_pdf_table(pdf_stream):
             table = page.extract_table()
             if table:
                 for row in table:
-                    if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "교필", "교선", "전공선택", "전공필수",
+                    if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "복전", "부전", "연전", "연계", "교필", "교선", "전공선택", "전공필수",
                                                                     "전공", "전심", "기초", "일선", "일반선택", "공통", "공통전공", "전공기본",
                                                                     "전공심화", "기초전공", "전기", "복전"]):
                         grade = row[9].strip() if row[9] else "" 
@@ -261,7 +261,6 @@ def save_pdf_data_to_db(user_id, subjects_data, major=None):
 
             if subject['이수구분'] in ['교양', '교선', '교필'] and subject['주제'] == ' ':
                 lecture_name = subject['교과목명']
-                    
                 if '영어' in lecture_name or '중국어' in lecture_name or '일본어' in lecture_name:
                         subject['주제'] = '외국어'
                 elif '인간' in lecture_name and ':' in lecture_name:

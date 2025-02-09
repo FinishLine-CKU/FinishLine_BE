@@ -19,7 +19,7 @@ from .models import NowLectureData
 from .serializers import MyDoneLectureSerializer
 from .serializers import AllLectureDataSerializer
 from .serializers import NowLectureDataSerializer
-from .major_calculate import pop_user_major, user_graduation_standard, need_credit
+from .major_calculate import need_credit
 
 logger = logging.getLogger(__name__)
 
@@ -99,13 +99,11 @@ def upload_pdf(request):
         'duplicate_files': duplicate_files,
     })
 
-
-
 @api_view(['POST'])
 def general_check(request):
     user_id = request.data.get('user_id')
 
-    print(f"Received user_id: {user_id}")
+    # print(f"Received user_id: {user_id}")
     result = check_db_mydone_liber(user_id) 
     print(result)
 
@@ -119,39 +117,84 @@ def general_check(request):
             '교양필수_이수_학점': result.get("교양필수 이수 학점", []), 
             '교양선택_이수_학점': result.get("교양선택 이수 학점", []), 
             '일반선택_이수_학점': result.get("일반선택 이수 학점", []), 
-            #'일반선택_부족_학점': result.get("일반선택 부족 학점", []), 
         }
     })
+
 @api_view(['POST'])
 def test_major(request):
     data = request.data
     student_id = data.get('student_id')
-    need_major, user_major, id = need_credit(student_id)
-    major = User.objects.filter(student_id = student_id).values_list('major', flat=True)
-    gradu = Standard.objects.filter(index = id).first()
+    result = need_credit(student_id)
+    if len(result) == 3:
+        need_major, user_major, id = need_credit(student_id)
+        major = User.objects.filter(student_id = student_id).values_list('major', flat=True)
+        done_major_rest = User.objects.filter(student_id = student_id).values_list('done_major_rest', flat=True)
+        gradu = Standard.objects.filter(index = id).first()
 
-    if gradu.rest_credit == None:
-        data = {
-            'major_info' : major[0], # 전공
-            'need_major' : need_major, # 부족학점
-            'user_major' : user_major, # 이수한 학점
-            'total_credit' : gradu.total_credit, # 졸업 총 학점
-            'major_credit' : gradu.major_credit, # 전공 총 학점
-            'general_essential_credit' : gradu.general_essential_credit, # 교양필수 총 학점
-            'general_selection_credit' : gradu.general_selection_credit, # 교양필수 총 학점
-            'rest_credit' : 0,
-        },
+        if gradu.rest_credit == None:
+            data = {
+                'major_info' : major[0], # 전공
+                'need_major' : need_major, # 부족학점
+                'user_major' : user_major, # 이수한 학점
+                'total_credit' : gradu.total_credit, # 졸업 총 학점
+                'major_credit' : gradu.major_credit, # 전공 총 학점
+                'general_essential_credit' : gradu.general_essential_credit, # 교양필수 총 학점
+                'general_selection_credit' : gradu.general_selection_credit, # 교양필수 총 학점
+                'rest_credit' : 0,
+                'done_major_rest' : done_major_rest[0]
+            },
+        else:
+            data = {
+                'major_info' : major[0], # 전공
+                'need_major' : need_major, # 부족학점
+                'user_major' : user_major, # 이수한 학점
+                'total_credit' : gradu.total_credit, # 졸업 총 학점
+                'major_credit' : gradu.major_credit, # 전공 총 학점
+                'general_essential_credit' : gradu.general_essential_credit, # 교양필수 총 학점
+                'general_selection_credit' : gradu.general_selection_credit, # 교양필수 총 학점
+                'rest_credit' : gradu.rest_credit,
+                'done_major_rest' : done_major_rest[0]
+            }
     else:
-        data = {
-            'major_info' : major[0], # 전공
-            'need_major' : need_major, # 부족학점
-            'user_major' : user_major, # 이수한 학점
-            'total_credit' : gradu.total_credit, # 졸업 총 학점
-            'major_credit' : gradu.major_credit, # 전공 총 학점
-            'general_essential_credit' : gradu.general_essential_credit, # 교양필수 총 학점
-            'general_selection_credit' : gradu.general_selection_credit, # 교양필수 총 학점
-            'rest_credit' : gradu.rest_credit
-        }
+        # 추가 전공자 결과 반환
+        need_major, user_major, id, need_sub_major, user_sub_major = need_credit(student_id)
+        major = User.objects.filter(student_id = student_id).values_list('major', flat=True)
+        done_major_rest = User.objects.filter(student_id = student_id).values_list('done_major_rest', flat=True)
+        gradu = Standard.objects.filter(index = id).first()
+
+        # 의학과, 간호학과, 건축학, 건축공학 전공
+        if gradu.rest_credit == None:
+            data = {
+                'major_info' : major[0], # 전공
+                'need_major' : need_major, # 부족학점
+                'user_major' : user_major, # 이수한 학점
+                'total_credit' : gradu.total_credit, # 졸업 기준 학점
+                'major_credit' : gradu.major_credit, # 전공 기준 학점
+                'general_essential_credit' : gradu.general_essential_credit, # 교양필수 기준 학점
+                'general_selection_credit' : gradu.general_selection_credit, # 교양필수 기준 학점
+                'rest_credit' : 0,
+                'need_sub_major' : need_sub_major, # 부족 추가전공 학점
+                'user_sub_major' : user_sub_major, # 이수한 추가전공 학점
+                'sub_major_credit' : gradu.sub_major_credit, # 추가전공 기준 학점
+                'sub_major_type' : gradu.sub_major_type,
+                'done_major_rest' : done_major_rest[0]
+            },
+        else:
+            data = {
+                'major_info' : major[0], # 전공
+                'need_major' : need_major, # 부족학점
+                'user_major' : user_major, # 이수한 학점
+                'total_credit' : gradu.total_credit, # 졸업 기준 학점
+                'major_credit' : gradu.major_credit, # 전공 기준 학점
+                'general_essential_credit' : gradu.general_essential_credit, # 교양필수 기준 학점
+                'general_selection_credit' : gradu.general_selection_credit, # 교양필수 기준 학점
+                'rest_credit' : gradu.rest_credit,
+                'need_sub_major' : need_sub_major, # 부족 추가전공 학점
+                'user_sub_major' : user_sub_major, # 이수한 추가전공 학점
+                'sub_major_credit' : gradu.sub_major_credit, # 추가전공 기준 학점
+                'sub_major_type' : gradu.sub_major_type,
+                'done_major_rest' : done_major_rest[0]
+            }
     print(data)
     return Response (data)
 
