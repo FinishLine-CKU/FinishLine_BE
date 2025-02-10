@@ -162,7 +162,7 @@ def check_db_mydone_liber(user_id):
 
                 elif lecture_credit > choice_credit:
                     del choice_item[lecture_topic]
-                    missing_credit = lecture_credit - lecture_credit
+                    missing_credit = lecture_credit - choice_credit
                     normal_later += missing_credit # 초과 학점 일반선택 학점 추가
 
                     delete_items.append(needcheck)
