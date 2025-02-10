@@ -38,7 +38,6 @@ class MyDoneLecture(models.Model):
     lecture_code = models.CharField(max_length=50, null=True, blank=True)
     lecture_name = models.CharField(max_length=200)
     credit = models.DecimalField(max_digits=3, decimal_places=1)
-    grade = models.CharField(max_length=5, blank=True, null=True)
     user_id = models.CharField(max_length=30, null=True)
 
     alllecture = models.ForeignKey(AllLectureData, on_delete=models.CASCADE, null=True)
