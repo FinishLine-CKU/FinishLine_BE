@@ -29,7 +29,6 @@ def pop_user_sub_major(student_id):
     lecture_type__in = ['복전', '부전', '연전', '연계'],
     user_id = student_id
     ).values_list('credit', flat=True))
-
     user_credit = sum(user_sub_major_lectures)
 
     print('추가 전공 과목 총 이수학점: ', user_credit)
@@ -57,7 +56,6 @@ def user_graduation_standard(student_id):
         major = '일반학과'
 
     sub_major_type = user_info[0]['sub_major_type']
-
     if sub_major_type == '':
         sub_major_type = None
         major_standard = list(Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values_list('major_credit', flat=True))
@@ -76,7 +74,6 @@ def user_graduation_standard(student_id):
         # print('추가전공 기준: ', sub_major_standard)
         # print('인덱스: ', standard_id[0])
         # print(major_standard, sub_major_standard, standard_id[0])
-
         return major_standard, sub_major_standard, standard_id[0]
 
 def need_credit(student_id):
@@ -113,4 +110,5 @@ def need_credit(student_id):
         else:
             done_major_rest = 0
             User.objects.filter(student_id = student_id).update(need_major = need_major, done_major = user_major, done_major_rest = done_major_rest, need_sub_major = need_sub_major, done_sub_major = user_sub_major)
+        print('검사 결과 : ',need_sub_major)
         return need_major, user_major, std_id, need_sub_major, user_sub_major # 전공부족학점, 전공이수학점, 졸업 요건 인덱스

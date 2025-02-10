@@ -20,6 +20,7 @@ from .serializers import MyDoneLectureSerializer
 from .serializers import AllLectureDataSerializer
 from .serializers import NowLectureDataSerializer
 from .major_calculate import need_credit
+from .micro_degree_calculate import need_micro_degree
 
 logger = logging.getLogger(__name__)
 
@@ -197,6 +198,18 @@ def test_major(request):
                 'sub_major_type' : gradu.sub_major_type,
                 'done_major_rest' : done_major_rest[0],
             }
+    print(data)
+    return Response (data)
+
+@api_view(['POST'])
+def test_micro_degree(request):
+    data = request.data
+    student_id = data.get('student_id')
+    result = need_micro_degree(student_id)
+    if (result == 0) or (result == None) :
+        data = {'done_micro_degree' : 0 }
+    else:
+        data = {'done_micro_degree' : result}
     print(data)
     return Response (data)
 
