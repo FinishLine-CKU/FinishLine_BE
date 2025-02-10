@@ -125,8 +125,8 @@ def test_major(request):
     data = request.data
     student_id = data.get('student_id')
     result = need_credit(student_id)
-    if len(result) == 3:
-        need_major, user_major, id = need_credit(student_id)
+    if len(result) == 4:
+        need_major, user_major, id, need_sub_major = need_credit(student_id)
         major = User.objects.filter(student_id = student_id).values_list('major', flat=True)
         done_major_rest = User.objects.filter(student_id = student_id).values_list('done_major_rest', flat=True)
         gradu = Standard.objects.filter(index = id).first()
@@ -141,7 +141,8 @@ def test_major(request):
                 'general_essential_credit' : gradu.general_essential_credit, # 교양필수 총 학점
                 'general_selection_credit' : gradu.general_selection_credit, # 교양필수 총 학점
                 'rest_credit' : 0,
-                'done_major_rest' : done_major_rest[0]
+                'done_major_rest' : done_major_rest[0],
+                'need_sub_major' : need_sub_major
             },
         else:
             data = {
@@ -153,7 +154,8 @@ def test_major(request):
                 'general_essential_credit' : gradu.general_essential_credit, # 교양필수 총 학점
                 'general_selection_credit' : gradu.general_selection_credit, # 교양필수 총 학점
                 'rest_credit' : gradu.rest_credit,
-                'done_major_rest' : done_major_rest[0]
+                'done_major_rest' : done_major_rest[0],
+                'need_sub_major' : need_sub_major
             }
     else:
         # 추가 전공자 결과 반환
@@ -193,7 +195,7 @@ def test_major(request):
                 'user_sub_major' : user_sub_major, # 이수한 추가전공 학점
                 'sub_major_credit' : gradu.sub_major_credit, # 추가전공 기준 학점
                 'sub_major_type' : gradu.sub_major_type,
-                'done_major_rest' : done_major_rest[0]
+                'done_major_rest' : done_major_rest[0],
             }
     print(data)
     return Response (data)

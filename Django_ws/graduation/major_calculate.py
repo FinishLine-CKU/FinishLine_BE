@@ -1,22 +1,7 @@
-'''
-from graduation.models import MyDoneLecture, Standard
-from user.models import User
-from graduation.major_calculate import pop_user_major, user_graduation_standard, need_credit
-
-pop_user_major()
-
-user_graduation_standard()
-'''
-
-'''
-순서
-
-1. 기이수과목에서 전공 교과목 추출 (전필, 전선)
-2. 사용자의 졸업 요건 선택 (학번, 전공, 추가전공 고려)
-3. 두 값의 차이를 계산
-4. User Table에 결과 저장
-
-'''
+# 1. 기이수과목에서 전공 교과목 추출 (전필, 전선)
+# 2. 사용자의 졸업 요건 선택 (학번, 전공, 추가전공 고려)
+# 3. 두 값의 차이를 계산
+# 4. User Table에 결과 저장
 
 from graduation.models import Standard
 from graduation.models import MyDoneLecture
@@ -97,16 +82,19 @@ def user_graduation_standard(student_id):
 def need_credit(student_id):
     standard = user_graduation_standard(student_id)
     if len(standard) == 2: # 추가 전공 해당 없을 시
-        user_major = pop_user_major(student_id)
-        major_standard = standard[0]
-        std_id = standard[1]
+        need_sub_major = 0  # 추가 전공 부족학점 초기화
+        user_major = pop_user_major(student_id) # 전공 총 이수학점
+        major_standard = standard[0]    # 전공 기준 학점
+        std_id = standard[1]    # 인덱스
         need_major = major_standard - user_major
         if need_major < 0:
-            done_major_rest = abs(need_major)
-            User.objects.filter(student_id = student_id).update(need_major = need_major, done_major = user_major, done_major_rest = done_major_rest)
+            done_major_rest = abs(need_major)   # 전공에서 일선으로 빠지는 학점
+            need_major = 0
+            User.objects.filter(student_id = student_id).update(need_major = need_major, done_major = user_major, done_major_rest = done_major_rest, need_sub_major = need_sub_major)
         else:
-            User.objects.filter(student_id = student_id).update(need_major = need_major, done_major = user_major)
-        return need_major, user_major, std_id # 전공부족학점, 전공이수학점, 졸업 요건 인덱스
+            done_major_rest = 0
+            User.objects.filter(student_id = student_id).update(need_major = need_major, done_major = user_major, done_major_rest = done_major_rest, need_sub_major = need_sub_major)
+        return need_major, user_major, std_id, need_sub_major # 전공부족학점, 전공이수학점, 졸업 요건 인덱스
     else:
         user_major = pop_user_major(student_id)
         user_sub_major = pop_user_sub_major(student_id)
@@ -116,10 +104,13 @@ def need_credit(student_id):
         need_major = major_standard - user_major
         need_sub_major = sub_major_standard - user_sub_major # 추가 전공 학점 반영
         if need_major < 0:
-            done_major_rest = abs(need_major)
+            done_major_rest = abs(need_major)   # 전공에서 일선으로 빠지는 학점
+            need_major = 0
             if need_sub_major < 0:
-                done_major_rest += abs(need_sub_major)
+                done_major_rest += abs(need_sub_major)  # 추가전공에서 일선으로 빠지는 학점
+                need_sub_major = 0
             User.objects.filter(student_id = student_id).update(need_major = need_major, done_major = user_major, done_major_rest = done_major_rest, need_sub_major = need_sub_major, done_sub_major = user_sub_major)
         else:
-            User.objects.filter(student_id = student_id).update(need_major = need_major, done_major = user_major, need_sub_major = need_sub_major, done_sub_major = user_sub_major)
+            done_major_rest = 0
+            User.objects.filter(student_id = student_id).update(need_major = need_major, done_major = user_major, done_major_rest = done_major_rest, need_sub_major = need_sub_major, done_sub_major = user_sub_major)
         return need_major, user_major, std_id, need_sub_major, user_sub_major # 전공부족학점, 전공이수학점, 졸업 요건 인덱스
