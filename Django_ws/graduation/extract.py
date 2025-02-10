@@ -195,7 +195,7 @@ def extract_major_from_pdf_table(pdf_stream):
     print(f"추출된 학과: {major_data} → 변환된 코드: {major_code}")
     return major_code
 
-def extract_from_pdf_table(pdf_stream):
+def extract_from_pdf_table(user_id, pdf_stream):
     year, semester = extract_from_pdf_title(pdf_stream)
     
     pdf_stream.seek(0)
@@ -221,12 +221,13 @@ def extract_from_pdf_table(pdf_stream):
                             '주제': row[1] if row[1].strip() else ' ',
                             '교과목명': row[4],
                             '학점': row[7],
+                            '학번': user_id
                         }
                         table_data.append(subject_data)
         
     return table_data
 
-def save_pdf_data_to_db(user_id, subjects_data, major=None):
+def save_pdf_data_to_db(subjects_data, major=None):
     saved_subjects = []
     print(f"확인용: {major}")
 
@@ -236,6 +237,7 @@ def save_pdf_data_to_db(user_id, subjects_data, major=None):
             semester=subject['학기'],
             lecture_name=subject['교과목명'],
             lecture_type=subject['이수구분'],
+            user_id=subject['학번'],
         ).exists():
             continue 
 
@@ -289,10 +291,9 @@ def save_pdf_data_to_db(user_id, subjects_data, major=None):
                     lecture_topic=subject['주제'],
                     lecture_name=subject['교과목명'],
                     credit=subject['학점'],
-                    # grade=subject['등급'],
                     lecture_code=matching_alllecture.lecture_code,
                     alllecture=matching_alllecture,
-                    user_id=user_id
+                    user_id=subject['학번'],
                 )
                 subject_instance.save()
                 saved_subjects.append(subject_instance)
