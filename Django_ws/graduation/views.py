@@ -77,9 +77,9 @@ def upload_pdf(request):
 
                 extracted_major = extract_major_from_pdf_table(pdf_bytes)
 
-                extracted_table = extract_from_pdf_table(pdf_bytes)
+                extracted_table = extract_from_pdf_table(user_id, pdf_bytes)
 
-                saved_subjects = save_pdf_data_to_db(user_id, extracted_table, extracted_major)
+                saved_subjects = save_pdf_data_to_db(extracted_table, extracted_major)
 
                 if saved_subjects: 
                     result_data.append({
