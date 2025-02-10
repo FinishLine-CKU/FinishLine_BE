@@ -287,7 +287,6 @@ def save_pdf_data_to_db(user_id, subjects_data, major=None):
                 lecture_topic=subject['주제'],
                 lecture_name=subject['교과목명'],
                 credit=subject['학점'],
-                grade=subject['등급'],
                 lecture_code=matching_alllecture.lecture_code,
                 alllecture=matching_alllecture,
                 user_id=user_id
