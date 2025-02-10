@@ -16,4 +16,5 @@ urlpatterns = [
     path('general_check/', views.general_check),
     path('api/', include(router.urls)),
     path('test_major/', views.test_major, name='test_major'),
+    path('test_micro_degree/', views.test_micro_degree, name='test_micro_degree')
 ]
