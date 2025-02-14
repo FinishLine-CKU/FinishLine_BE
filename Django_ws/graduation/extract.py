@@ -252,6 +252,23 @@ def save_pdf_data_to_db(subjects_data, major=None):
                     lecture_name=subject['교과목명'],
                     major_code=change_major_code
                 ).first()
+                
+            elif '복전' in subject['이수구분']:
+                matching_alllecture = AllLectureData.objects.filter(
+                      year=subject['이수년도'],
+                      semester=subject['학기'],
+                      lecture_name=subject['교과목명'],
+                      credit=subject['학점'],
+                ).first()
+
+            elif '부전' in subject['이수구분']:
+                matching_alllecture = AllLectureData.objects.filter(
+                      year=subject['이수년도'],
+                      semester=subject['학기'],
+                      lecture_name=subject['교과목명'],
+                      credit=subject['학점'],
+                ).first()
+
             else:
                 matching_alllecture = AllLectureData.objects.filter(
                     year=subject['이수년도'],
