@@ -61,10 +61,12 @@ def check_register(request):
     if student_id and password:
         if User.objects.filter(student_id = student_id).exists():
             user = User.objects.filter(student_id = student_id).first()
+            upload_pdf = MyDoneLecture.objects.filter(user_id = student_id).exists()
             if check_password(password, user.password):
                 data = {
                     'idToken' : user.student_id,
-                    'name' : user.name
+                    'name' : user.name,
+                    'uploadPDF' : upload_pdf
                 }
             else:
                 error = '학번 또는 비밀번호가 올바르지 않습니다.'
