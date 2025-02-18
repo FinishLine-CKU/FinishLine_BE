@@ -2,7 +2,11 @@ from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.decorators import api_view
 from .scraping import scraping
 from .models import User
+from graduation.models import Standard
 from graduation.models import MyDoneLecture
+from graduation.liberCheck import check_db_mydone_liber
+from graduation.major_calculate import user_graduation_standard
+
 from rest_framework.response import Response
 
 @api_view(['POST'])
@@ -58,13 +62,62 @@ def check_register(request):
     data = request.data
     student_id = data.get('studentId')
     password = data.get('password')
+
     if student_id and password:
         if User.objects.filter(student_id = student_id).exists():
             user = User.objects.filter(student_id = student_id).first()
+            upload_pdf = MyDoneLecture.objects.filter(user_id = student_id).exists()    # 기이수과목 DB 확인
+            if user.done_major == None:
+                result = {
+                    "교양필수 부족 학점": None,
+                    "교양선택 부족 학점": None
+                }
+                needNormalTotalCredit = None,
+                needTotalCredit = None
+
+            else:   # 졸업 검사 이력이 있다면
+                result = check_db_mydone_liber(student_id)  # 교양 부족학점
+                standard = user_graduation_standard(student_id) # 기준 가져오기
+                std = Standard.objects.filter(index = standard[-1]).first()
+                if user.done_rest == None:
+                    done_rest = 0
+                else:
+                    done_rest = user.done_rest
+                if user.done_major_rest == None:
+                    done_major_rest = 0
+                else:
+                    done_major_rest = user.done_major_rest
+                if user.done_micro_degree == None:
+                    done_micro_degree = 0
+                else:
+                    done_micro_degree = user.done_micro_degree
+                
+                needNormalTotalCredit = std.rest_credit - (done_rest + done_major_rest + done_micro_degree)
+                if needNormalTotalCredit < 0:
+                    needNormalTotalCredit = 0
+                
+                user.need_rest = needNormalTotalCredit  # 부족한 일선 총 학점 저장
+                user.save()
+
+                if user.need_sub_major == None:
+                    need_sub_major = 0
+                else:
+                    need_sub_major = user.need_sub_major
+
+                needTotalCredit = needNormalTotalCredit + user.need_major + user.need_general + need_sub_major   # 부족한 학점 총계
+
+
             if check_password(password, user.password):
                 data = {
                     'idToken' : user.student_id,
-                    'name' : user.name
+                    'name' : user.name,
+                    'testing' : user.done_major,
+                    'uploadPDF' : upload_pdf,
+                    'needEsseCredit' : result.get("교양필수 부족 학점", []),
+                    'needChoiceCredit' : result.get("교양선택 부족 학점", []),
+                    'need_sub_major' : user.need_sub_major,
+                    'needNormalTotalCredit' : needNormalTotalCredit,
+                    'needTotalCredit' : needTotalCredit
                 }
             else:
                 error = '학번 또는 비밀번호가 올바르지 않습니다.'
