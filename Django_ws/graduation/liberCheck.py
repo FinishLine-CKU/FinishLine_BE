@@ -225,6 +225,46 @@ def check_db_mydone_liber(user_id):
         if item in lectures_dict:
             lectures_dict.remove(item)
 
+    ######################################################## 교필 대체과목 영역 계산(18 ~ 19) ########################################################
+
+    delete_items = []
+
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        if lecture_topic in ["정보와기술"]:
+            for ness_item in ness_result:
+                if "창의적사고와코딩" in ness_item and ness_item["창의적사고와코딩"] > lecture_credit:
+                    ness_credit = ness_item["창의적사고와코딩"]
+                    missing_credit = ness_credit - lecture_credit
+                    ness_item["창의적사고와코딩"] = missing_credit
+                    ness_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "창의적사고와코딩" in ness_item and ness_item["창의적사고와코딩"] == lecture_credit: 
+                    del ness_item["창의적사고와코딩"]
+                    delete_items.append(needcheck)
+                    ness_item["총합"] -= lecture_credit
+
+                elif "창의적사고와코딩" in ness_item and ness_item["창의적사고와코딩"] < lecture_credit: 
+                    ness_credit = ness_item["창의적사고와코딩"]
+                    missing_credit = ness_credit - lecture_credit
+                    normal_later += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del ness_item["창의적사고와코딩"]
+                    delete_items.append(needcheck)
+                    
+                    ness_item["총합"] -= choice_credit    # 학점 기준 초과 시 반영
+                else:
+                    break
+
+    # print('수강 인정 교선 과목 (삭제) : ')
+    # pprint.pprint(delete_items, width=80, sort_dicts=False)
+
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+
     ############################################## 교선 균형 1, 2, 3, 4 대체과목 반영 ##############################################
 
     delete_items = []

@@ -176,6 +176,7 @@ def extract_major_from_pdf_table(pdf_stream):
     pdf_stream.seek(0)  
     with pdfplumber.open(pdf_stream) as pdf:
         major_data = None  
+        student_year = None
         for page in pdf.pages:
             table = page.extract_table()
             if table:
@@ -187,13 +188,24 @@ def extract_major_from_pdf_table(pdf_stream):
                                 break
                     if major_data:
                         break
-            if major_data:
+
+            for row in table:
+                if '학 번' in row:
+                    for cell in row:
+                        if cell and "학 번" not in cell:
+                            student_year = cell.strip()[:4]
+                            break
+                if student_year:
+                    break
+
+            if major_data and student_year:
                 break
 
     major_code = get_major_code(major_data)
 
     print(f"추출된 학과: {major_data} → 변환된 코드: {major_code}")
-    return major_code
+    print(student_year)
+    return major_code, student_year
 
 def extract_from_pdf_table(user_id, pdf_stream):
     year, semester = extract_from_pdf_title(pdf_stream)
@@ -227,7 +239,7 @@ def extract_from_pdf_table(user_id, pdf_stream):
         
     return table_data
 
-def save_pdf_data_to_db(subjects_data, major=None):
+def save_pdf_data_to_db(subjects_data, student_year, major=None):
     saved_subjects = []
     print(f"확인용: {major}")
 
@@ -252,6 +264,23 @@ def save_pdf_data_to_db(subjects_data, major=None):
                     lecture_name=subject['교과목명'],
                     major_code=change_major_code
                 ).first()
+                
+            elif '복전' in subject['이수구분']:
+                matching_alllecture = AllLectureData.objects.filter(
+                      year=subject['이수년도'],
+                      semester=subject['학기'],
+                      lecture_name=subject['교과목명'],
+                      credit=subject['학점'],
+                ).first()
+
+            elif '부전' in subject['이수구분']:
+                matching_alllecture = AllLectureData.objects.filter(
+                      year=subject['이수년도'],
+                      semester=subject['학기'],
+                      lecture_name=subject['교과목명'],
+                      credit=subject['학점'],
+                ).first()
+
             else:
                 matching_alllecture = AllLectureData.objects.filter(
                     year=subject['이수년도'],
@@ -271,7 +300,9 @@ def save_pdf_data_to_db(subjects_data, major=None):
                         subject['주제'] = 'VERUM캠프'
                 elif '논리적사고와글쓰기' in lecture_name:
                         subject['주제'] = '논리적사고와글쓰기'
-                elif '창의적사고와코딩' in lecture_name:
+                elif '창의적사고와코딩' in lecture_name and student_year in ['2018', '2019']:
+                        subject['주제'] = '창의적사고와코딩'
+                elif '창의적사고와코딩' in lecture_name and student_year in ['2020', '2021', '2022']:
                         subject['주제'] = 'MSC교과군'
                 elif '봉사와실천' in lecture_name:
                         subject['주제'] = '봉사활동'
