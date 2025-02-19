@@ -2,3 +2,5 @@
 venv/
 .env
 developments.py
+*.pyc
+__pycache__/
