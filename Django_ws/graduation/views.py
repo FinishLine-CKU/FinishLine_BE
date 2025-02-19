@@ -75,11 +75,11 @@ def upload_pdf(request):
             try:
                 pdf_bytes = BytesIO(uploaded_file.read())
 
-                extracted_major = extract_major_from_pdf_table(pdf_bytes)
+                extracted_major, student_year = extract_major_from_pdf_table(pdf_bytes)
 
                 extracted_table = extract_from_pdf_table(user_id, pdf_bytes)
 
-                saved_subjects = save_pdf_data_to_db(extracted_table, extracted_major)
+                saved_subjects = save_pdf_data_to_db(extracted_table, student_year, extracted_major)
 
                 if saved_subjects: 
                     result_data.append({
@@ -111,8 +111,8 @@ def general_check(request):
     return Response({
         'message': 'Files processed successfully',
         'general_data': {
-            '교양필수_부족_학점': result.get("교양필수 부족 학점", []), 
-            '교양선택_부족_학점': result.get("교양선택 부족 학점", []),  
+            '교양필수_부족_학점': result.get("교양필수 부족 학점", []), #
+            '교양선택_부족_학점': result.get("교양선택 부족 학점", []), #
             '교양필수_부족_영역': result.get("교양필수 부족 영역", []), 
             '교양선택_부족_영역': result.get("교양선택 부족 영역", []), 
             '교양필수_이수_학점': result.get("교양필수 이수 학점", []), 
