@@ -2,3 +2,6 @@
 venv/
 .env
 developments.py
+production.py
+*.pyc
+__pycache__/
