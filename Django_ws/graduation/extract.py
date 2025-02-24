@@ -189,14 +189,14 @@ def extract_major_from_pdf_table(pdf_stream):
                     if major_data:
                         break
 
-            for row in table:
-                if '학 번' in row:
-                    for cell in row:
-                        if cell and "학 번" not in cell:
-                            student_year = cell.strip()[:4]
-                            break
-                if student_year:
-                    break
+                for row in table:
+                    if '학 번' in row:
+                        for cell in row:
+                            if cell and "학 번" not in cell:
+                                student_year = cell.strip()[:4]
+                                break
+                    if student_year:
+                        break
 
             if major_data and student_year:
                 break
