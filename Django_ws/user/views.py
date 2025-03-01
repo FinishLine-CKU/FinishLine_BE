@@ -15,10 +15,14 @@ def student_auth(request):
     data = request.data
     studentId = data.get('studentId')
     studentPW = data.get('studentPW')
+    isPasswordReset = data.get('isPasswordReset', False)  
+    
     result = scraping(studentId, studentPW)
     if isinstance(result, tuple):
         student_id, name, major = result
-        if User.objects.filter(student_id = student_id, name = name).exists():
+        
+
+        if User.objects.filter(student_id = student_id, name = name).exists() and not isPasswordReset:
             error = '이미 가입된 회원입니다.'
             data = {'error' : error}          
         elif int(student_id[:4]) >= 2023 or int(student_id[:4]) <= 2017:
