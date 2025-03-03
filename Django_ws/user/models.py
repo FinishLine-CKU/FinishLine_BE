@@ -22,6 +22,13 @@ class User(models.Model):
     
     def __str__(self):
         return self.name
+    
+class VisitorCount(models.Model):
+    session_id = models.CharField(max_length=255, unique=True, primary_key=True)
+    visit_date = models.DateField(unique=True, null=True)
+
+    def __str__(self):
+        return self.session_id
 
 
 
