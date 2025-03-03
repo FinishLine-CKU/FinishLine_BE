@@ -22,13 +22,6 @@ class User(models.Model):
     
     def __str__(self):
         return self.name
-    
-class VisitorCount(models.Model):
-    date = models.DateField(unique=True)
-    count = models.IntegerField(default=0)
-
-    def __str__(self):
-        return f"Visitor count for {self.date}: {self.count}"
 
 
 
