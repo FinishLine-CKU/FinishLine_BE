@@ -24,11 +24,11 @@ class User(models.Model):
         return self.name
     
 class VisitorCount(models.Model):
-    date = models.DateField(unique=True)
-    count = models.IntegerField(default=0)
+    session_id = models.CharField(max_length=255, unique=True, primary_key=True)
+    visit_date = models.DateField(unique=True, null=True)
 
     def __str__(self):
-        return f"Visitor count for {self.date}: {self.count}"
+        return self.session_id
 
 
 
