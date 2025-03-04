@@ -9,12 +9,18 @@ from graduation.major_calculate import user_graduation_standard
 
 from rest_framework.response import Response
 from user.models import VisitorCount
+<<<<<<< HEAD
 from django.http import JsonResponse
 from django.utils.timezone import now
 from django.http import HttpResponse
 from datetime import timedelta, datetime, timezone
 import uuid
 from user.models import VisitorCookie
+=======
+from django.http import JsonResponse, HttpResponse
+from datetime import datetime, timedelta
+import uuid
+>>>>>>> 689397e (test DB 수정 및 쿠키 테스트)
 
 
 @api_view(['POST'])
@@ -229,17 +235,55 @@ def lack_credit(request):
     print(data)
     return Response (data)
 
+@api_view(['POST'])
+def track_visitor(request):
+    # 쿠키에서 'visitor_id'를 가져옵니다.
+    visitor_id = request.COOKIES.get('visitor_id')
+
+    # 'visitor_id'가 없으면 새로 생성
+    if not visitor_id:
+        # 방문자 ID를 생성하는 로직 (예: UUID 사용)
+        import uuid
+        visitor_id = str(uuid.uuid4())
+        print('없당')
+
+        # 쿠키에 'visitor_id'를 설정하고, 만료 시간을 지정합니다.
+        response = HttpResponse(JsonResponse({'message': 'New visitor'}))
+        response.set_cookie('visitor_id', visitor_id, max_age=365*24*60*60, samesite='none', domain='loaclhost://3000' ,path='/')  # 1년 동안 유효한 쿠키
+    else:
+        response = HttpResponse(JsonResponse({'message': 'Returning visitor'}))
+        print('있당')
+
+    # 오늘 날짜를 가져옵니다.
+    today = datetime.now().date()
+
+    # 쿠키로 방문자를 찾거나 새로 생성합니다.
+    visitor = VisitorCount.objects.filter(session_id=visitor_id, visit_date=today).first()
+
+    if not visitor:
+        VisitorCount.objects.create(session_id=visitor_id, visit_date=today)
+
+    # 전체 방문자 수와 오늘 방문자 수를 계산합니다.
+    total_visitors = VisitorCount.objects.count()
+    today_visitors = VisitorCount.objects.filter(visit_date=today).count()
+
+    # 데이터 반환
+    data = {'total_visitors': total_visitors, 'today_visitors': today_visitors}
+    
+    # 응답 반환
+    response.data = data
+    return response
+
+
 # @api_view(['POST'])
 # def track_visitor(request):
-#     session_key = request.COOKIES.get('sessionid')
-#     print(now())
-#     print(session_key)
+#     visitor_id = request.COOKIES.get('visitor_id')
 
-#     if not session_key:
+#     if not visitor_id:
 #         request.session.create()  # 새로운 세션 생성
 #         session_key = request.session.session_key  # 세션 키를 가져옴
 
-#     today = now().date()
+#     today = datetime.datetime.now().date()
 
 #     visitor = VisitorCount.objects.filter(session_id = session_key, visit_date = today).first()
 
@@ -251,6 +295,8 @@ def lack_credit(request):
 
 #     data = {'total_visitors' : total_visitors, 'today_visitors' : today_visitors}
 #     return Response(data)
+
+
 #     session_id = 1
 
     # #세션 데이터의 키 값을 visited_today으로 선언을 하고
