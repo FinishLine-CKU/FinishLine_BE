@@ -11,6 +11,10 @@ from rest_framework.response import Response
 from user.models import VisitorCount
 from django.http import JsonResponse
 from django.utils.timezone import now
+from django.http import HttpResponse
+from datetime import timedelta, datetime, timezone
+import uuid
+from user.models import VisitorCookie
 
 
 @api_view(['POST'])
@@ -225,27 +229,28 @@ def lack_credit(request):
     print(data)
     return Response (data)
 
-@api_view(['POST'])
-def track_visitor(request):
-    session_key = request.COOKIES.get('sessionid')
-    print(now())
+# @api_view(['POST'])
+# def track_visitor(request):
+#     session_key = request.COOKIES.get('sessionid')
+#     print(now())
+#     print(session_key)
 
-    if not session_key:
-        request.session.create()  # 새로운 세션 생성
-        session_key = request.session.session_key  # 세션 키를 가져옴
+#     if not session_key:
+#         request.session.create()  # 새로운 세션 생성
+#         session_key = request.session.session_key  # 세션 키를 가져옴
 
-    today = now().date()
+#     today = now().date()
 
-    visitor = VisitorCount.objects.filter(session_id = session_key, visit_date = today).first()
+#     visitor = VisitorCount.objects.filter(session_id = session_key, visit_date = today).first()
 
-    if not visitor:
-        VisitorCount.objects.create(session_id = session_key, visit_date = today)
+#     if not visitor:
+#         VisitorCount.objects.create(session_id = session_key, visit_date = today)
         
-    total_visitors = VisitorCount.objects.count()
-    today_visitors = VisitorCount.objects.filter(visit_date = today).count()
+#     total_visitors = VisitorCount.objects.count()
+#     today_visitors = VisitorCount.objects.filter(visit_date = today).count()
 
-    data = {'total_visitors' : total_visitors, 'today_visitors' : today_visitors}
-    return Response(data)
+#     data = {'total_visitors' : total_visitors, 'today_visitors' : today_visitors}
+#     return Response(data)
 #     session_id = 1
 
     # #세션 데이터의 키 값을 visited_today으로 선언을 하고
@@ -300,3 +305,64 @@ def track_visitor(request):
     # else:
     #     # 이미 'last_visit' 쿠키가 존재하면
     #     return JsonResponse({'message': 'Visitor already tracked', 'last_visit': request.COOKIES['last_visit']})
+@api_view(['POST'])
+def track_visitor(request):
+    last_visit = request.COOKIES.get('last_visit')
+
+    response = HttpResponse("쿠키가 설정되었습니다!")
+
+    if last_visit:
+        try:
+            last_visit_datetime = datetime.strptime(last_visit, '%Y-%m-%d %H:%M:%S.%f')
+        except ValueError:
+            last_visit_datetime = datetime.strptime(last_visit, '%Y-%m-%d %H:%M:%S')
+
+        last_visit_datetime = last_visit_datetime.replace(tzinfo=timezone.utc)
+
+        if datetime.now(timezone.utc) > last_visit_datetime + timedelta(days=1):  
+            response.delete_cookie('last_visit')
+            last_visit = None
+
+    if not last_visit:
+        last_visit = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%f')
+
+        # 현재 UTC 시간
+        now = datetime.now(timezone.utc)
+
+        # UTC 기준 오후 3시를 생성
+        afternoon_3 = now.replace(hour=15, minute=0, second=0, microsecond=0)
+
+        # 현재 시간에 따라 만료 시간 설정
+        if now < afternoon_3:
+            # 오후 3시 이전이면 오늘 오후 3시로 만료 시간 설정
+            expire_time = afternoon_3
+        else:
+            # 오후 3시 이후이면 내일 오후 3시로 만료 시간 설정
+            expire_time = (now + timedelta(days=1)).replace(hour=15, minute=0, second=0, microsecond=0)
+
+        response.set_cookie('last_visit', last_visit, expires=expire_time, httponly=True, secure=True, samesite="None")
+
+        today = datetime.now(timezone.utc).date()
+        visitor_entry, created = VisitorCookie.objects.get_or_create(id=1)
+        last_visit_datetime = datetime.strptime(last_visit, '%Y-%m-%d %H:%M:%S.%f')
+
+        if last_visit_datetime.date() < today:
+            visitor_entry.today_visitor = 1
+        else:
+            visitor_entry.today_visitor += 1
+
+        visitor_entry.total_visitor += 1
+        visitor_entry.save()
+
+    return response
+
+@api_view(['GET'])
+def VisitorCookieAPI(request):
+    visitor_data = VisitorCookie.objects.first()
+    
+    if visitor_data:
+        return Response({
+            'today_visitor': visitor_data.today_visitor
+        })
+    else:
+        return Response({'error': 'Visitor data not found'}, status=404)
