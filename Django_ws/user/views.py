@@ -66,6 +66,22 @@ def register_info(request):
     return Response (False)
 
 @api_view(['POST'])
+def reset_check_register(request):
+    data = request.data
+    student_id = data.get('studentId')
+    if student_id:
+        if User.objects.filter(student_id = student_id).exists():
+            data = {'success' : True}
+        else:
+            error = '회원 정보를 찾을 수 없습니다. 회원가입을 먼저 진행해주세요.'
+            data = {'error' : error}
+    else:
+        error = '서버가 원활하지 않습니다. 잠시 후 다시 시도해주세요.'
+        data = {'error' : error}
+    print(data)
+    return Response (data)
+
+@api_view(['POST'])
 def check_register(request):
     data = request.data
     student_id = data.get('studentId')
