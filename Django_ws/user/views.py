@@ -6,8 +6,14 @@ from graduation.models import Standard
 from graduation.models import MyDoneLecture
 from graduation.liberCheck import check_db_mydone_liber
 from graduation.major_calculate import user_graduation_standard
-
 from rest_framework.response import Response
+from user.models import VisitorCount
+from django.http import JsonResponse
+from django.utils.timezone import now
+from django.http import HttpResponse
+from datetime import timedelta, datetime, timezone
+from user.models import VisitorCookie
+
 
 @api_view(['POST'])
 def student_auth(request):
@@ -237,3 +243,65 @@ def lack_credit(request):
         data = {'error' : error}
     print(data)
     return Response (data)
+
+@api_view(['POST'])
+def track_visitor(request):
+    last_visit = request.COOKIES.get('last_visit')
+
+    response = HttpResponse("쿠키가 설정되었습니다!")
+
+    if last_visit:
+        try:
+            last_visit_datetime = datetime.strptime(last_visit, '%Y-%m-%d %H:%M:%S.%f')
+        except ValueError:
+            last_visit_datetime = datetime.strptime(last_visit, '%Y-%m-%d %H:%M:%S')
+
+        last_visit_datetime = last_visit_datetime.replace(tzinfo=timezone.utc)
+
+        if datetime.now(timezone.utc) > last_visit_datetime + timedelta(days=1):  
+            response.delete_cookie('last_visit')
+            last_visit = None
+
+    if not last_visit:
+        last_visit = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%f')
+
+        # 현재 UTC 시간
+        now = datetime.now(timezone.utc)
+
+        # UTC 기준 오후 3시를 생성
+        afternoon_3 = now.replace(hour=15, minute=0, second=0, microsecond=0)
+
+        # 현재 시간에 따라 만료 시간 설정
+        if now < afternoon_3:
+            # 오후 3시 이전이면 오늘 오후 3시로 만료 시간 설정
+            expire_time = afternoon_3
+        else:
+            # 오후 3시 이후이면 내일 오후 3시로 만료 시간 설정
+            expire_time = (now + timedelta(days=1)).replace(hour=15, minute=0, second=0, microsecond=0)
+
+        response.set_cookie('last_visit', last_visit, expires=expire_time, httponly=True, secure=True, samesite="None")
+
+        today = datetime.now(timezone.utc).date()
+        visitor_entry, created = VisitorCookie.objects.get_or_create(id=1)
+        last_visit_datetime = datetime.strptime(last_visit, '%Y-%m-%d %H:%M:%S.%f')
+
+        if last_visit_datetime.date() < today:
+            visitor_entry.today_visitor = 1
+        else:
+            visitor_entry.today_visitor += 1
+
+        visitor_entry.total_visitor += 1
+        visitor_entry.save()
+
+    return response
+
+@api_view(['GET'])
+def VisitorCookieAPI(request):
+    visitor_data = VisitorCookie.objects.first()
+    
+    if visitor_data:
+        return Response({
+            'today_visitor': visitor_data.today_visitor
+        })
+    else:
+        return Response({'error': 'Visitor data not found'}, status=404)
