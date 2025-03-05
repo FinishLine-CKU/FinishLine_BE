@@ -22,6 +22,11 @@ class User(models.Model):
     
     def __str__(self):
         return self.name
+    
+class VisitorCount(models.Model):
+    id = models.IntegerField(default=1, primary_key=True)
+    total_visitor = models.IntegerField(default=0, blank=True, null=True)
+    today_visitor = models.IntegerField(default=0, blank=True, null=True)
 
-
-
+    def __str__(self):
+        return self.today_visitor

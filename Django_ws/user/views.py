@@ -6,8 +6,13 @@ from graduation.models import Standard
 from graduation.models import MyDoneLecture
 from graduation.liberCheck import check_db_mydone_liber
 from graduation.major_calculate import user_graduation_standard
-
 from rest_framework.response import Response
+from user.models import VisitorCount
+from django.http import JsonResponse
+from django.utils.timezone import now
+from django.http import HttpResponse
+from datetime import timedelta, datetime, timezone
+
 
 @api_view(['POST'])
 def student_auth(request):
@@ -15,10 +20,11 @@ def student_auth(request):
     data = request.data
     studentId = data.get('studentId')
     studentPW = data.get('studentPW')
+    isPasswordReset = data.get('isPasswordReset', False)
     result = scraping(studentId, studentPW)
     if isinstance(result, tuple):
         student_id, name, major = result
-        if User.objects.filter(student_id = student_id, name = name).exists():
+        if User.objects.filter(student_id = student_id, name = name).exists() and not isPasswordReset:
             error = '이미 가입된 회원입니다.'
             data = {'error' : error}          
         elif int(student_id[:4]) >= 2023 or int(student_id[:4]) <= 2017:
@@ -63,6 +69,22 @@ def register_info(request):
             return Response (False)
     print('회원가입 필수 데이터 누락')
     return Response (False)
+
+@api_view(['POST'])
+def reset_check_register(request):
+    data = request.data
+    student_id = data.get('studentId')
+    if student_id:
+        if User.objects.filter(student_id = student_id).exists():
+            data = {'success' : True}
+        else:
+            error = '회원 정보를 찾을 수 없습니다. 회원가입을 먼저 진행해주세요.'
+            data = {'error' : error}
+    else:
+        error = '서버가 원활하지 않습니다. 잠시 후 다시 시도해주세요.'
+        data = {'error' : error}
+    print(data)
+    return Response (data)
 
 @api_view(['POST'])
 def check_register(request):
@@ -220,3 +242,65 @@ def lack_credit(request):
         data = {'error' : error}
     print(data)
     return Response (data)
+
+@api_view(['POST'])
+def track_visitor(request):
+    last_visit = request.COOKIES.get('last_visit')
+
+    response = HttpResponse("쿠키가 설정되었습니다!")
+
+    if last_visit:
+        try:
+            last_visit_datetime = datetime.strptime(last_visit, '%Y-%m-%d %H:%M:%S.%f')
+        except ValueError:
+            last_visit_datetime = datetime.strptime(last_visit, '%Y-%m-%d %H:%M:%S')
+
+        last_visit_datetime = last_visit_datetime.replace(tzinfo=timezone.utc)
+
+        if datetime.now(timezone.utc) > last_visit_datetime + timedelta(days=1):  
+            response.delete_cookie('last_visit')
+            last_visit = None
+
+    if not last_visit:
+        last_visit = datetime.now(timezone.utc).strftime('%Y-%m-%d %H:%M:%S.%f')
+
+        # 현재 UTC 시간
+        now = datetime.now(timezone.utc)
+
+        # UTC 기준 오후 3시를 생성
+        afternoon_3 = now.replace(hour=15, minute=0, second=0, microsecond=0)
+
+        # 현재 시간에 따라 만료 시간 설정
+        if now < afternoon_3:
+            # 오후 3시 이전이면 오늘 오후 3시로 만료 시간 설정
+            expire_time = afternoon_3
+        else:
+            # 오후 3시 이후이면 내일 오후 3시로 만료 시간 설정
+            expire_time = (now + timedelta(days=1)).replace(hour=15, minute=0, second=0, microsecond=0)
+
+        response.set_cookie('last_visit', last_visit, expires=expire_time, httponly=True, secure=True, samesite="None")
+
+        today = datetime.now(timezone.utc).date()
+        visitor_entry, created = VisitorCount.objects.get_or_create(id=1)
+        last_visit_datetime = datetime.strptime(last_visit, '%Y-%m-%d %H:%M:%S.%f')
+
+        if last_visit_datetime.date() < today:
+            visitor_entry.today_visitor = 1
+        else:
+            visitor_entry.today_visitor += 1
+
+        visitor_entry.total_visitor += 1
+        visitor_entry.save()
+
+    return response
+
+@api_view(['GET'])
+def VisitorCookieAPI(request):
+    visitor_data = VisitorCount.objects.first()
+    
+    if visitor_data:
+        return Response({
+            'today_visitor': visitor_data.today_visitor
+        })
+    else:
+        return Response({'error': 'Visitor data not found'}, status=404)

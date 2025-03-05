@@ -39,7 +39,7 @@ def scraping(studentId, studentPW):
         return student_id, name, major
     except UnexpectedAlertPresentException:
         driver.quit()
-        errorMessage = '아이디 또는 비밀번호가 올바르지 않습니다.'
+        errorMessage = '아이디 또는 비밀번호를 확인해주세요.'
         return errorMessage
     except:
         driver.quit()
