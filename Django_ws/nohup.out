@@ -1,0 +1,163 @@
+[2025-02-10 21:10:31 +0000] [2609] [INFO] Starting gunicorn 23.0.0
+[2025-02-10 21:10:31 +0000] [2609] [INFO] Listening at: http://0.0.0.0:8000 (2609)
+[2025-02-10 21:10:31 +0000] [2609] [INFO] Using worker: sync
+[2025-02-10 21:10:31 +0000] [2610] [INFO] Booting worker with pid: 2610
+[2025-02-10 21:10:31 +0000] [2611] [INFO] Booting worker with pid: 2611
+[2025-02-10 21:10:31 +0000] [2612] [INFO] Booting worker with pid: 2612
+Internal Server Error: /user/student_auth/
+Traceback (most recent call last):
+  File "/home/ubuntu/FinishLine_BE/Django_ws/user/scraping.py", line 16, in scraping
+    driver = webdriver.Chrome(options = options)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/selenium/webdriver/chrome/webdriver.py", line 45, in __init__
+    super().__init__(
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/selenium/webdriver/chromium/webdriver.py", line 66, in __init__
+    super().__init__(command_executor=executor, options=options)
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 241, in __init__
+    self.start_session(capabilities)
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 329, in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 384, in execute
+    self.error_handler.check_response(response)
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.SessionNotCreatedException: Message: session not created: probably user data directory is already in use, please specify a unique value for --user-data-dir argument, or don't use --user-data-dir
+Stacktrace:
+#0 0x65355f6a209a <unknown>
+#1 0x65355f1698b0 <unknown>
+#2 0x65355f1a2ea4 <unknown>
+#3 0x65355f19e8ff <unknown>
+#4 0x65355f1ef29f <unknown>
+#5 0x65355f1ee7d6 <unknown>
+#6 0x65355f1e0753 <unknown>
+#7 0x65355f1ac38e <unknown>
+#8 0x65355f1adb51 <unknown>
+#9 0x65355f66b76b <unknown>
+#10 0x65355f66f6f2 <unknown>
+#11 0x65355f6578fc <unknown>
+#12 0x65355f6702e4 <unknown>
+#13 0x65355f63b9cf <unknown>
+#14 0x65355f690cd8 <unknown>
+#15 0x65355f690eb6 <unknown>
+#16 0x65355f6a0f16 <unknown>
+#17 0x79625549caa4 <unknown>
+#18 0x796255529c3c <unknown>
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/Django_ws/user/views.py", line 13, in student_auth
+    result = scraping(studentId, studentPW)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/Django_ws/user/scraping.py", line 44, in scraping
+    driver.quit()
+    ^^^^^^
+UnboundLocalError: cannot access local variable 'driver' where it is not associated with a value
+Internal Server Error: /user/student_auth/
+Traceback (most recent call last):
+  File "/home/ubuntu/FinishLine_BE/Django_ws/user/scraping.py", line 16, in scraping
+    driver = webdriver.Chrome(options = options)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/selenium/webdriver/chrome/webdriver.py", line 45, in __init__
+    super().__init__(
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/selenium/webdriver/chromium/webdriver.py", line 66, in __init__
+    super().__init__(command_executor=executor, options=options)
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 241, in __init__
+    self.start_session(capabilities)
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 329, in start_session
+    response = self.execute(Command.NEW_SESSION, caps)["value"]
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/selenium/webdriver/remote/webdriver.py", line 384, in execute
+    self.error_handler.check_response(response)
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/selenium/webdriver/remote/errorhandler.py", line 232, in check_response
+    raise exception_class(message, screen, stacktrace)
+selenium.common.exceptions.SessionNotCreatedException: Message: session not created: probably user data directory is already in use, please specify a unique value for --user-data-dir argument, or don't use --user-data-dir
+Stacktrace:
+#0 0x63fcb8df009a <unknown>
+#1 0x63fcb88b78b0 <unknown>
+#2 0x63fcb88f0ea4 <unknown>
+#3 0x63fcb88ec8ff <unknown>
+#4 0x63fcb893d29f <unknown>
+#5 0x63fcb893c7d6 <unknown>
+#6 0x63fcb892e753 <unknown>
+#7 0x63fcb88fa38e <unknown>
+#8 0x63fcb88fbb51 <unknown>
+#9 0x63fcb8db976b <unknown>
+#10 0x63fcb8dbd6f2 <unknown>
+#11 0x63fcb8da58fc <unknown>
+#12 0x63fcb8dbe2e4 <unknown>
+#13 0x63fcb8d899cf <unknown>
+#14 0x63fcb8ddecd8 <unknown>
+#15 0x63fcb8ddeeb6 <unknown>
+#16 0x63fcb8deef16 <unknown>
+#17 0x77d6e2e9caa4 <unknown>
+#18 0x77d6e2f29c3c <unknown>
+
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/django/core/handlers/exception.py", line 55, in inner
+    response = get_response(request)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/django/core/handlers/base.py", line 197, in _get_response
+    response = wrapped_callback(request, *callback_args, **callback_kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/django/views/decorators/csrf.py", line 65, in _view_wrapper
+    return view_func(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/django/views/generic/base.py", line 104, in view
+    return self.dispatch(request, *args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/rest_framework/views.py", line 509, in dispatch
+    response = self.handle_exception(exc)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/rest_framework/views.py", line 469, in handle_exception
+    self.raise_uncaught_exception(exc)
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/rest_framework/views.py", line 480, in raise_uncaught_exception
+    raise exc
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/rest_framework/views.py", line 506, in dispatch
+    response = handler(request, *args, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/venv/lib/python3.12/site-packages/rest_framework/decorators.py", line 50, in handler
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/Django_ws/user/views.py", line 13, in student_auth
+    result = scraping(studentId, studentPW)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/ubuntu/FinishLine_BE/Django_ws/user/scraping.py", line 44, in scraping
+    driver.quit()
+    ^^^^^^
+UnboundLocalError: cannot access local variable 'driver' where it is not associated with a value
+[2025-02-10 21:32:20 +0000] [2609] [INFO] Handling signal: term
+[2025-02-11 06:32:20 +0900] [2610] [INFO] Worker exiting (pid: 2610)
+[2025-02-11 06:32:20 +0900] [2611] [INFO] Worker exiting (pid: 2611)
+[2025-02-11 06:32:20 +0900] [2612] [INFO] Worker exiting (pid: 2612)
+[2025-02-10 21:32:21 +0000] [2609] [INFO] Shutting down: Master

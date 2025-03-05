@@ -1,6 +1,7 @@
 from django.db import models
 from django.db.models.fields.related import ForeignKey
 
+#전체 과목 데이터
 class AllLectureData(models.Model):
     alllecture_id = models.AutoField(primary_key=True)
     year = models.CharField(max_length=5)
@@ -15,6 +16,7 @@ class AllLectureData(models.Model):
     def __str__(self):
         return f"{self.lecture_name} ({self.year}-{self.semester})"
     
+#현재 과목 데이터(25년도)
 class NowLectureData(models.Model):
     nowlecture_id = models.AutoField(primary_key=True)
     year = models.CharField(max_length=5)
@@ -29,6 +31,7 @@ class NowLectureData(models.Model):
     def __str__(self):
         return f"{self.lecture_name} ({self.year}-{self.semester})"
     
+#내 기이수 과목 데이터
 class MyDoneLecture(models.Model):
     mydone_id = models.AutoField(primary_key=True)
     year = models.CharField(max_length=5)
@@ -45,6 +48,7 @@ class MyDoneLecture(models.Model):
     def __str__(self):
         return f"{self.lecture_name} ({self.lecture_topic}) ({self.credit})"
     
+#교양 요건 연도별 기준표
 class liberRequire(models.Model):
     liber_id = models.AutoField(primary_key=True)
     연도 = models.CharField(max_length=5, blank=True, null=True)

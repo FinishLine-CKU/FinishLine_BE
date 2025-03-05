@@ -18,6 +18,7 @@ def extract_from_pdf_title(pdf_stream):
         else:
             return None, None
         
+#전공 -> 전공코드
 MAJOR_MAP = {
     '의예과': '030501*',
     '간호학과': '030502*',
@@ -49,6 +50,7 @@ MAJOR_MAP = {
     '사회복지학과': '03300105',
     '경영학과': '03300106',
     '광고홍보학과': '03300107',
+    '경찰행정학과': '03301001',
     '경찰행정학부-경찰행정학': '03301001',
     '경찰행정학부-해양경찰': '03301002',
     '행정학과': '03300104',
@@ -111,67 +113,69 @@ MAJOR_MAP = {
     '트리니티융합-스포츠재활의학': '03300123',
     }
 
+# ' ' -> MSC교과군
 Science_Base = [
-  '4차산업혁명과융합기술의이해',
-  'Art&HomoLudens',
-  '경제학의이해',
-  '미술의이해와비평',
-  '언론학개론-인간과미디어',
-  '언론학개론-인간과소통',
-  '일반물리학',
-  '일반생물학',
-  '창의적디자인발상과표현',
-  '한국사회의이해',
-  '현대사회와법',
-  '경영학기초',
-  '기초체력의이해',
-  '문학의이해',
-  '문화관광콘텐츠스토리텔링의이해',
-  '물리학의이해',
-  '생활속의생명과학I',
-  '예비교사를위한데이터활용과보고서작성',
-  '정치학의이해',
-  '창의적컴퓨팅사고를위한파이썬',
-  '창의적사고와디자인',
-  '알기쉬운재활의이해',
-  '동양문화의이해',
-  '일반수학1',
-  '수리융합적사고와문제해결',
-  '웹프로그래밍기초',
-  '인문학적건강관리',
-  '문학적표현과언어학적원리Ⅰ',
-  '일반화학',
-  '생활속의화학',
-  '알기쉬운시장경제',
-  '예술과과학의융합',
-  '간호와생명과학',
-  '현대사회의심리이해',
-  '달콤한식음료이야기',
-  '생활속의생명과학II',
-  '서비스산업의이해',
-  '현대스포츠의세계',
-  '인공지능활용을위한데이터과학',
-  '서양문화의이해',
-  '삶과화법과교육',
-  'ICT와교육',
-  '컴퓨팅사고력',
-  '재미있는스포츠통계',
-  '국가경제의이해',
-  '생활속의물리',
-  '인간과환경',
-  '메타버스와일상생활',
-  'AcademicEnglish:Reading&Writing1',
-  '기초생명과학',
-  '동아시아문화의이해',
-  '인체생명과학Ⅰ',
-  '인체생명과학Ⅱ',
-  '전생애인간발달과건강증진',
-  '디지털시민교육'
+    '4차산업혁명과융합기술의이해',
+    'Art&HomoLudens',
+    '경제학의이해',
+    '미술의이해와비평',
+    '언론학개론-인간과미디어',
+    '언론학개론-인간과소통',
+    '일반물리학',
+    '일반생물학',
+    '창의적디자인발상과표현',
+    '한국사회의이해',
+    '현대사회와법',
+    '경영학기초',
+    '기초체력의이해',
+    '문학의이해',
+    '문화관광콘텐츠스토리텔링의이해',
+    '물리학의이해',
+    '생활속의생명과학I',
+    '예비교사를위한데이터활용과보고서작성',
+    '정치학의이해',
+    '창의적컴퓨팅사고를위한파이썬',
+    '창의적사고와디자인',
+    '알기쉬운재활의이해',
+    '동양문화의이해',
+    '일반수학1',
+    '수리융합적사고와문제해결',
+    '웹프로그래밍기초',
+    '인문학적건강관리',
+    '문학적표현과언어학적원리Ⅰ',
+    '일반화학',
+    '생활속의화학',
+    '알기쉬운시장경제',
+    '예술과과학의융합',
+    '간호와생명과학',
+    '현대사회의심리이해',
+    '달콤한식음료이야기',
+    '생활속의생명과학II',
+    '서비스산업의이해',
+    '현대스포츠의세계',
+    '인공지능활용을위한데이터과학',
+    '서양문화의이해',
+    '삶과화법과교육',
+    'ICT와교육',
+    '컴퓨팅사고력',
+    '재미있는스포츠통계',
+    '국가경제의이해',
+    '생활속의물리',
+    '인간과환경',
+    '메타버스와일상생활',
+    'AcademicEnglish:Reading&Writing1',
+    '기초생명과학',
+    '동아시아문화의이해',
+    '인체생명과학Ⅰ',
+    '인체생명과학Ⅱ',
+    '전생애인간발달과건강증진',
+    '디지털시민교육'
 ]
 
 def get_major_code(major_name):
     return MAJOR_MAP.get(major_name, None)
 
+#학과, 전공, 학번 추출
 def extract_major_from_pdf_table(pdf_stream):
     pdf_stream.seek(0)  
     with pdfplumber.open(pdf_stream) as pdf:
@@ -189,14 +193,14 @@ def extract_major_from_pdf_table(pdf_stream):
                     if major_data:
                         break
 
-            for row in table:
-                if '학 번' in row:
-                    for cell in row:
-                        if cell and "학 번" not in cell:
-                            student_year = cell.strip()[:4]
-                            break
-                if student_year:
-                    break
+                for row in table:
+                    if '학 번' in row:
+                        for cell in row:
+                            if cell and "학 번" not in cell:
+                                student_year = cell.strip()[:4]
+                                break
+                    if student_year:
+                        break
 
             if major_data and student_year:
                 break
@@ -207,6 +211,7 @@ def extract_major_from_pdf_table(pdf_stream):
     print(student_year)
     return major_code, student_year
 
+#과목 목록 추출
 def extract_from_pdf_table(user_id, pdf_stream):
     year, semester = extract_from_pdf_title(pdf_stream)
     
@@ -226,6 +231,7 @@ def extract_from_pdf_table(user_id, pdf_stream):
                         if grade in ["N", "F"]:
                             continue
                         
+                        #추출한 과목을 정해진 형식으로 저장
                         subject_data = {
                             '이수년도': year,
                             '학기': semester,
@@ -239,11 +245,13 @@ def extract_from_pdf_table(user_id, pdf_stream):
         
     return table_data
 
+#전체 과목 데이터에서 과목코드를 가져와 내 기이수 과목에 저장
 def save_pdf_data_to_db(subjects_data, student_year, major=None):
     saved_subjects = []
     print(f"확인용: {major}")
 
     for subject in subjects_data:
+        #중복된 데이터의 경우
         if MyDoneLecture.objects.filter(
             year=subject['이수년도'],
             semester=subject['학기'],
@@ -253,6 +261,7 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
         ).exists():
             continue 
 
+        #아니라면 이수영역 변경
         else:
 
             if "사제동행세미나" in subject['교과목명'] and major:
@@ -314,6 +323,7 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
                     if any(sub in lecture_name for sub in Science_Base):
                         subject['주제'] = 'MSC교과군'
 
+            #내 기이수 과목에 저장
             if matching_alllecture:
                 subject_instance = MyDoneLecture(
                     year=subject['이수년도'],
