@@ -278,7 +278,7 @@ def track_visitor(request):
             # 오후 3시 이후이면 내일 오후 3시로 만료 시간 설정
             expire_time = (now + timedelta(days=1)).replace(hour=15, minute=0, second=0, microsecond=0)
 
-        response.set_cookie('last_visit', last_visit, expires=expire_time, httponly=True, secure=True, samesite="None")
+        response.set_cookie('last_visit', last_visit, expires=expire_time, httponly=True, secure=True, samesite="Lax")
 
         today = datetime.now(timezone.utc).date()
         visitor_entry, created = VisitorCount.objects.get_or_create(id=1)

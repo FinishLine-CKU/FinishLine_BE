@@ -61,7 +61,7 @@ TEMPLATES = [
 
 # https 설정
 
-SECURE_SSL_REDIRECT = True
+#SECURE_SSL_REDIRECT = True
 
 SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
 
@@ -130,7 +130,16 @@ DATABASES = {
         'NAME': 'FinishLine_DB',
         'USER': 'FinishLine',
         'PASSWORD': 'finishline',
-        'HOST': 'finishline-mysql.chkyek42quy7.ap-northeast-2.rds.amazonaws.com',
+        'HOST': 'finishline-mysql-snap.chkyek42quy7.ap-northeast-2.rds.amazonaws.com',
         'PORT': '3306',
     }
 }
+
+# 방문자 수 쿠키 설정
+CORS_ALLOW_CREDENTIALS = True  # 쿠키를 포함한 요청 허용
+SESSION_COOKIE_SECURE = True
+SESSION_COOKIE_SAMESITE = 'Lax'
+CORS_ORIGIN_ALLOW_ALL = False
+CORS_ALLOWED_ORIGINS = [
+    "https://finishline-cku.com"
+]
