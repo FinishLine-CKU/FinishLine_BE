@@ -6,14 +6,12 @@ from graduation.models import Standard
 from graduation.models import MyDoneLecture
 from graduation.liberCheck import check_db_mydone_liber
 from graduation.major_calculate import user_graduation_standard
-
 from rest_framework.response import Response
 from user.models import VisitorCount
 from django.http import JsonResponse
 from django.utils.timezone import now
 from django.http import HttpResponse
 from datetime import timedelta, datetime, timezone
-import uuid
 from user.models import VisitorCookie
 
 
