@@ -12,7 +12,6 @@ from django.http import JsonResponse
 from django.utils.timezone import now
 from django.http import HttpResponse
 from datetime import timedelta, datetime, timezone
-from user.models import VisitorCookie
 
 
 @api_view(['POST'])
@@ -282,7 +281,7 @@ def track_visitor(request):
         response.set_cookie('last_visit', last_visit, expires=expire_time, httponly=True, secure=True, samesite="None")
 
         today = datetime.now(timezone.utc).date()
-        visitor_entry, created = VisitorCookie.objects.get_or_create(id=1)
+        visitor_entry, created = VisitorCount.objects.get_or_create(id=1)
         last_visit_datetime = datetime.strptime(last_visit, '%Y-%m-%d %H:%M:%S.%f')
 
         if last_visit_datetime.date() < today:
@@ -297,7 +296,7 @@ def track_visitor(request):
 
 @api_view(['GET'])
 def VisitorCookieAPI(request):
-    visitor_data = VisitorCookie.objects.first()
+    visitor_data = VisitorCount.objects.first()
     
     if visitor_data:
         return Response({
