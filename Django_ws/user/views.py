@@ -9,7 +9,6 @@ from graduation.major_calculate import user_graduation_standard
 from rest_framework.response import Response
 from user.models import VisitorCount
 from django.http import JsonResponse
-from django.utils.timezone import now
 from django.http import HttpResponse
 from datetime import timedelta, datetime, timezone
 
@@ -257,6 +256,7 @@ def track_visitor(request):
 
         last_visit_datetime = last_visit_datetime.replace(tzinfo=timezone.utc)
 
+        # 쿠키가 삭제가 안되었다면 삭제
         if datetime.now(timezone.utc) > last_visit_datetime + timedelta(days=1):  
             response.delete_cookie('last_visit')
             last_visit = None
@@ -276,15 +276,18 @@ def track_visitor(request):
             expire_time = afternoon_3
         else:
             # 오후 3시 이후이면 내일 오후 3시로 만료 시간 설정
-            expire_time = (now + timedelta(days=1)).replace(hour=15, minute=0, second=0, microsecond=0)
+            expire_time = (afternoon_3 + timedelta(days=1))
 
         response.set_cookie('last_visit', last_visit, expires=expire_time, httponly=True, secure=True, samesite="None")
 
-        today = datetime.now(timezone.utc).date()
-        visitor_entry, created = VisitorCount.objects.get_or_create(id=1)
+        today = datetime.now(timezone.utc)
+        visitor_entry = VisitorCount.objects.filter(id=1).first()
         last_visit_datetime = datetime.strptime(last_visit, '%Y-%m-%d %H:%M:%S.%f')
+        last_visit_datetime = last_visit_datetime.replace(tzinfo=timezone.utc)
 
-        if last_visit_datetime.date() < today:
+        clear_time = now.replace(hour=15, minute=0, second=0, microsecond=0)
+
+        if (today >= clear_time) and (visitor_entry.today_visitor != 1):
             visitor_entry.today_visitor = 1
         else:
             visitor_entry.today_visitor += 1
