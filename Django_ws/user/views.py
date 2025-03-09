@@ -280,17 +280,7 @@ def track_visitor(request):
 
         response.set_cookie('last_visit', last_visit, expires=expire_time, httponly=True, secure=True, samesite="None")
 
-        today = datetime.now(timezone.utc)
         visitor_entry = VisitorCount.objects.filter(id=1).first()
-        last_visit_datetime = datetime.strptime(last_visit, '%Y-%m-%d %H:%M:%S.%f')
-        last_visit_datetime = last_visit_datetime.replace(tzinfo=timezone.utc)
-
-        clear_time = now.replace(hour=15, minute=0, second=0, microsecond=0)
-
-        if (today >= clear_time) and (visitor_entry.today_visitor != 1):
-            visitor_entry.today_visitor = 1
-        else:
-            visitor_entry.today_visitor += 1
 
         visitor_entry.total_visitor += 1
         visitor_entry.save()
