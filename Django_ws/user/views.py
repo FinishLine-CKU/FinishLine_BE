@@ -282,6 +282,7 @@ def track_visitor(request):
 
         visitor_entry = VisitorCount.objects.filter(id=1).first()
 
+        visitor_entry.today_visitor += 1
         visitor_entry.total_visitor += 1
         visitor_entry.save()
 

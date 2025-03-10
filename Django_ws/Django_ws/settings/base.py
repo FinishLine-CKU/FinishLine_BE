@@ -137,5 +137,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 CRONJOBS = [
-    ('0 15 * * *', 'Django_ws.user.cron.reset_today_visitor_count'),    # 로그 추가 시 : , '>> /tmp/log/ggbc_cron.log'
+    ('0 15 * * *', 'user.cron.reset_today_visitor_count'),    # 로그 추가 시 : , '>> /tmp/log/ggbc_cron.log'
 ]
