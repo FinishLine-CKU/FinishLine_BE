@@ -2,13 +2,12 @@ from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.decorators import api_view
 from .scraping import scraping
 from .models import User
+from user.models import VisitorCount
 from graduation.models import Standard
 from graduation.models import MyDoneLecture
 from graduation.liberCheck import check_db_mydone_liber
 from graduation.major_calculate import user_graduation_standard
 from rest_framework.response import Response
-from user.models import VisitorCount
-from django.http import JsonResponse
 from django.http import HttpResponse
 from datetime import timedelta, datetime, timezone
 
@@ -243,7 +242,7 @@ def lack_credit(request):
     return Response (data)
 
 @api_view(['POST'])
-def track_visitor(request):
+def set_visitor_cookie(request):
     last_visit = request.COOKIES.get('last_visit')
 
     response = HttpResponse("쿠키가 설정되었습니다!")
@@ -289,7 +288,7 @@ def track_visitor(request):
     return response
 
 @api_view(['GET'])
-def VisitorCookieAPI(request):
+def get_visitor_info(request):
     visitor_data = VisitorCount.objects.first()
     
     if visitor_data:
