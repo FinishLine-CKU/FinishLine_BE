@@ -11,6 +11,6 @@ urlpatterns = [
     path('change_pw/', views.change_pw, name='change_pw'),
     path('change_info/', views.change_info, name='change_info'),
     path('lack_credit/', views.lack_credit, name='lack_credit'),
-    path('track_visitor/', views.track_visitor, name='track_visitor'),
-    path('track_visitor_count/', views.VisitorCookieAPI, name='VisitorCookieAPI'),
+    path('set_visitor_cookie/', views.set_visitor_cookie, name='set_visitor_cookie'),
+    path('get_visitor_info/', views.get_visitor_info, name='get_visitor_info'),
 ]
