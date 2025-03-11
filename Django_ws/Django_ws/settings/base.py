@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'django_crontab',
 
     #추가 라이브러리 등록
     'rest_framework',
@@ -133,3 +134,8 @@ STATIC_URL = 'static/'
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+
+CRONJOBS = [
+    ('0 15 * * *', 'user.cron.reset_today_visitor_count'),    # 로그 추가 시 : , '>> /tmp/log/ggbc_cron.log'
+]
