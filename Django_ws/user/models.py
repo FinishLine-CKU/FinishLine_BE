@@ -2,6 +2,8 @@ from django.db import models
 
 # Create your models here.
 class User(models.Model):
+    last_login = models.DateTimeField(null=True)
+    date_time_joined = models.DateTimeField()
     name = models.CharField(max_length=50)
     student_id = models.CharField(max_length=30, unique=True, primary_key=True)
     password = models.CharField(max_length=100)
