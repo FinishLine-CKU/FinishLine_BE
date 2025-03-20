@@ -8,54 +8,69 @@ from graduation.models import MyDoneLecture
 from user.models import User
 
 
-# 1. 기이수 과목 (전공 추출)
-# 기이수과목에서 lecture_type (이수구분) : 전필, 전선 추출
+# 1-1. 기이수 과목 (전공 추출)
+# 기이수과목에서 lecture_type (이수구분) : 전필, 전선, 전심, 전기, 기초, 공통 추출
 
 def pop_user_major(student_id):
+
+    # 기이수과목에서 전공과목 학점 추출
     user_major_lectures = list(MyDoneLecture.objects.filter(
-    lecture_type__in = ['전필', '전선', '전심', '전기', '기초', '공통'],
-    user_id = student_id
-    ).values_list('credit', flat=True))
+        lecture_type__in = ['전필', '전선', '전심', '전기', '기초', '공통'],
+        user_id = student_id).values_list('credit', flat=True))
 
+    # 전공과목 총 이수학점 계산
     user_credit = sum(user_major_lectures)
-
     print('전공 과목 총 이수학점: ', user_credit)
 
     return user_credit
 
 
-def pop_user_sub_major(student_id):
-    user_sub_major_lectures = list(MyDoneLecture.objects.filter(
-    lecture_type__in = ['복전', '부전', '연전', '연계'],
-    user_id = student_id
-    ).values_list('credit', flat=True))
-    user_credit = sum(user_sub_major_lectures)
+# 1-2. 기이수 과목 (추가 전공 추출)
+# 기이수과목에서 lecture_type (이수구분) : 복전, 부전, 연전, 연계 추출
 
+def pop_user_sub_major(student_id):
+
+    # 기이수과목에서 추가전공과목 학점 추출
+    user_sub_major_lectures = list(MyDoneLecture.objects.filter(
+        lecture_type__in = ['복전', '부전', '연전', '연계'],
+        user_id = student_id).values_list('credit', flat=True))
+
+    # 추가전공과목 총 이수학점 계산
+    user_credit = sum(user_sub_major_lectures)
     print('추가 전공 과목 총 이수학점: ', user_credit)
-    print('추출된 추가 전공 과목 : ', user_sub_major_lectures)
 
     return user_credit
 
 
 # 2. 학생 정보 (졸업요건 조회)
-# 학번 : 적용 년도 설정
-# 전공 : 소속 단과대학 설정
+# 학번 > 입학년도 추출
+# 전공 > 소속 단과대학 분류
 # 복전/부전공 여부 : 일반학과 분류 시 복전/부전공 여부 확인 
 
 def user_graduation_standard(student_id):
+
     user_info = User.objects.filter(student_id = student_id).values('student_id', 'major', 'sub_major_type')
+
+    # 학번 > 입학년도 추출
     year = user_info[0]['student_id'][:4]
+
+    # 전공 > 소속 단과대학 분류 (트리니티 추가 시 if 조건에 입학 년도 추가)
     if (user_info[0]['major'] == '030501*') or (user_info[0]['major'] == '030503*'):
         major = '의학과'
+
     elif (user_info[0]['major'] == '030502*'):
         major = '간호학과'
+
     elif (user_info[0]['major'] == '03300118'):
         major = '건축공학'
+
     elif (user_info[0]['major'] == '03300117'):
         major = '건축학'
-    else :
+
+    else : 
         major = '일반학과'
 
+    # 추가 전공이 없을 시
     sub_major_type = user_info[0]['sub_major_type']
     if sub_major_type == '':
         sub_major_type = None
@@ -66,6 +81,7 @@ def user_graduation_standard(student_id):
 
         return major_standard[0], standard_id[0]
 
+    # 추가 전공이 이수
     else:
         standard = Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values('major_credit', 'sub_major_credit')
         standard_id = list(Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values_list('index', flat=True))
@@ -96,6 +112,7 @@ def need_credit(student_id):
             done_major_rest += user_sub_major   # 추가 전공 이수과목 일선으로 추가
             User.objects.filter(student_id = student_id).update(need_major = need_major, done_major = user_major, done_major_rest = done_major_rest, need_sub_major = need_sub_major)
         return need_major, user_major, std_id, need_sub_major # 전공부족학점, 전공이수학점, 졸업 요건 인덱스
+        
     else:
         user_major = pop_user_major(student_id)
         user_sub_major = pop_user_sub_major(student_id)
