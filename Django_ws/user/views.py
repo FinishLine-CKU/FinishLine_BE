@@ -52,6 +52,7 @@ def register_info(request):
     if name and major and student_id and password:
         try:
             user = User.objects.create(
+                date_time_joined = (datetime.now(timezone.utc) + timedelta(hours=9)),
                 name = name,
                 major = major,
                 student_id = student_id,
@@ -135,6 +136,8 @@ def check_register(request):
 
 
             if check_password(password, user.password):
+                user.last_login = (datetime.now(timezone.utc) + timedelta(hours=9))
+                user.save()
                 data = {
                     'idToken' : user.student_id,
                     'name' : user.name,
