@@ -52,6 +52,18 @@ class MyDoneLectureModelViewSet(ModelViewSet):
 class AllLectureDataModelViewSet(ModelViewSet):
     queryset = AllLectureData.objects.all()
     serializer_class = AllLectureDataSerializer
+
+    @action(detail=False, methods=['get'], url_path='filter-by-code/(?P<lectureCode>[^/.]+)')
+    def filter_by_code(self, request, lectureCode=None): 
+        
+        if len(lectureCode) > 9:
+            lectureCode
+        else:
+            lectureCode = lectureCode[:6] + "-" + lectureCode[6:9]
+            
+        queryset = AllLectureData.objects.filter(lecture_code=lectureCode)
+        serializer = self.get_serializer(queryset, many=True)
+        return Response(serializer.data)
     
 #과목코드로 조회
 class NowLectureModelViewSet(ModelViewSet):
@@ -60,8 +72,7 @@ class NowLectureModelViewSet(ModelViewSet):
 
     @action(detail=False, methods=['get'], url_path='filter-by-code/(?P<lectureCode>[^/.]+)')
     def filter_by_code(self, request, lectureCode=None): 
-        lectureCode = lectureCode.strip()
-
+        
         if len(lectureCode) > 9:
             lectureCode
         else:
