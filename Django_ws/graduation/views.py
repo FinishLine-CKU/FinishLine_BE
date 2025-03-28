@@ -35,7 +35,7 @@ class MyDoneLectureModelViewSet(ModelViewSet):
         if not user_id:
             return Response({"detail": "user_id is required"}, status=status.HTTP_400_BAD_REQUEST)
         
-        queryset = MyDoneLecture.objects.filter(user_id=user_id)
+        queryset = MyDoneLecture.objects.filter(user_id=user_id).order_by('-year')
         serializer = MyDoneLectureSerializer(queryset, many=True)
         return Response(serializer.data)
     
@@ -47,6 +47,25 @@ class MyDoneLectureModelViewSet(ModelViewSet):
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return super().create(request, *args, **kwargs)
+        
+    def destroy(self, request, *args, **kwargs):
+        lecture_code = kwargs.get('pk')  # URL 경로에서 lecture_code를 가져옵니다.
+        user_id = request.data.get('user_id')
+
+        if not user_id or not lecture_code:
+            return Response({'detail': 'user_id and lecture_code are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        subject = MyDoneLecture.objects.filter(user_id=user_id, lecture_code=lecture_code).first()
+
+        if not subject:
+            return Response({'detail': 'Subject not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        subject.delete()
+
+        return Response(
+            {"detail": f"Lecture {lecture_code} deleted successfully."},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 #전체과목 데이터 조회
 class AllLectureDataModelViewSet(ModelViewSet):
