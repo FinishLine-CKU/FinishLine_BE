@@ -30,6 +30,7 @@ class MyDoneLectureModelViewSet(ModelViewSet):
     queryset = MyDoneLecture.objects.all()
     serializer_class = MyDoneLectureSerializer
     
+    #GET 요청
     def list(self, request, *args, **kwargs):
         user_id = request.GET.get('user_id')  # 쿼리 파라미터에서 user_id 가져오기
         if not user_id:
@@ -39,6 +40,7 @@ class MyDoneLectureModelViewSet(ModelViewSet):
         serializer = MyDoneLectureSerializer(queryset, many=True)
         return Response(serializer.data)
     
+    #POST 요청
     def create(self, request, *args, **kwargs):
         if isinstance(request.data, list):
             serializer = self.get_serializer(data=request.data, many=True)
@@ -48,8 +50,9 @@ class MyDoneLectureModelViewSet(ModelViewSet):
         else:
             return super().create(request, *args, **kwargs)
         
+    #DELETE 요청
     def destroy(self, request, *args, **kwargs):
-        lecture_code = kwargs.get('pk')  # URL 경로에서 lecture_code를 가져옵니다.
+        lecture_code = kwargs.get('pk')
         user_id = request.data.get('user_id')
 
         if not user_id or not lecture_code:
@@ -58,6 +61,7 @@ class MyDoneLectureModelViewSet(ModelViewSet):
         subject = MyDoneLecture.objects.filter(user_id=user_id, lecture_code=lecture_code).first()
 
         if not subject:
+            print(f"delete요청 에러 사용자: {user_id}, {lecture_code}")
             return Response({'detail': 'Subject not found'}, status=status.HTTP_404_NOT_FOUND)
         
         subject.delete()
@@ -82,6 +86,7 @@ class AllLectureDataModelViewSet(ModelViewSet):
             
         queryset = AllLectureData.objects.filter(lecture_code=lectureCode)
         serializer = self.get_serializer(queryset, many=True)
+        print(serializer.data)
         return Response(serializer.data)
     
 #과목코드로 조회
@@ -153,6 +158,7 @@ def upload_pdf(request):
                 return Response({'error': f'Error processing file {uploaded_file.name}: {str(e)}'}, status=500)
             
     logger.info("File processing completed.")
+    print(result_data)
     return Response({
         'message': 'Files processed successfully',
         'data': result_data,
