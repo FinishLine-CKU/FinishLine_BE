@@ -209,6 +209,7 @@ def extract_major_from_pdf_table(pdf_stream):
                     if '학 번' in row:
                         for cell in row:
                             if cell and "학 번" not in cell:
+                                user_id = cell
                                 student_year = cell.strip()[:4]
                                 break
                     if student_year:
@@ -219,8 +220,7 @@ def extract_major_from_pdf_table(pdf_stream):
 
     major_code = get_major_code(major_data)
 
-    print(f"추출된 학과: {major_data} → 변환된 코드: {major_code}")
-    print(student_year)
+    print(f"사용자 학번: {user_id} 추출된 학과: {major_data} → 변환된 코드: {major_code}")
     return major_code, student_year
 
 #과목 목록 추출
@@ -260,7 +260,6 @@ def extract_from_pdf_table(user_id, pdf_stream):
 #전체 과목 데이터에서 과목코드를 가져와 내 기이수 과목에 저장
 def save_pdf_data_to_db(subjects_data, student_year, major=None):
     saved_subjects = []
-    print(f"확인용: {major}")
 
     for subject in subjects_data:
         #중복된 데이터의 경우
@@ -275,6 +274,7 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
 
         #아니라면 이수영역 변경
         else:
+            print(f"사용자 전공: {major} 사용자 ID: {subject['학번']}")
 
             if "사제동행세미나" in subject['교과목명'] and major:
                 change_major_code = major[0] if isinstance(major, list) else major 
@@ -295,6 +295,14 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
                 ).first()
 
             elif '부전' in subject['이수구분']:
+                matching_alllecture = AllLectureData.objects.filter(
+                      year=subject['이수년도'],
+                      semester=subject['학기'],
+                      lecture_name=subject['교과목명'],
+                      credit=subject['학점'],
+                ).first()
+
+            elif '일선' in subject['이수구분']:
                 matching_alllecture = AllLectureData.objects.filter(
                       year=subject['이수년도'],
                       semester=subject['학기'],
@@ -351,7 +359,7 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
                 subject_instance.save()
                 saved_subjects.append(subject_instance)
             else:
-                print(f"No matching AllLectureData found for: {subject['교과목명']} (전공: {major[0] if major else '미확인'})")
+                print(f"전체 데이터에서 누락된 과목: {subject['학번']} {subject['교과목명']} (전공: {major[0] if major else '미확인'})")
                 continue
 
     return saved_subjects

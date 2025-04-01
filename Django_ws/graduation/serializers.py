@@ -6,7 +6,7 @@ from .models import NowLectureData
 class MyDoneLectureSerializer(serializers.ModelSerializer):
     class Meta:
         model = MyDoneLecture
-        fields = ['year', 'semester', 'lecture_code', 'lecture_type', 'lecture_topic', 'lecture_name', 'credit', 'user_id']
+        fields = ['year', 'semester', 'lecture_code', 'lecture_type', 'lecture_topic', 'lecture_name', 'credit', 'user_id', 'can_delete']
 
 class AllLectureDataSerializer(serializers.ModelSerializer):
     class Meta:
