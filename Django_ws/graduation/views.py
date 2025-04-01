@@ -36,14 +36,15 @@ class MyDoneLectureModelViewSet(ModelViewSet):
         if not user_id:
             return Response({"detail": "user_id is required"}, status=status.HTTP_400_BAD_REQUEST)
         
-        queryset = MyDoneLecture.objects.filter(user_id=user_id).order_by('-year')
+        queryset = MyDoneLecture.objects.filter(user_id=user_id).order_by('-year', '-semester')
         serializer = MyDoneLectureSerializer(queryset, many=True)
         return Response(serializer.data)
     
     #POST 요청
     def create(self, request, *args, **kwargs):
-        if isinstance(request.data, list):
-            serializer = self.get_serializer(data=request.data, many=True)
+        if isinstance(request.data, dict) and 'subjectsToSave' in request.data:
+            subjects = request.data['subjectsToSave']
+            serializer = self.get_serializer(data=subjects, many=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
