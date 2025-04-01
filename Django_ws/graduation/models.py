@@ -42,6 +42,7 @@ class MyDoneLecture(models.Model):
     lecture_name = models.CharField(max_length=200)
     credit = models.DecimalField(max_digits=3, decimal_places=1)
     user_id = models.CharField(max_length=30, null=True)
+    can_delete = models.BooleanField(default=False)
 
     alllecture = models.ForeignKey(AllLectureData, on_delete=models.CASCADE, null=True)
 

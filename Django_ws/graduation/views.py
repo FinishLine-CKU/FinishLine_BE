@@ -30,23 +30,98 @@ class MyDoneLectureModelViewSet(ModelViewSet):
     queryset = MyDoneLecture.objects.all()
     serializer_class = MyDoneLectureSerializer
     
+    #GET 요청
     def list(self, request, *args, **kwargs):
         user_id = request.GET.get('user_id')  # 쿼리 파라미터에서 user_id 가져오기
         if not user_id:
             return Response({"detail": "user_id is required"}, status=status.HTTP_400_BAD_REQUEST)
         
-        queryset = MyDoneLecture.objects.filter(user_id=user_id)
+        queryset = MyDoneLecture.objects.filter(user_id=user_id).order_by('-year', '-semester')
         serializer = MyDoneLectureSerializer(queryset, many=True)
         return Response(serializer.data)
     
+    #POST 요청
     def create(self, request, *args, **kwargs):
-        if isinstance(request.data, list):
-            serializer = self.get_serializer(data=request.data, many=True)
+        if isinstance(request.data, dict) and 'subjectsToSave' in request.data:
+            subjects = request.data['subjectsToSave']
+
+            user_id = subjects[0]['user_id']
+
+            for subject in subjects:
+                lecture_code = subject['lecture_code'] 
+                user_major_code = User.objects.filter(student_id=user_id).values('major').first()
+                user_sub_major_type = User.objects.filter(student_id=user_id).values('sub_major_type').first()
+                user_sub_major = User.objects.filter(student_id=user_id).values('sub_major').first()
+                subject_major_code = NowLectureData.objects.filter(lecture_code=lecture_code).values('major_code').first()
+                print('과목찾기 : ', user_id, user_major_code, user_sub_major_type, user_sub_major['sub_major'])
+                if(subject_major_code['major_code'] == " "):
+                    print(user_id, "교양 추가 : ", lecture_code)
+                    break
+
+                elif(user_major_code['major'] == subject_major_code['major_code']):
+                    print('과목찾기 : ', user_id, "전공 추가 : ", lecture_code)
+                    break
+
+                elif(user_sub_major_type['sub_major_type']):
+                    user_sub_major_type_data = user_sub_major_type['sub_major_type']
+
+                    if(user_sub_major_type_data == 'double'):
+                        if(user_sub_major['sub_major'] == subject_major_code['major_code']):
+                            subject['lecture_type'] = '복전'
+                            print('과목찾기 : ', user_id, "복전으로 변경 : ",  lecture_code, subject_major_code)
+
+                        else:
+                            subject['lecture_type'] = '일선'
+                            print('과목찾기 : ', user_id, "일선으로 변경 : ", lecture_code, subject_major_code)
+
+                    elif(user_sub_major_type_data == 'minor'):
+                        if(user_sub_major['sub_major'] == subject_major_code['major_code']):
+                            subject['lecture_type'] = '부전'
+                            print('과목찾기 : ', user_id, "복전으로 변경 : ", lecture_code, subject_major_code)
+                        else:
+                            subject['lecture_type'] = '일선'
+                            print('과목찾기 : ', user_id, "일선으로 변경 : ", lecture_code, subject_major_code)
+                    
+                    else:
+                        subject['lecture_type'] = '일선'
+                        print('과목찾기 : ', user_id, "일선으로 변경 : ", lecture_code, subject_major_code)
+
+                    #연계전공 로직 연전/연계 확인 필요
+                    # elif(user_sub_major_type_data == 'linked'):
+                    #     if(user_sub_major['sub_major'] == subject_major_code['major_code']):
+                    #         subject['lecture_type'] = '연전'
+                    #     else:
+                    #         subject['lecture_type'] = '일선'
+                else:
+                    subject['lecture_type'] = '일선'
+
+            serializer = self.get_serializer(data=subjects, many=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:
             return super().create(request, *args, **kwargs)
+        
+    #DELETE 요청
+    def destroy(self, request, *args, **kwargs):
+        lecture_code = kwargs.get('pk')
+        user_id = request.data.get('user_id')
+
+        if not user_id or not lecture_code:
+            return Response({'detail': 'user_id and lecture_code are required'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        subject = MyDoneLecture.objects.filter(user_id=user_id, lecture_code=lecture_code).first()
+
+        if not subject:
+            print(f"delete요청 에러 사용자: {user_id}, {lecture_code}")
+            return Response({'detail': 'Subject not found'}, status=status.HTTP_404_NOT_FOUND)
+        
+        subject.delete()
+
+        return Response(
+            {"detail": f"Lecture {lecture_code} deleted successfully."},
+            status=status.HTTP_204_NO_CONTENT
+        )
 
 #전체과목 데이터 조회
 class AllLectureDataModelViewSet(ModelViewSet):
@@ -63,6 +138,7 @@ class AllLectureDataModelViewSet(ModelViewSet):
             
         queryset = AllLectureData.objects.filter(lecture_code=lectureCode)
         serializer = self.get_serializer(queryset, many=True)
+        print(serializer.data)
         return Response(serializer.data)
     
 #과목코드로 조회
@@ -134,6 +210,7 @@ def upload_pdf(request):
                 return Response({'error': f'Error processing file {uploaded_file.name}: {str(e)}'}, status=500)
             
     logger.info("File processing completed.")
+    print(result_data)
     return Response({
         'message': 'Files processed successfully',
         'data': result_data,
