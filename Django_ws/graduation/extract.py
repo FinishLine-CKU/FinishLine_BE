@@ -302,6 +302,14 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
                       credit=subject['학점'],
                 ).first()
 
+            elif '일선' in subject['이수구분']:
+                matching_alllecture = AllLectureData.objects.filter(
+                      year=subject['이수년도'],
+                      semester=subject['학기'],
+                      lecture_name=subject['교과목명'],
+                      credit=subject['학점'],
+                ).first()
+
             else:
                 matching_alllecture = AllLectureData.objects.filter(
                     year=subject['이수년도'],

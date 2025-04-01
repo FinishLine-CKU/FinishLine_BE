@@ -44,6 +44,57 @@ class MyDoneLectureModelViewSet(ModelViewSet):
     def create(self, request, *args, **kwargs):
         if isinstance(request.data, dict) and 'subjectsToSave' in request.data:
             subjects = request.data['subjectsToSave']
+
+            user_id = subjects[0]['user_id']
+
+            for subject in subjects:
+                lecture_code = subject['lecture_code'] 
+                user_major_code = User.objects.filter(student_id=user_id).values('major').first()
+                user_sub_major_type = User.objects.filter(student_id=user_id).values('sub_major_type').first()
+                user_sub_major = User.objects.filter(student_id=user_id).values('sub_major').first()
+                subject_major_code = NowLectureData.objects.filter(lecture_code=lecture_code).values('major_code').first()
+                print('과목찾기 : ', user_id, user_major_code, user_sub_major_type, user_sub_major['sub_major'])
+                if(subject_major_code['major_code'] == " "):
+                    print(user_id, "교양 추가 : ", lecture_code)
+                    break
+
+                elif(user_major_code['major'] == subject_major_code['major_code']):
+                    print('과목찾기 : ', user_id, "전공 추가 : ", lecture_code)
+                    break
+
+                elif(user_sub_major_type['sub_major_type']):
+                    user_sub_major_type_data = user_sub_major_type['sub_major_type']
+
+                    if(user_sub_major_type_data == 'double'):
+                        if(user_sub_major['sub_major'] == subject_major_code['major_code']):
+                            subject['lecture_type'] = '복전'
+                            print('과목찾기 : ', user_id, "복전으로 변경 : ",  lecture_code, subject_major_code)
+
+                        else:
+                            subject['lecture_type'] = '일선'
+                            print('과목찾기 : ', user_id, "일선으로 변경 : ", lecture_code, subject_major_code)
+
+                    elif(user_sub_major_type_data == 'minor'):
+                        if(user_sub_major['sub_major'] == subject_major_code['major_code']):
+                            subject['lecture_type'] = '부전'
+                            print('과목찾기 : ', user_id, "복전으로 변경 : ", lecture_code, subject_major_code)
+                        else:
+                            subject['lecture_type'] = '일선'
+                            print('과목찾기 : ', user_id, "일선으로 변경 : ", lecture_code, subject_major_code)
+                    
+                    else:
+                        subject['lecture_type'] = '일선'
+                        print('과목찾기 : ', user_id, "일선으로 변경 : ", lecture_code, subject_major_code)
+
+                    #연계전공 로직 연전/연계 확인 필요
+                    # elif(user_sub_major_type_data == 'linked'):
+                    #     if(user_sub_major['sub_major'] == subject_major_code['major_code']):
+                    #         subject['lecture_type'] = '연전'
+                    #     else:
+                    #         subject['lecture_type'] = '일선'
+                else:
+                    subject['lecture_type'] = '일선'
+
             serializer = self.get_serializer(data=subjects, many=True)
             serializer.is_valid(raise_exception=True)
             serializer.save()
