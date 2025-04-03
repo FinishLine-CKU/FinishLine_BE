@@ -13,7 +13,7 @@ from datetime import timedelta, datetime, timezone
 
 
 @api_view(['POST'])
-def student_auth(request):
+def student_auth(request):    # 재학생인증
     non_target = ['국어교육과', '지리교육과', '수학교육과', '체육교육과', '컴퓨터교육과', '영어교육과', '역사교육과', '자율전공학부']
     data = request.data
     studentId = data.get('studentId')
@@ -36,11 +36,11 @@ def student_auth(request):
     else:
         error = result
         data = {'error' : error}
-    print(data)
+    print(f'Success Student Auth! \n{major} {student_id} {name}')
     return Response (data)
 
 @api_view(['POST'])
-def register_info(request):
+def register_info(request):    # 회원가입
     data = request.data
     name = data.get('name')
     major = data.get('major')
@@ -61,13 +61,14 @@ def register_info(request):
                 micro_degree = micro_degree,
                 password = make_password(password)
             )
-            print(user.name, user.major, user.student_id, user.sub_major_type, user.sub_major, user.micro_degree, user.password)
+            print(f'Success Sign Up! \n회원가입 일시(KST): {user.date_time_joined} \n이름: {user.name} \n전공코드: {user.major} \n학번: {user.student_id} \n비밀번호: {user.password} \n추가전공 종류: {user.sub_major_type} \n추가전공 코드: {user.sub_major} \n소단위전공: {user.micro_degree}')
             return Response (True)
         except Exception as e:
             print(f'DB 저장 오류: {repr(e)}')
             return Response (False)
-    print('회원가입 필수 데이터 누락')
-    return Response (False)
+    else:
+        print(f'Fail Sign Up')
+        return Response (False)
 
 @api_view(['POST'])
 def reset_check_register(request):
@@ -86,7 +87,7 @@ def reset_check_register(request):
     return Response (data)
 
 @api_view(['POST'])
-def check_register(request):
+def check_register(request):    # 로그인
     data = request.data
     student_id = data.get('studentId')
     password = data.get('password')
@@ -162,7 +163,7 @@ def check_register(request):
     return Response (data)
 
 @api_view(['POST'])
-def my_info(request):
+def my_info(request):    # 마이페이지
     data = request.data
     student_id = data.get('idToken')
     if User.objects.filter(student_id = student_id).exists():
@@ -183,7 +184,7 @@ def my_info(request):
     return Response (data)
 
 @api_view(['POST'])
-def remove_membership(request):
+def remove_membership(request):    # 회원 탈퇴
     data = request.data
     student_id = data.get('idToken')
     if User.objects.filter(student_id = student_id).exists():
@@ -196,7 +197,7 @@ def remove_membership(request):
     return Response (data)
 
 @api_view(['POST'])
-def change_pw(request):
+def change_pw(request):    # 비밀번호 변경
     data = request.data
     student_id = data.get('studentId')
     password = data.get('password')
@@ -212,7 +213,7 @@ def change_pw(request):
     return Response (data)
 
 @api_view(['POST'])
-def change_info(request):
+def change_info(request):    # 회원정보 수정
     data = request.data
     student_id = data.get('studentId')
     sub_major_type = data.get('sub_major_type')
@@ -245,7 +246,7 @@ def lack_credit(request):
     return Response (data)
 
 @api_view(['POST'])
-def set_visitor_cookie(request):
+def set_visitor_cookie(request):    # 방문자 수 계산
     last_visit = request.COOKIES.get('last_visit')
 
     response = HttpResponse("쿠키가 설정되었습니다!")
@@ -291,7 +292,7 @@ def set_visitor_cookie(request):
     return response
 
 @api_view(['GET'])
-def get_visitor_info(request):
+def get_visitor_info():
     visitor_data = VisitorCount.objects.first()
     
     if visitor_data:
