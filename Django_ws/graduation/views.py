@@ -81,17 +81,19 @@ class MyDoneLectureModelViewSet(ModelViewSet):
                         else:
                             subject['lecture_type'] = '일선'
                             print('과목찾기 : ', user_id, "일선으로 변경 : ", lecture_code, subject_major_code)
+
+                    elif(user_sub_major_type_data == 'linked'):
+                        if(user_sub_major['sub_major'] == subject_major_code['major_code']):
+                            subject['lecture_type'] = '연계'
+                            print('과목찾기 : ', user_id, "연계전공으로 변경 : ", lecture_code, subject_major_code)
+                        else:
+                            subject['lecture_type'] = '일선'
+                            print('과목찾기 : ', user_id, "일선으로 변경 : ", lecture_code, subject_major_code)
                     
                     else:
                         subject['lecture_type'] = '일선'
                         print('과목찾기 : ', user_id, "일선으로 변경 : ", lecture_code, subject_major_code)
 
-                    #연계전공 로직 연전/연계 확인 필요
-                    # elif(user_sub_major_type_data == 'linked'):
-                    #     if(user_sub_major['sub_major'] == subject_major_code['major_code']):
-                    #         subject['lecture_type'] = '연전'
-                    #     else:
-                    #         subject['lecture_type'] = '일선'
                 else:
                     subject['lecture_type'] = '일선'
 

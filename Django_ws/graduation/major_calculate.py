@@ -26,7 +26,7 @@ def pop_user_major(student_id):
 
 def pop_user_sub_major(student_id):
     user_sub_major_lectures = list(MyDoneLecture.objects.filter(
-    lecture_type__in = ['복전', '부전', '연전', '연계'],
+    lecture_type__in = ['복전', '부전', '연계'],
     user_id = student_id
     ).values_list('credit', flat=True))
     user_credit = sum(user_sub_major_lectures)
