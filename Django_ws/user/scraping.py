@@ -38,7 +38,8 @@ def scraping(studentId, studentPW):
         driver.quit()
         errorMessage = '아이디 또는 비밀번호를 확인해주세요.'
         return errorMessage
-    except:
+    except Exception as e:
         driver.quit()
+        print(f'재학생 인증 오류코드(디버깅): {e}')
         errorMessage = '회원 정보를 확인할 수 없습니다. 잠시 후 다시 시도해주세요.'
         return errorMessage

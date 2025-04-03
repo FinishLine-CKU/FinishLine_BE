@@ -24,19 +24,23 @@ def student_auth(request):    # 재학생인증
         student_id, name, major = result
         if User.objects.filter(student_id = student_id, name = name).exists() and not isPasswordReset:
             error = '이미 가입된 회원입니다.'
-            data = {'error' : error}          
+            data = {'error' : error}
+            print(f'Fail Student Auth.. \nerror: {data}')
         elif int(student_id[:4]) >= 2023 or int(student_id[:4]) <= 2017:
             error = '서비스 이용 대상이 아닙니다.'
             data = {'error' : error}
+            print(f'Fail Student Auth.. \nerror: {data}')
         elif major in non_target:
             error = '서비스 이용 대상이 아닙니다.'
             data = {'error' : error}
+            print(f'Fail Student Auth.. \nerror: {data}')
         else:
             data = {'student_id': student_id, 'name' : name, 'major' : major}
+            print(f'Success Student Auth! \n{major} {student_id} {name}')
     else:
         error = result
         data = {'error' : error}
-    print(f'Success Student Auth! \n{major} {student_id} {name}')
+        print(f'Fail Student Auth.. \nerror: {data}')
     return Response (data)
 
 @api_view(['POST'])
