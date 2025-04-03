@@ -17,7 +17,7 @@ class User(models.Model):
     need_rest = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_major = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_general = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
-    done_rest = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
+    done_general_rest = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_major_rest = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_sub_major = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_micro_degree = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)

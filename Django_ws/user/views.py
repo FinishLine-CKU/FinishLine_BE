@@ -107,10 +107,10 @@ def check_register(request):
                 result = check_db_mydone_liber(student_id)  # 교양 부족학점
                 standard = user_graduation_standard(student_id) # 기준 가져오기
                 std = Standard.objects.filter(index = standard[-1]).first()
-                if user.done_rest == None:
-                    done_rest = 0
+                if user.done_general_rest == None:
+                    done_general_rest = 0
                 else:
-                    done_rest = user.done_rest
+                    done_general_rest = user.done_general_rest
                 if user.done_major_rest == None:
                     done_major_rest = 0
                 else:
@@ -120,7 +120,7 @@ def check_register(request):
                 else:
                     done_micro_degree = user.done_micro_degree
                 
-                needNormalTotalCredit = std.rest_credit - (done_rest + done_major_rest + done_micro_degree)
+                needNormalTotalCredit = std.rest_credit - (done_general_rest + done_major_rest + done_micro_degree)
                 if needNormalTotalCredit < 0:
                     needNormalTotalCredit = 0
                 
