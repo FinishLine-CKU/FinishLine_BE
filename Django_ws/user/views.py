@@ -18,7 +18,7 @@ def student_auth(request):    # 재학생인증
     data = request.data
     studentId = data.get('studentId')
     studentPW = data.get('studentPW')
-    isPasswordReset = data.get('isPasswordReset', False)
+    isPasswordReset = data.get('isPasswordReset', False)    # 비밀번호 재설정
     result = scraping(studentId, studentPW)
     if isinstance(result, tuple):
         student_id, name, major = result
@@ -75,7 +75,7 @@ def register_info(request):    # 회원가입
         return Response (False)
 
 @api_view(['POST'])
-def reset_check_register(request):
+def reset_check_register(request):  # 비밀번호 재설정 (회원 정보 확인)
     data = request.data
     student_id = data.get('studentId')
     if student_id:
