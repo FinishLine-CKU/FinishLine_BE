@@ -5,8 +5,8 @@ import re
 from .models import MyDoneLecture
 from .models import AllLectureData
 
-def extract_from_pdf_title(pdf_stream):
-    with pdfplumber.open(pdf_stream) as pdf:
+def extract_from_pdf_title(uploaded_file):
+    with pdfplumber.open(uploaded_file) as pdf:
         first_page = pdf.pages[0]
         text = first_page.extract_text()
 
@@ -191,11 +191,12 @@ def get_major_code(major_name):
     return MAJOR_MAP.get(major_name, None)
 
 #학과, 전공, 학번 추출
-def extract_major_from_pdf_table(pdf_stream):
-    pdf_stream.seek(0)  
-    with pdfplumber.open(pdf_stream) as pdf:
+def extract_major_from_pdf_table(uploaded_file):
+    uploaded_file.seek(0)  
+    with pdfplumber.open(uploaded_file) as pdf:
         major_data = None  
         student_year = None
+        print(uploaded_file)
         for page in pdf.pages:
             table = page.extract_table()
             if table:
@@ -226,15 +227,19 @@ def extract_major_from_pdf_table(pdf_stream):
     return major_code, student_year
 
 #과목 목록 추출
-def extract_from_pdf_table(user_id, pdf_stream):
-    year, semester = extract_from_pdf_title(pdf_stream)
+def extract_from_pdf_table(user_id, uploaded_file):
+    year, semester = extract_from_pdf_title(uploaded_file)
     
-    pdf_stream.seek(0)
+    uploaded_file.seek(0)
     
-    with pdfplumber.open(pdf_stream) as pdf:
+    with pdfplumber.open(uploaded_file) as pdf:
         table_data = []
         for page in pdf.pages:
             table = page.extract_table()
+
+            for i in table:
+                print(i)
+                
             if table:
                 for row in table:
                     if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "복전", "부전", "연계", "교필", "교선", "전공선택", "전공필수",
