@@ -642,7 +642,7 @@ def calculate_and_save_standard(complete_liber, need_liber, complete_normal, stu
         
         user.done_general = complete_liber
         user.need_general = need_liber
-        user.done_rest = complete_normal
+        user.done_general_rest = complete_normal
 
         
         user.save()

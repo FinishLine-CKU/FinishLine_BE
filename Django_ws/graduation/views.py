@@ -81,17 +81,19 @@ class MyDoneLectureModelViewSet(ModelViewSet):
                         else:
                             subject['lecture_type'] = '일선'
                             print('과목찾기 : ', user_id, "일선으로 변경 : ", lecture_code, subject_major_code)
+
+                    elif(user_sub_major_type_data == 'linked'):
+                        if(user_sub_major['sub_major'] == subject_major_code['major_code']):
+                            subject['lecture_type'] = '연계'
+                            print('과목찾기 : ', user_id, "연계전공으로 변경 : ", lecture_code, subject_major_code)
+                        else:
+                            subject['lecture_type'] = '일선'
+                            print('과목찾기 : ', user_id, "일선으로 변경 : ", lecture_code, subject_major_code)
                     
                     else:
                         subject['lecture_type'] = '일선'
                         print('과목찾기 : ', user_id, "일선으로 변경 : ", lecture_code, subject_major_code)
 
-                    #연계전공 로직 연전/연계 확인 필요
-                    # elif(user_sub_major_type_data == 'linked'):
-                    #     if(user_sub_major['sub_major'] == subject_major_code['major_code']):
-                    #         subject['lecture_type'] = '연전'
-                    #     else:
-                    #         subject['lecture_type'] = '일선'
                 else:
                     subject['lecture_type'] = '일선'
 
@@ -173,24 +175,26 @@ def upload_pdf(request):
     for uploaded_file in files:
         if uploaded_file.name.endswith('.pdf'):
             try:
-                pdf_bytes = io.BytesIO()
+                # pdf_bytes = io.BytesIO()
 
                 #메모리 효율을 위해 chunks로 나누어 분석
-                for chunk in uploaded_file.chunks():
-                    pdf_bytes.write(chunk)
+                # for chunk in uploaded_file.chunks():
+                #     pdf_bytes.write(chunk)
 
-                pdf_bytes.seek(0)
+                uploaded_file.seek(0)
+
+                print("사용자:", user_id, "PDF 추출 로직 시작")
 
                 #학번과 전공을 추출
-                extracted_major, student_year = extract_major_from_pdf_table(pdf_bytes)
+                extracted_major, student_year = extract_major_from_pdf_table(uploaded_file)
 
                 #pdf내부 과목목록을 추출
-                extracted_table = extract_from_pdf_table(user_id, pdf_bytes)
+                extracted_table = extract_from_pdf_table(user_id, uploaded_file)
 
                 #DB에 이수영역 변경 후 저장
                 saved_subjects = save_pdf_data_to_db(extracted_table, student_year, extracted_major)
 
-                pdf_bytes.close()
+                # pdf_bytes.close()
 
                 if saved_subjects: 
                     result_data.append({
