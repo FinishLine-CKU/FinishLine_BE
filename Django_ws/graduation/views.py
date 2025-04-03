@@ -181,6 +181,8 @@ def upload_pdf(request):
 
                 pdf_bytes.seek(0)
 
+                print("사용자:", user_id, "PDF 추출 로직 시작")
+
                 #학번과 전공을 추출
                 extracted_major, student_year = extract_major_from_pdf_table(pdf_bytes)
 

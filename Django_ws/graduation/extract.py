@@ -209,7 +209,6 @@ def extract_major_from_pdf_table(pdf_stream):
                     if '학 번' in row:
                         for cell in row:
                             if cell and "학 번" not in cell:
-                                user_id = cell
                                 student_year = cell.strip()[:4]
                                 break
                     if student_year:
@@ -220,7 +219,7 @@ def extract_major_from_pdf_table(pdf_stream):
 
     major_code = get_major_code(major_data)
 
-    print(f"사용자 학번: {user_id} 추출된 학과: {major_data} → 변환된 코드: {major_code}")
+    print(f"추출된 학과: {major_data} → 변환된 코드: {major_code}")
     return major_code, student_year
 
 #과목 목록 추출
