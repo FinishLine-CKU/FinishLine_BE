@@ -237,7 +237,7 @@ def extract_from_pdf_table(user_id, pdf_stream):
             table = page.extract_table()
             if table:
                 for row in table:
-                    if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "복전", "부전", "연전", "연계", "교필", "교선", "전공선택", "전공필수",
+                    if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "복전", "부전", "연계", "교필", "교선", "전공선택", "전공필수",
                                                                     "전공", "전심", "기초", "일선", "일반선택", "공통", "공통전공", "전공기본",
                                                                     "전공심화", "기초전공", "전기"]):
                         grade = row[9].strip() if row[9] else "" 
