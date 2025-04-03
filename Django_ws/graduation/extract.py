@@ -5,8 +5,8 @@ import re
 from .models import MyDoneLecture
 from .models import AllLectureData
 
-def extract_from_pdf_title(pdf_stream):
-    with pdfplumber.open(pdf_stream) as pdf:
+def extract_from_pdf_title(uploaded_file):
+    with pdfplumber.open(uploaded_file) as pdf:
         first_page = pdf.pages[0]
         text = first_page.extract_text()
 
@@ -64,8 +64,11 @@ MAJOR_MAP = {
     '광고홍보학과': '03300107',
     '트리니티융합-광고홍보학전공': '03300107',
     '경찰행정학과': '03301001',
+    '경찰행정학부': '03301001',
     '경찰행정학부-경찰행정학': '03301001',
     '경찰행정학부-해양경찰': '03301002',
+    '경찰행정학부-경찰행정학전공': '03301001',
+    '경찰행정학부-해양경찰전공': '03301002',
     '경찰학부': '03301001',
     '경찰학부-경찰행정학': '03301001',
     '경찰학부-해양경찰': '03301002',
@@ -188,11 +191,12 @@ def get_major_code(major_name):
     return MAJOR_MAP.get(major_name, None)
 
 #학과, 전공, 학번 추출
-def extract_major_from_pdf_table(pdf_stream):
-    pdf_stream.seek(0)  
-    with pdfplumber.open(pdf_stream) as pdf:
+def extract_major_from_pdf_table(uploaded_file):
+    uploaded_file.seek(0)  
+    with pdfplumber.open(uploaded_file) as pdf:
         major_data = None  
         student_year = None
+        print(uploaded_file)
         for page in pdf.pages:
             table = page.extract_table()
             if table:
@@ -209,7 +213,6 @@ def extract_major_from_pdf_table(pdf_stream):
                     if '학 번' in row:
                         for cell in row:
                             if cell and "학 번" not in cell:
-                                user_id = cell
                                 student_year = cell.strip()[:4]
                                 break
                     if student_year:
@@ -220,19 +223,23 @@ def extract_major_from_pdf_table(pdf_stream):
 
     major_code = get_major_code(major_data)
 
-    print(f"사용자 학번: {user_id} 추출된 학과: {major_data} → 변환된 코드: {major_code}")
+    print(f"추출된 학과: {major_data} → 변환된 코드: {major_code}")
     return major_code, student_year
 
 #과목 목록 추출
-def extract_from_pdf_table(user_id, pdf_stream):
-    year, semester = extract_from_pdf_title(pdf_stream)
+def extract_from_pdf_table(user_id, uploaded_file):
+    year, semester = extract_from_pdf_title(uploaded_file)
     
-    pdf_stream.seek(0)
+    uploaded_file.seek(0)
     
-    with pdfplumber.open(pdf_stream) as pdf:
+    with pdfplumber.open(uploaded_file) as pdf:
         table_data = []
         for page in pdf.pages:
             table = page.extract_table()
+
+            for i in table:
+                print(i)
+                
             if table:
                 for row in table:
                     if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "복전", "부전", "연계", "교필", "교선", "전공선택", "전공필수",
