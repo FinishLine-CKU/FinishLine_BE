@@ -296,7 +296,7 @@ def set_visitor_cookie(request):    # 방문자 수 계산
     return response
 
 @api_view(['GET'])
-def get_visitor_info():
+def get_visitor_info(request):
     visitor_data = VisitorCount.objects.first()
     
     if visitor_data:
