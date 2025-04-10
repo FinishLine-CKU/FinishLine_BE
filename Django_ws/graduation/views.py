@@ -265,7 +265,7 @@ def test_major(request):
                 'essentialGEStandard' : gradu.essential_GE_standatd, # 교양필수 총 학점
                 'choiceGEStandard' : gradu.choice_GE_standard, # 교양필수 총 학점
                 'restStandard' : 0,
-                'done_major_rest' : done_major_rest[0],
+                'doneMajorRest' : done_major_rest[0],
                 'lackSubMajor' : lack_sub_major,
                 'done_rest' : done_rest[0]
             },
@@ -279,7 +279,7 @@ def test_major(request):
                 'essentialGEStandard' : gradu.essential_GE_standatd, # 교양필수 총 학점
                 'choiceGEStandard' : gradu.choice_GE_standard, # 교양필수 총 학점
                 'restStandard' : gradu.rest_standard,
-                'done_major_rest' : done_major_rest[0],
+                'doneMajorRest' : done_major_rest[0],
                 'lackSubMajor' : lack_sub_major,
                 'done_rest' : done_rest[0]
             }
@@ -306,7 +306,7 @@ def test_major(request):
                 'doneSubMajor' : done_sub_major, # 이수한 추가전공 학점
                 'subMajorStandard' : gradu.sub_major_standard, # 추가전공 기준 학점
                 'sub_major_type' : gradu.sub_major_type,
-                'done_major_rest' : done_major_rest[0],
+                'doneMajorRest' : done_major_rest[0],
                 'done_rest' : done_rest[0]
             },
         else:
@@ -323,7 +323,7 @@ def test_major(request):
                 'doneSubMajor' : done_sub_major, # 이수한 추가전공 학점
                 'subMajorStandard' : gradu.sub_major_standard, # 추가전공 기준 학점
                 'sub_major_type' : gradu.sub_major_type,
-                'done_major_rest' : done_major_rest[0],
+                'doneMajorRest' : done_major_rest[0],
                 'done_rest' : done_rest[0]
             }
     print(data)
