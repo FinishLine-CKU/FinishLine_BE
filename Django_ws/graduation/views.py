@@ -9,6 +9,12 @@ from .extract import extract_from_pdf_table
 from .extract import save_pdf_data_to_db
 from .extract import extract_major_from_pdf_table
 from .liberCheck import check_db_mydone_liber
+from .liber_calculate import mydone_liber_get
+from .liber_calculate import user_liberrequire_get
+from .liber_calculate import liber_human_calculate
+from .liber_calculate import are_you_human
+from .liber_calculate import GE_fusion_calculate
+from .liber_calculate import GE_basic_calculate
 import logging
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
@@ -225,22 +231,39 @@ def upload_pdf(request):
 @api_view(['POST'])
 def general_check(request):
     user_id = request.data.get('user_id')
+    user_major = User.objects.filter(student_id=user_id).values('major').first() #{'major': '03300111'}
+    year = user_id[:4]
 
-    # print(f"Received user_id: {user_id}")
-    result = check_db_mydone_liber(user_id) 
-    print(result)
+    #소속 단과대학 추출
+    home_collage = are_you_human(user_major) #단과대학 추출 일반
+    #전체과목 데이터 추출
+    lecture_dict, liber_credit = mydone_liber_get(user_id)
+    #사용자 교양요건 추출
+    user_liber_result = user_liberrequire_get(year, home_collage)
 
-    return Response({
-        'message': 'Files processed successfully',
-        'general_data': {
-            '교양필수_부족_학점': result.get("교양필수 부족 학점", []), #
-            '교양선택_부족_학점': result.get("교양선택 부족 학점", []), #
+    #졸업요건 검사로직
+    if (year > '2022'):
+        lecture_dict_human_result, liber_human_item = liber_human_calculate(lecture_dict, user_liber_result)
+        lecture_dict_fusion_result, liber_fusion_item = GE_fusion_calculate(lecture_dict_human_result, user_liber_result)
+        lecture_dict_basic_result, liber_basic_item = GE_basic_calculate(lecture_dict_fusion_result, user_liber_result, home_collage, year)
+        print("교양기초계산", lecture_dict_basic_result)
+        print("교양기초계산 영역", user_liber_result)
+    else:    
+        result = check_db_mydone_liber(user_id) 
+
+    data = {
+            '교양필수_부족_학점': result.get("교양필수 부족 학점", []),
+            '교양선택_부족_학점': result.get("교양선택 부족 학점", []), 
             '교양필수_부족_영역': result.get("교양필수 부족 영역", []), 
             '교양선택_부족_영역': result.get("교양선택 부족 영역", []), 
             '교양필수_이수_학점': result.get("교양필수 이수 학점", []), 
             '교양선택_이수_학점': result.get("교양선택 이수 학점", []), 
             '일반선택_이수_학점': result.get("일반선택 이수 학점", []), 
-        }
+    }
+
+    return Response({
+        'message': 'Files processed successfully',
+        'general_data': (data)
     })
 
 @api_view(['POST'])
