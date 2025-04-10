@@ -237,7 +237,7 @@ def general_check(request):
             'lackChoiceGE': result.get("교양선택 부족 학점", []), #
             '교양필수_부족_영역': result.get("교양필수 부족 영역", []), 
             '교양선택_부족_영역': result.get("교양선택 부족 영역", []), 
-            '교양필수_이수_학점': result.get("교양필수 이수 학점", []), 
+            'doneEssentialGE': result.get("교양필수 이수 학점", []), 
             '교양선택_이수_학점': result.get("교양선택 이수 학점", []), 
             '일반선택_이수_학점': result.get("일반선택 이수 학점", []), 
         }
