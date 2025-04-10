@@ -105,8 +105,8 @@ def check_register(request):    # 로그인
                     "교양필수 부족 학점": None,
                     "교양선택 부족 학점": None
                 }
-                needNormalTotalCredit = None,
-                needTotalCredit = None
+                lack_rest_total = None,
+                lack_total = None
 
             else:   # 졸업 검사 이력이 있다면
                 result = check_db_mydone_liber(student_id)  # 교양 부족학점
@@ -125,11 +125,11 @@ def check_register(request):    # 로그인
                 else:
                     done_MD = user.done_MD
                 
-                needNormalTotalCredit = std.rest_standard - (done_general_rest + done_major_rest + done_MD)
-                if needNormalTotalCredit < 0:
-                    needNormalTotalCredit = 0
+                lack_rest_total = std.rest_standard - (done_general_rest + done_major_rest + done_MD)
+                if lack_rest_total < 0:
+                    lack_rest_total = 0
                 
-                user.need_rest = needNormalTotalCredit  # 부족한 일선 총 학점 저장
+                user.need_rest = lack_rest_total  # 부족한 일선 총 학점 저장
                 user.save()
 
                 if user.lack_sub_major == None:
@@ -137,7 +137,7 @@ def check_register(request):    # 로그인
                 else:
                     lack_sub_major = user.lack_sub_major
 
-                needTotalCredit = needNormalTotalCredit + user.lack_major + user.need_general + lack_sub_major   # 부족한 학점 총계
+                lack_total = lack_rest_total + user.lack_major + user.need_general + lack_sub_major   # 부족한 학점 총계
 
 
             if check_password(password, user.password):
@@ -151,8 +151,8 @@ def check_register(request):    # 로그인
                     'lackEssentialGE' : result.get("교양필수 부족 학점", []),
                     'lackChoiceGE' : result.get("교양선택 부족 학점", []),
                     'lackSubMajor' : user.lack_sub_major,
-                    'needNormalTotalCredit' : needNormalTotalCredit,
-                    'needTotalCredit' : needTotalCredit
+                    'lackRestTotal' : lack_rest_total,
+                    'lackTotal' : lack_total
                 }
             else:
                 error = '학번 또는 비밀번호가 올바르지 않습니다.'

@@ -257,7 +257,7 @@ def test_major(request):
 
         if gradu.rest_standard == None:
             data = {
-                'major_info' : major[0], # 전공
+                'major' : major[0], # 전공
                 'lackMajor' : lack_major, # 부족학점
                 'doneMajor' : done_major, # 이수한 학점
                 'totalStandard' : gradu.total_standard, # 졸업 총 학점
@@ -271,7 +271,7 @@ def test_major(request):
             },
         else:
             data = {
-                'major_info' : major[0], # 전공
+                'major' : major[0], # 전공
                 'lackMajor' : lack_major, # 부족학점
                 'doneMajor' : done_major, # 이수한 학점
                 'totalStandard' : gradu.total_standard, # 졸업 총 학점
@@ -294,7 +294,7 @@ def test_major(request):
         # 의학과, 간호학과, 건축학, 건축공학 전공
         if gradu.rest_standard == None:
             data = {
-                'major_info' : major[0], # 전공
+                'major' : major[0], # 전공
                 'lackMajor' : lack_major, # 부족학점
                 'doneMajor' : done_major, # 이수한 학점
                 'totalStandard' : gradu.total_standard, # 졸업 기준 학점
@@ -305,13 +305,13 @@ def test_major(request):
                 'lackSubMajor' : lack_sub_major, # 부족 추가전공 학점
                 'doneSubMajor' : done_sub_major, # 이수한 추가전공 학점
                 'subMajorStandard' : gradu.sub_major_standard, # 추가전공 기준 학점
-                'sub_major_type' : gradu.sub_major_type,
+                'subMajorType' : gradu.sub_major_type,
                 'doneMajorRest' : done_major_rest[0],
                 'doneRest' : done_rest[0]
             },
         else:
             data = {
-                'major_info' : major[0], # 전공
+                'major' : major[0], # 전공
                 'lackMajor' : lack_major, # 부족학점
                 'doneMajor' : done_major, # 이수한 학점
                 'totalStandard' : gradu.total_standard, # 졸업 기준 학점
@@ -322,7 +322,7 @@ def test_major(request):
                 'lackSubMajor' : lack_sub_major, # 부족 추가전공 학점
                 'doneSubMajor' : done_sub_major, # 이수한 추가전공 학점
                 'subMajorStandard' : gradu.sub_major_standard, # 추가전공 기준 학점
-                'sub_major_type' : gradu.sub_major_type,
+                'subMajorType' : gradu.sub_major_type,
                 'doneMajorRest' : done_major_rest[0],
                 'doneRest' : done_rest[0]
             }
