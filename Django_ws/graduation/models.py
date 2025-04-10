@@ -80,7 +80,7 @@ class Standard(models.Model):
     index = models.AutoField(primary_key=True)
     college = models.CharField(max_length=50)
     year = models.CharField(max_length=30)
-    total_credit = models.DecimalField(max_digits=5, decimal_places=1)
+    total_standard = models.DecimalField(max_digits=5, decimal_places=1)
     sub_major_type = models.CharField(max_length=30, blank=True, null=True)
     sub_major_credit = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
     major_credit = models.DecimalField(max_digits=4, decimal_places=1)

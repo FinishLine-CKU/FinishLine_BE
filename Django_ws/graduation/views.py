@@ -260,7 +260,7 @@ def test_major(request):
                 'major_info' : major[0], # 전공
                 'lackMajor' : lack_major, # 부족학점
                 'doneMajor' : done_major, # 이수한 학점
-                'total_credit' : gradu.total_credit, # 졸업 총 학점
+                'totalStandard' : gradu.total_standard, # 졸업 총 학점
                 'major_credit' : gradu.major_credit, # 전공 총 학점
                 'general_essential_credit' : gradu.general_essential_credit, # 교양필수 총 학점
                 'general_selection_credit' : gradu.general_selection_credit, # 교양필수 총 학점
@@ -274,7 +274,7 @@ def test_major(request):
                 'major_info' : major[0], # 전공
                 'lackMajor' : lack_major, # 부족학점
                 'doneMajor' : done_major, # 이수한 학점
-                'total_credit' : gradu.total_credit, # 졸업 총 학점
+                'totalStandard' : gradu.total_standard, # 졸업 총 학점
                 'major_credit' : gradu.major_credit, # 전공 총 학점
                 'general_essential_credit' : gradu.general_essential_credit, # 교양필수 총 학점
                 'general_selection_credit' : gradu.general_selection_credit, # 교양필수 총 학점
@@ -297,7 +297,7 @@ def test_major(request):
                 'major_info' : major[0], # 전공
                 'lackMajor' : lack_major, # 부족학점
                 'doneMajor' : done_major, # 이수한 학점
-                'total_credit' : gradu.total_credit, # 졸업 기준 학점
+                'totalStandard' : gradu.total_standard, # 졸업 기준 학점
                 'major_credit' : gradu.major_credit, # 전공 기준 학점
                 'general_essential_credit' : gradu.general_essential_credit, # 교양필수 기준 학점
                 'general_selection_credit' : gradu.general_selection_credit, # 교양필수 기준 학점
@@ -314,7 +314,7 @@ def test_major(request):
                 'major_info' : major[0], # 전공
                 'lackMajor' : lack_major, # 부족학점
                 'doneMajor' : done_major, # 이수한 학점
-                'total_credit' : gradu.total_credit, # 졸업 기준 학점
+                'totalStandard' : gradu.total_standard, # 졸업 기준 학점
                 'major_credit' : gradu.major_credit, # 전공 기준 학점
                 'general_essential_credit' : gradu.general_essential_credit, # 교양필수 기준 학점
                 'general_selection_credit' : gradu.general_selection_credit, # 교양필수 기준 학점
