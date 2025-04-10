@@ -132,12 +132,12 @@ def check_register(request):    # 로그인
                 user.need_rest = needNormalTotalCredit  # 부족한 일선 총 학점 저장
                 user.save()
 
-                if user.need_sub_major == None:
-                    need_sub_major = 0
+                if user.lack_sub_major == None:
+                    lack_sub_major = 0
                 else:
-                    need_sub_major = user.need_sub_major
+                    lack_sub_major = user.lack_sub_major
 
-                needTotalCredit = needNormalTotalCredit + user.lack_major + user.need_general + need_sub_major   # 부족한 학점 총계
+                needTotalCredit = needNormalTotalCredit + user.lack_major + user.need_general + lack_sub_major   # 부족한 학점 총계
 
 
             if check_password(password, user.password):
@@ -150,7 +150,7 @@ def check_register(request):    # 로그인
                     'uploadPDF' : upload_pdf,
                     'lackEssentialGE' : result.get("교양필수 부족 학점", []),
                     'lackChoiceGE' : result.get("교양선택 부족 학점", []),
-                    'need_sub_major' : user.need_sub_major,
+                    'lackSubMajor' : user.lack_sub_major,
                     'needNormalTotalCredit' : needNormalTotalCredit,
                     'needTotalCredit' : needTotalCredit
                 }

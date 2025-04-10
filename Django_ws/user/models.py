@@ -13,7 +13,7 @@ class User(models.Model):
     micro_degree = models.CharField(max_length=100, blank=True, null=True)
     lack_major = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     need_general = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
-    need_sub_major = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
+    lack_sub_major = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     need_rest = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_major = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_general = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
