@@ -335,9 +335,9 @@ def test_micro_degree(request):
     student_id = data.get('student_id')
     result = need_micro_degree(student_id)
     if (result == 0) or (result == None) :
-        data = {'done_micro_degree' : 0 }
+        data = {'doneMD' : 0 }
     else:
-        data = {'done_micro_degree' : result}
+        data = {'doneMD' : result}
     print(data)
     return Response (data)
 

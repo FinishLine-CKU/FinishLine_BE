@@ -120,12 +120,12 @@ def check_register(request):    # 로그인
                     done_major_rest = 0
                 else:
                     done_major_rest = user.done_major_rest
-                if user.done_micro_degree == None:
-                    done_micro_degree = 0
+                if user.done_MD == None:
+                    done_MD = 0
                 else:
-                    done_micro_degree = user.done_micro_degree
+                    done_MD = user.done_MD
                 
-                needNormalTotalCredit = std.rest_standard - (done_general_rest + done_major_rest + done_micro_degree)
+                needNormalTotalCredit = std.rest_standard - (done_general_rest + done_major_rest + done_MD)
                 if needNormalTotalCredit < 0:
                     needNormalTotalCredit = 0
                 
