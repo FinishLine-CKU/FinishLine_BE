@@ -85,7 +85,7 @@ class Standard(models.Model):
     sub_major_credit = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
     major_standard = models.DecimalField(max_digits=4, decimal_places=1)
     essential_GE_standatd = models.DecimalField(max_digits=4, decimal_places=1)
-    general_selection_credit = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
+    choice_GE_standard = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
     rest_credit = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
     micro_degree_credit = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
     
