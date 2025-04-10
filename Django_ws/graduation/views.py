@@ -267,7 +267,7 @@ def test_major(request):
                 'restStandard' : 0,
                 'doneMajorRest' : done_major_rest[0],
                 'lackSubMajor' : lack_sub_major,
-                'done_rest' : done_rest[0]
+                'doneRest' : done_rest[0]
             },
         else:
             data = {
@@ -281,7 +281,7 @@ def test_major(request):
                 'restStandard' : gradu.rest_standard,
                 'doneMajorRest' : done_major_rest[0],
                 'lackSubMajor' : lack_sub_major,
-                'done_rest' : done_rest[0]
+                'doneRest' : done_rest[0]
             }
     else:
         # 추가 전공자 결과 반환
@@ -307,7 +307,7 @@ def test_major(request):
                 'subMajorStandard' : gradu.sub_major_standard, # 추가전공 기준 학점
                 'sub_major_type' : gradu.sub_major_type,
                 'doneMajorRest' : done_major_rest[0],
-                'done_rest' : done_rest[0]
+                'doneRest' : done_rest[0]
             },
         else:
             data = {
@@ -324,7 +324,7 @@ def test_major(request):
                 'subMajorStandard' : gradu.sub_major_standard, # 추가전공 기준 학점
                 'sub_major_type' : gradu.sub_major_type,
                 'doneMajorRest' : done_major_rest[0],
-                'done_rest' : done_rest[0]
+                'doneRest' : done_rest[0]
             }
     print(data)
     return Response (data)
