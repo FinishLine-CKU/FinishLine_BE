@@ -239,7 +239,7 @@ def general_check(request):
             'lackChoiceGETopic': result.get("교양선택 부족 영역", []), 
             'doneEssentialGE': result.get("교양필수 이수 학점", []), 
             'doneChoiceGE': result.get("교양선택 이수 학점", []), 
-            '일반선택_이수_학점': result.get("일반선택 이수 학점", []), 
+            'doneGERest': result.get("일반선택 이수 학점", []), 
         }
     })
 
