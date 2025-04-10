@@ -83,7 +83,7 @@ class Standard(models.Model):
     total_standard = models.DecimalField(max_digits=5, decimal_places=1)
     sub_major_type = models.CharField(max_length=30, blank=True, null=True)
     sub_major_credit = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
-    major_credit = models.DecimalField(max_digits=4, decimal_places=1)
+    major_standard = models.DecimalField(max_digits=4, decimal_places=1)
     general_essential_credit = models.DecimalField(max_digits=4, decimal_places=1)
     general_selection_credit = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
     rest_credit = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)

@@ -59,7 +59,7 @@ def user_graduation_standard(student_id):
     sub_major_type = user_info[0]['sub_major_type']
     if sub_major_type == '':
         sub_major_type = None
-        major_standard = list(Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values_list('major_credit', flat=True))
+        major_standard = list(Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values_list('major_standard', flat=True))
         standard_id = list(Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values_list('index', flat=True))
         # print('전공 기준: ', major_standard[0])
         # print('인덱스: ', standard_id[0])
@@ -67,9 +67,9 @@ def user_graduation_standard(student_id):
         return major_standard[0], standard_id[0]
 
     else:
-        standard = Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values('major_credit', 'sub_major_credit')
+        standard = Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values('major_standard', 'sub_major_credit')
         standard_id = list(Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values_list('index', flat=True))
-        major_standard = standard[0]['major_credit']
+        major_standard = standard[0]['major_standard']
         sub_major_standard = standard[0]['sub_major_credit']
         # print('전공 기준: ', major_standard)
         # print('추가전공 기준: ', sub_major_standard)
