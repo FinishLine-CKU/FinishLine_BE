@@ -137,7 +137,7 @@ def check_register(request):    # 로그인
                 else:
                     need_sub_major = user.need_sub_major
 
-                needTotalCredit = needNormalTotalCredit + user.need_major + user.need_general + need_sub_major   # 부족한 학점 총계
+                needTotalCredit = needNormalTotalCredit + user.lack_major + user.need_general + need_sub_major   # 부족한 학점 총계
 
 
             if check_password(password, user.password):
@@ -242,7 +242,7 @@ def lack_credit(request):
     student_id = data.get('student_id')
     if student_id:
         user = User.objects.filter(student_id = student_id).first()
-        data = {'need_major' : user.need_major}
+        data = {'lackMajor' : user.lack_major}
     else:
         error = '회원정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.'
         data = {'error' : error}
