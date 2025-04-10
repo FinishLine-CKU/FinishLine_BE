@@ -235,7 +235,7 @@ def general_check(request):
         'general_data': {
             'lackEssentialGE': result.get("교양필수 부족 학점", []), #
             'lackChoiceGE': result.get("교양선택 부족 학점", []), #
-            '교양필수_부족_영역': result.get("교양필수 부족 영역", []), 
+            'lackEssentialGETopic': result.get("교양필수 부족 영역", []), 
             '교양선택_부족_영역': result.get("교양선택 부족 영역", []), 
             'doneEssentialGE': result.get("교양필수 이수 학점", []), 
             'doneChoiceGE': result.get("교양선택 이수 학점", []), 
