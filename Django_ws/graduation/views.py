@@ -255,7 +255,7 @@ def test_major(request):
         done_rest = User.objects.filter(student_id = student_id).values_list('done_rest', flat=True)
         gradu = Standard.objects.filter(index = id).first()
 
-        if gradu.rest_credit == None:
+        if gradu.rest_standard == None:
             data = {
                 'major_info' : major[0], # 전공
                 'lackMajor' : lack_major, # 부족학점
@@ -264,7 +264,7 @@ def test_major(request):
                 'majorStandard' : gradu.major_standard, # 전공 총 학점
                 'essentialGEStandard' : gradu.essential_GE_standatd, # 교양필수 총 학점
                 'choiceGEStandard' : gradu.choice_GE_standard, # 교양필수 총 학점
-                'rest_credit' : 0,
+                'restStandard' : 0,
                 'done_major_rest' : done_major_rest[0],
                 'need_sub_major' : need_sub_major,
                 'done_rest' : done_rest[0]
@@ -278,7 +278,7 @@ def test_major(request):
                 'majorStandard' : gradu.major_standard, # 전공 총 학점
                 'essentialGEStandard' : gradu.essential_GE_standatd, # 교양필수 총 학점
                 'choiceGEStandard' : gradu.choice_GE_standard, # 교양필수 총 학점
-                'rest_credit' : gradu.rest_credit,
+                'restStandard' : gradu.rest_standard,
                 'done_major_rest' : done_major_rest[0],
                 'need_sub_major' : need_sub_major,
                 'done_rest' : done_rest[0]
@@ -292,7 +292,7 @@ def test_major(request):
         gradu = Standard.objects.filter(index = id).first()
 
         # 의학과, 간호학과, 건축학, 건축공학 전공
-        if gradu.rest_credit == None:
+        if gradu.rest_standard == None:
             data = {
                 'major_info' : major[0], # 전공
                 'lackMajor' : lack_major, # 부족학점
@@ -301,7 +301,7 @@ def test_major(request):
                 'majorStandard' : gradu.major_standard, # 전공 기준 학점
                 'essentialGEStandard' : gradu.essential_GE_standatd, # 교양필수 기준 학점
                 'choiceGEStandard' : gradu.choice_GE_standard, # 교양필수 기준 학점
-                'rest_credit' : 0,
+                'restStandard' : 0,
                 'need_sub_major' : need_sub_major, # 부족 추가전공 학점
                 'user_sub_major' : user_sub_major, # 이수한 추가전공 학점
                 'sub_major_credit' : gradu.sub_major_credit, # 추가전공 기준 학점
@@ -318,7 +318,7 @@ def test_major(request):
                 'majorStandard' : gradu.major_standard, # 전공 기준 학점
                 'essentialGEStandard' : gradu.essential_GE_standatd, # 교양필수 기준 학점
                 'choiceGEStandard' : gradu.choice_GE_standard, # 교양필수 기준 학점
-                'rest_credit' : gradu.rest_credit,
+                'restStandard' : gradu.rest_standard,
                 'need_sub_major' : need_sub_major, # 부족 추가전공 학점
                 'user_sub_major' : user_sub_major, # 이수한 추가전공 학점
                 'sub_major_credit' : gradu.sub_major_credit, # 추가전공 기준 학점
