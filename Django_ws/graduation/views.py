@@ -304,7 +304,7 @@ def test_major(request):
                 'restStandard' : 0,
                 'lackSubMajor' : lack_sub_major, # 부족 추가전공 학점
                 'doneSubMajor' : done_sub_major, # 이수한 추가전공 학점
-                'sub_major_credit' : gradu.sub_major_credit, # 추가전공 기준 학점
+                'subMajorStandard' : gradu.sub_major_standard, # 추가전공 기준 학점
                 'sub_major_type' : gradu.sub_major_type,
                 'done_major_rest' : done_major_rest[0],
                 'done_rest' : done_rest[0]
@@ -321,7 +321,7 @@ def test_major(request):
                 'restStandard' : gradu.rest_standard,
                 'lackSubMajor' : lack_sub_major, # 부족 추가전공 학점
                 'doneSubMajor' : done_sub_major, # 이수한 추가전공 학점
-                'sub_major_credit' : gradu.sub_major_credit, # 추가전공 기준 학점
+                'subMajorStandard' : gradu.sub_major_standard, # 추가전공 기준 학점
                 'sub_major_type' : gradu.sub_major_type,
                 'done_major_rest' : done_major_rest[0],
                 'done_rest' : done_rest[0]

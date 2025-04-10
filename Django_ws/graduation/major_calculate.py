@@ -67,10 +67,10 @@ def user_graduation_standard(student_id):
         return major_standard[0], standard_id[0]
 
     else:
-        standard = Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values('major_standard', 'sub_major_credit')
+        standard = Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values('major_standard', 'sub_major_standard')
         standard_id = list(Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values_list('index', flat=True))
         major_standard = standard[0]['major_standard']
-        sub_major_standard = standard[0]['sub_major_credit']
+        sub_major_standard = standard[0]['sub_major_standard']
         # print('전공 기준: ', major_standard)
         # print('추가전공 기준: ', sub_major_standard)
         # print('인덱스: ', standard_id[0])
