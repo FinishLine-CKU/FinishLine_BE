@@ -80,7 +80,7 @@ def user_graduation_standard(student_id):
 def need_credit(student_id):
     standard = user_graduation_standard(student_id)
     done_major = pop_user_major(student_id) # 전공 총 이수학점
-    user_sub_major = pop_user_sub_major(student_id) # 추가 전공 이수과목
+    done_sub_major = pop_user_sub_major(student_id) # 추가 전공 이수과목
     user_rest = pop_rest_credit(student_id) # 일선 총 이수학점
     major_standard = standard[0]    # 전공 기준 학점
     lack_major = major_standard - done_major
@@ -93,13 +93,13 @@ def need_credit(student_id):
         # 전공 이수 학점을 초과 하여 이수한 경우 (= 전공 졸업요건 초과)
         if lack_major < 0:
             done_major_rest = abs(lack_major)   # 전공에서 일선으로 빠지는 학점
-            done_major_rest += user_sub_major   # 추가 전공 이수과목 일선으로 추가 (추가전공 변경 우려)
+            done_major_rest += done_sub_major   # 추가 전공 이수과목 일선으로 추가 (추가전공 변경 우려)
             lack_major = 0
         
         # 전공 이수 학점이 부족한 경우
         else:
             done_major_rest = 0
-            done_major_rest += user_sub_major   # 추가 전공 이수과목 일선으로 추가 (추가전공 변경 우려)
+            done_major_rest += done_sub_major   # 추가 전공 이수과목 일선으로 추가 (추가전공 변경 우려)
         
         User.objects.filter(student_id = student_id).update(lack_major = lack_major, done_major = done_major, done_major_rest = done_major_rest, lack_sub_major = lack_sub_major, done_rest = user_rest)
         return lack_major, done_major, std_id, lack_sub_major # 전공부족학점, 전공이수학점, 졸업 요건 인덱스
@@ -108,7 +108,7 @@ def need_credit(student_id):
     else:
         sub_major_standard = standard[1]
         std_id = standard[2]
-        lack_sub_major = sub_major_standard - user_sub_major # 추가 전공 학점 반영
+        lack_sub_major = sub_major_standard - done_sub_major # 추가 전공 학점 반영
 
         # 전공 이수 학점을 초과 하여 이수한 경우 (= 전공 졸업요건 초과)
         if lack_major < 0:
@@ -120,7 +120,7 @@ def need_credit(student_id):
                 done_major_rest += abs(lack_sub_major)  # 추가전공에서 일선으로 빠지는 학점
                 lack_sub_major = 0
 
-            User.objects.filter(student_id = student_id).update(lack_major = lack_major, done_major = done_major, done_major_rest = done_major_rest, lack_sub_major = lack_sub_major, done_sub_major = user_sub_major, done_rest = user_rest)
+            User.objects.filter(student_id = student_id).update(lack_major = lack_major, done_major = done_major, done_major_rest = done_major_rest, lack_sub_major = lack_sub_major, done_sub_major = done_sub_major, done_rest = user_rest)
         
         # 전공 이수 학점이 부족한 경우
         else:
@@ -129,6 +129,6 @@ def need_credit(student_id):
                 done_major_rest = abs(lack_sub_major)  # 추가전공에서 일선으로 빠지는 학점
                 lack_sub_major = 0
             done_major_rest = 0
-            User.objects.filter(student_id = student_id).update(lack_major = lack_major, done_major = done_major, done_major_rest = done_major_rest, lack_sub_major = lack_sub_major, done_sub_major = user_sub_major, done_rest = user_rest)
+            User.objects.filter(student_id = student_id).update(lack_major = lack_major, done_major = done_major, done_major_rest = done_major_rest, lack_sub_major = lack_sub_major, done_sub_major = done_sub_major, done_rest = user_rest)
         print('검사 결과 : ',lack_sub_major)
-        return lack_major, done_major, std_id, lack_sub_major, user_sub_major # 전공부족학점, 전공이수학점, 졸업 요건 인덱스
+        return lack_major, done_major, std_id, lack_sub_major, done_sub_major # 전공부족학점, 전공이수학점, 졸업 요건 인덱스
