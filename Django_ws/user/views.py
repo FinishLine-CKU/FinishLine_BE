@@ -149,7 +149,7 @@ def check_register(request):    # 로그인
                     'testing' : user.done_major,
                     'uploadPDF' : upload_pdf,
                     'lackEssentialGE' : result.get("교양필수 부족 학점", []),
-                    'needChoiceCredit' : result.get("교양선택 부족 학점", []),
+                    'lackChoiceGE' : result.get("교양선택 부족 학점", []),
                     'need_sub_major' : user.need_sub_major,
                     'needNormalTotalCredit' : needNormalTotalCredit,
                     'needTotalCredit' : needTotalCredit
