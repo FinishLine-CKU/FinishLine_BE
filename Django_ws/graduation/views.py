@@ -244,10 +244,14 @@ def general_check(request):
     #졸업요건 검사로직
     if (year > '2022'):
         lecture_dict_human_result, liber_human_item = liber_human_calculate(lecture_dict, user_liber_result)
+        print("교양 인성 계산", lecture_dict_human_result)
+        print("교양 인성 영역", liber_human_item)
         lecture_dict_fusion_result, liber_fusion_item = GE_fusion_calculate(lecture_dict_human_result, user_liber_result)
+        print("교양 융합 계산", lecture_dict_fusion_result)
+        print("교양 융합 영역", liber_fusion_item)
         lecture_dict_basic_result, liber_basic_item = GE_basic_calculate(lecture_dict_fusion_result, user_liber_result, home_collage, year)
-        print("교양기초계산", lecture_dict_basic_result)
-        print("교양기초계산 영역", user_liber_result)
+        print("교양 기초 계산", lecture_dict_basic_result)
+        print("교양 기초 영역", liber_basic_item)
     else:    
         result = check_db_mydone_liber(user_id) 
 
