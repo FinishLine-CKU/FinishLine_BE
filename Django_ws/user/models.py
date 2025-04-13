@@ -21,6 +21,7 @@ class User(models.Model):
     done_major_rest = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_rest = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_sub_major = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
+    done_sub_major_rest = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_MD = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     
     def __str__(self):
