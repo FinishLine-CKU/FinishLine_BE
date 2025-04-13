@@ -98,7 +98,7 @@ def user_liberrequire_get(year, home_collage):
             human_data = {'인간학', '봉사활동', 'VERUM캠프'}
 
         #교양기초
-        base_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초'}
+        base_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
 
         #교양융합
         if(year == '2025'):
@@ -181,6 +181,7 @@ def user_liberrequire_get(year, home_collage):
         data = {"ness_result":  ness_result,
                 "choice_result": choice_result}
 
+    print("교양요건 추출", data)
     return data
 
 
@@ -191,7 +192,7 @@ def liber_human_calculate(lecture_dict, user_liber_result):
     lectures_dict = lecture_dict #기이수 과목목록
 
     delete_items = []
-    normal_later = 0
+    rest_total = 0
 
     for needcheck in lectures_dict[:]:
         lecture_topic = needcheck['주제']
@@ -213,7 +214,7 @@ def liber_human_calculate(lecture_dict, user_liber_result):
                 elif lecture_credit > liber_credit:
                     del liber_item[lecture_topic]
                     missing_credit = liber_credit - lecture_credit
-                    normal_later += abs(missing_credit)  # 초과 학점 일반선택 학점 추가
+                    rest_total += abs(missing_credit)  # 초과 학점 일반선택 학점 추가
 
                     delete_items.append(needcheck)
 
@@ -255,7 +256,7 @@ def liber_human_calculate(lecture_dict, user_liber_result):
                         elif "트리니티아카데미" in liber_item and liber_item["트리니티아카데미"] < lecture_credit: 
                             ness_credit = liber_item["트리니티아카데미"]
                             missing_credit = ness_credit - lecture_credit
-                            normal_later += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                            rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
                             del liber_item["트리니티아카데미"]
                             delete_items.append(needcheck)
                             
@@ -269,68 +270,330 @@ def liber_human_calculate(lecture_dict, user_liber_result):
     for item in delete_items:
         if item in lectures_dict:
             lectures_dict.remove(item)
-    print("DEF 교양 인성 일선 확인", normal_later)
-    return lectures_dict, user_liber_result
+    print("DEF 교양 인성 일선 확인", rest_total)
+    return lectures_dict, user_liber_result, rest_total
 
 
 #교양 융합 계산
-def GE_fusion_calculate(lecture_dict, user_liber_result):
+def GE_fusion_calculate(lecture_dict, user_liber_result, rest_total):
     lectures_dict = [] #매개변수 담을 리스트
     user_liber_result = user_liber_result['merge_result'] #[{'정보활용': Decimal('6.0'), '창의융합': Decimal('6.0'), '문제해결': Decimal('6.0'), '총합': Decimal('18.0')}]
     lectures_dict = lecture_dict #기이수 과목목록
 
     delete_items = []
-    normal_later = 0
+    rest_total = rest_total
+
+    stack_economy = False
+    stack_health = False
+    stack_tech = False
+    stack_lit = False
+    stack_society = False
+    stack_art = False
+    stack_env = False
+    stack_science = False
+    stack_culture = False
 
     for needcheck in lectures_dict[:]:
         lecture_topic = needcheck['주제']
         lecture_credit = Decimal(needcheck['학점'])
-        print("DEF 교양 융합 과목 검수 하는 순서", needcheck)
 
-        GE_fusion_mapping_table = {
-            '정치와경제' : '정보활용',
-            '심리와건강' : '정보활용',
-            '정보와기술' : '정보활용',
-            '인간과문학' : '창의융합',
-            '역사와사회' : '창의융합',
-            '철학과예술' : '창의융합',
-            '자연과환경' : '문제해결',
-            '수리와과학' : '문제해결',
-            '언어와문화' : '문제해결',
-        }
+        if lecture_topic in ["정치와경제"]:
+            print("DEF 교양 융합 정보활용-정치와경제", needcheck)
 
-        lecture_topic = GE_fusion_mapping_table.get(lecture_topic, lecture_topic)
-
-        for liber_item in user_liber_result:
-            if lecture_topic in liber_item:
-                liber_credit = liber_item[lecture_topic]
-
-                if lecture_credit < liber_credit:
-                    missing_credit = liber_credit - lecture_credit
-                    liber_item[lecture_topic] = missing_credit
-
-                    delete_items.append(needcheck)
-
-                    liber_item['총합'] -= lecture_credit
-
-                elif lecture_credit > liber_credit:
-                    print("DEF일선으로 빠지는 과목", needcheck)
-                    del liber_item[lecture_topic]
-                    missing_credit = liber_credit - lecture_credit
-                    normal_later = abs(missing_credit)  # 초과 학점 일반선택 학점 추가
-
-                    delete_items.append(needcheck)
-
-                    liber_item['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
-
-                elif lecture_credit == liber_credit:
-                    del liber_item[lecture_topic]
-                    liber_item['총합'] -= liber_credit
-
-                    delete_items.append(needcheck)
-
+            if stack_economy == False:
+                stack_economy = True
             else:
                 continue
+
+            for liber_item in user_liber_result:
+                if "정보활용" in liber_item and liber_item["정보활용"] > lecture_credit:
+                    liber_credit = liber_item["정보활용"]
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item["정보활용"] = missing_credit
+                    liber_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "정보활용" in liber_item and liber_item["정보활용"] == lecture_credit: 
+                    del liber_item["정보활용"]
+                    delete_items.append(needcheck)
+                    liber_item["총합"] -= lecture_credit
+
+                elif "정보활용" in liber_item and liber_item["정보활용"] < lecture_credit: 
+                    liber_credit = liber_item["정보활용"]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del liber_item["정보활용"]
+                    delete_items.append(needcheck)
+                    
+                    liber_item["총합"] -= lecture_credit    # 학점 기준 초과 시 반영
+                else:
+                    continue
+
+        if lecture_topic in ["심리와건강"]:
+            print("DEF 교양 융합 정보활용-심리와건강", needcheck)
+            if stack_health == False:
+                stack_health = True
+            else:
+                continue
+
+            for liber_item in user_liber_result:
+                if "정보활용" in liber_item and liber_item["정보활용"] > lecture_credit:
+                    liber_credit = liber_item["정보활용"]
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item["정보활용"] = missing_credit
+                    liber_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "정보활용" in liber_item and liber_item["정보활용"] == lecture_credit: 
+                    del liber_item["정보활용"]
+                    delete_items.append(needcheck)
+                    liber_item["총합"] -= lecture_credit
+
+                elif "정보활용" in liber_item and liber_item["정보활용"] < lecture_credit: 
+                    liber_credit = liber_item["정보활용"]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del liber_item["정보활용"]
+                    delete_items.append(needcheck)
+                    
+                    liber_item["총합"] -= lecture_credit    # 학점 기준 초과 시 반영
+                else:
+                    continue
+
+        if lecture_topic in ["정보와기술"]:
+            print("DEF 교양 융합 정보활용-정보와기술", needcheck)
+            if stack_tech == False:
+                stack_tech = True
+            else:
+                continue
+
+            for liber_item in user_liber_result:
+                if "정보활용" in liber_item and liber_item["정보활용"] > lecture_credit:
+                    liber_credit = liber_item["정보활용"]
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item["정보활용"] = missing_credit
+                    liber_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "정보활용" in liber_item and liber_item["정보활용"] == lecture_credit: 
+                    del liber_item["정보활용"]
+                    delete_items.append(needcheck)
+                    liber_item["총합"] -= lecture_credit
+
+                elif "정보활용" in liber_item and liber_item["정보활용"] < lecture_credit: 
+                    liber_credit = liber_item["정보활용"]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del liber_item["정보활용"]
+                    delete_items.append(needcheck)
+                    
+                    liber_item["총합"] -= lecture_credit    # 학점 기준 초과 시 반영
+                else:
+                    continue
+
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+
+    #창의융합 계산
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        if lecture_topic in ["인간과문학"]:
+            print("DEF 교양 융합 정보활용", needcheck)
+            if stack_lit == False:
+                stack_lit = True
+            else:
+                continue
+
+            for liber_item in user_liber_result:
+                if "창의융합" in liber_item and liber_item["창의융합"] > lecture_credit:
+                    liber_credit = liber_item["창의융합"]
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item["창의융합"] = missing_credit
+                    liber_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "창의융합" in liber_item and liber_item["창의융합"] == lecture_credit: 
+                    del liber_item["창의융합"]
+                    delete_items.append(needcheck)
+                    liber_item["총합"] -= lecture_credit
+
+                elif "창의융합" in liber_item and liber_item["창의융합"] < lecture_credit: 
+                    liber_credit = liber_item["창의융합"]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del liber_item["창의융합"]
+                    delete_items.append(needcheck)
+                    
+                    liber_item["총합"] -= lecture_credit    # 학점 기준 초과 시 반영
+                else:
+                    continue
+
+        if lecture_topic in ["역사와사회"]:
+            print("DEF 교양 융합 정보활용", needcheck)
+            if stack_society == False:
+                stack_society = True
+            else:
+                continue
+
+            for liber_item in user_liber_result:
+                if "창의융합" in liber_item and liber_item["창의융합"] > lecture_credit:
+                    liber_credit = liber_item["창의융합"]
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item["창의융합"] = missing_credit
+                    liber_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "창의융합" in liber_item and liber_item["창의융합"] == lecture_credit: 
+                    del liber_item["창의융합"]
+                    delete_items.append(needcheck)
+                    liber_item["총합"] -= lecture_credit
+
+                elif "창의융합" in liber_item and liber_item["창의융합"] < lecture_credit: 
+                    liber_credit = liber_item["창의융합"]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del liber_item["창의융합"]
+                    delete_items.append(needcheck)
+                    
+                    liber_item["총합"] -= lecture_credit    # 학점 기준 초과 시 반영
+                else:
+                    continue
+
+        if lecture_topic in ["철학과예술"]:
+            print("DEF 교양 융합 정보활용", needcheck)
+            if stack_art == False:
+                stack_art = True
+            else:
+                continue
+
+            for liber_item in user_liber_result:
+                if "창의융합" in liber_item and liber_item["창의융합"] > lecture_credit:
+                    liber_credit = liber_item["창의융합"]
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item["창의융합"] = missing_credit
+                    liber_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "창의융합" in liber_item and liber_item["창의융합"] == lecture_credit: 
+                    del liber_item["창의융합"]
+                    delete_items.append(needcheck)
+                    liber_item["총합"] -= lecture_credit
+
+                elif "창의융합" in liber_item and liber_item["창의융합"] < lecture_credit: 
+                    liber_credit = liber_item["창의융합"]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del liber_item["창의융합"]
+                    delete_items.append(needcheck)
+                    
+                    liber_item["총합"] -= lecture_credit    # 학점 기준 초과 시 반영
+                else:
+                    continue
+
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+
+    #문제해결 계산
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        if lecture_topic in ["자연과환경"]:
+            print("DEF 교양 융합 정보활용", needcheck)
+            if stack_env == False:
+                stack_env = True
+            else:
+                continue
+
+            for liber_item in user_liber_result:
+                if "문제해결" in liber_item and liber_item["문제해결"] > lecture_credit:
+                    liber_credit = liber_item["문제해결"]
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item["문제해결"] = missing_credit
+                    liber_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "문제해결" in liber_item and liber_item["문제해결"] == lecture_credit: 
+                    del liber_item["문제해결"]
+                    delete_items.append(needcheck)
+                    liber_item["총합"] -= lecture_credit
+
+                elif "문제해결" in liber_item and liber_item["문제해결"] < lecture_credit: 
+                    liber_credit = liber_item["문제해결"]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del liber_item["문제해결"]
+                    delete_items.append(needcheck)
+                    
+                    liber_item["총합"] -= lecture_credit    # 학점 기준 초과 시 반영
+                else:
+                    continue
+
+        if lecture_topic in ["수리와과학"]:
+            print("DEF 교양 융합 정보활용", needcheck)
+            if stack_science == False:
+                stack_science = True
+            else:
+                continue
+
+            for liber_item in user_liber_result:
+                if "문제해결" in liber_item and liber_item["문제해결"] > lecture_credit:
+                    liber_credit = liber_item["문제해결"]
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item["문제해결"] = missing_credit
+                    liber_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "문제해결" in liber_item and liber_item["문제해결"] == lecture_credit: 
+                    del liber_item["문제해결"]
+                    delete_items.append(needcheck)
+                    liber_item["총합"] -= lecture_credit
+
+                elif "문제해결" in liber_item and liber_item["문제해결"] < lecture_credit: 
+                    liber_credit = liber_item["문제해결"]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del liber_item["문제해결"]
+                    delete_items.append(needcheck)
+                    
+                    liber_item["총합"] -= lecture_credit    # 학점 기준 초과 시 반영
+                else:
+                    continue
+
+        if lecture_topic in ["언어와문화"]:
+            print("DEF 교양 융합 정보활용", needcheck)
+            if stack_culture == False:
+                stack_culture = True
+            else:
+                continue
+
+            for liber_item in user_liber_result:
+                if "문제해결" in liber_item and liber_item["문제해결"] > lecture_credit:
+                    liber_credit = liber_item["문제해결"]
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item["문제해결"] = missing_credit
+                    liber_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "문제해결" in liber_item and liber_item["문제해결"] == lecture_credit: 
+                    del liber_item["문제해결"]
+                    delete_items.append(needcheck)
+                    liber_item["총합"] -= lecture_credit
+
+                elif "문제해결" in liber_item and liber_item["문제해결"] < lecture_credit: 
+                    liber_credit = liber_item["문제해결"]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del liber_item["문제해결"]
+                    delete_items.append(needcheck)
+                    
+                    liber_item["총합"] -= lecture_credit    # 학점 기준 초과 시 반영
+                else:
+                    continue
 
     for item in delete_items:
         if item in lectures_dict:
@@ -338,7 +601,7 @@ def GE_fusion_calculate(lecture_dict, user_liber_result):
 
     for liber_item in user_liber_result:
         if '융합비고' in liber_item:
-
+            print("융합비고 들어왔는지")
             stack_info = []
             stack_fusion = []
             stack_problem = []
@@ -351,6 +614,7 @@ def GE_fusion_calculate(lecture_dict, user_liber_result):
 
                     if len(stack_info) == 0:
                         stack_info.append(1)
+                        print("DEF 교양 융합 융합비고", needcheck)
                     else:
                         continue
 
@@ -370,7 +634,7 @@ def GE_fusion_calculate(lecture_dict, user_liber_result):
                         elif "융합비고" in liber_item and liber_item["융합비고"] < lecture_credit: 
                             liber_credit = liber_item["융합비고"]
                             missing_credit = liber_credit - lecture_credit
-                            normal_later += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                            rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
                             del liber_item["융합비고"]
                             delete_items.append(needcheck)
                             
@@ -401,7 +665,7 @@ def GE_fusion_calculate(lecture_dict, user_liber_result):
                         elif "융합비고" in liber_item and liber_item["융합비고"] < lecture_credit: 
                             liber_credit = liber_item["융합비고"]
                             missing_credit = liber_credit - lecture_credit
-                            normal_later += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                            rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
                             del liber_item["융합비고"]
                             delete_items.append(needcheck)
                             
@@ -432,7 +696,7 @@ def GE_fusion_calculate(lecture_dict, user_liber_result):
                         elif "융합비고" in liber_item and liber_item["융합비고"] < lecture_credit: 
                             liber_credit = liber_item["융합비고"]
                             missing_credit = liber_credit - lecture_credit
-                            normal_later += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                            rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
                             del liber_item["융합비고"]
                             delete_items.append(needcheck)
                             
@@ -450,25 +714,709 @@ def GE_fusion_calculate(lecture_dict, user_liber_result):
     for item in delete_items:
         if item in lectures_dict:
             lectures_dict.remove(item)
-    print("DEF교양 융합 일선 확인", normal_later)
-    return lectures_dict, user_liber_result
+    print("DEF교양 융합 일선 확인", rest_total)
+    return lectures_dict, user_liber_result, rest_total
 
 
 #23년도 교양 기초 계산
-def GE_basic_calculate(lecture_dict, user_liber_result, home_collage, year):
+def GE_basic_calculate_2023(lecture_dict, user_liber_result, home_collage, rest_total):
     lectures_dict = [] #매개변수 담을 리스트
     user_liber_result = user_liber_result['base_result'] #[{'논리적사고와글쓰기': Decimal('2.0'), '외국어': Decimal('4.0'), '자기관리': Decimal('6.0'), '총합': Decimal('12.0')}]
     lectures_dict = lecture_dict #기이수 과목목록
 
     delete_items = []
-    normal_later = 0
+    rest_total = rest_total
 
-    if year == '2023' and (home_collage == '1' or '2'):
-        return
-    elif year == '2023' and home_collage == '3':
-        return
-    elif year == '2024':
-        return
-    elif year == '2025':
-        return
-    return lectures_dict, user_liber_result
+    #계열기초
+    stack_major_base = []
+    #창의성
+    stack_creative = []
+    #창업
+    stack_startup = []
+    #진로탐색
+    stack_search = []
+
+    #일반대학의 경우
+    if (home_collage == '3'):
+        for needcheck in lectures_dict[:]:
+            lecture_topic = needcheck['주제']
+            lecture_credit = Decimal(needcheck['학점'])
+
+            for liber_item in user_liber_result:
+                if lecture_topic in liber_item:
+                    liber_credit = liber_item[lecture_topic]
+
+                    if lecture_credit < liber_credit:
+                        missing_credit = liber_credit - lecture_credit
+                        liber_item[lecture_topic] = missing_credit
+
+                        delete_items.append(needcheck)
+
+                        liber_item['총합'] -= lecture_credit
+
+                    elif lecture_credit > liber_credit:
+                        del liber_item[lecture_topic]
+                        missing_credit = liber_credit - lecture_credit
+                        rest_total += abs(missing_credit)  # 초과 학점 일반선택 학점 추가
+
+                        delete_items.append(needcheck)
+
+                        liber_item['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                    elif lecture_credit == liber_credit:
+                        del liber_item[lecture_topic]
+                        liber_item['총합'] -= liber_credit
+
+                        delete_items.append(needcheck)
+
+                else:
+                    break
+
+        for item in delete_items:
+            if item in lectures_dict:
+                lectures_dict.remove(item)
+        delete_items = []
+
+        #창의 계산
+        for needcheck in lectures_dict[:]:
+            lecture_topic = needcheck['주제']
+            lecture_credit = Decimal(needcheck['학점'])
+
+            if lecture_topic in ["창의성"]:
+
+                if len(stack_creative) == 0:
+                    stack_creative.append(1)
+                else:
+                    continue
+
+                for liber_item in user_liber_result:
+                    if "자기관리" in liber_item and liber_item["자기관리"] > lecture_credit:
+                        liber_credit = liber_item["자기관리"]
+                        missing_credit = liber_credit - lecture_credit
+                        liber_item["자기관리"] = missing_credit
+                        liber_item["총합"] -= lecture_credit
+                        delete_items.append(needcheck)
+
+                    elif "자기관리" in liber_item and liber_item["자기관리"] == lecture_credit: 
+                        del liber_item["자기관리"]
+                        delete_items.append(needcheck)
+                        liber_item["총합"] -= lecture_credit
+
+                    elif "자기관리" in liber_item and liber_item["자기관리"] < lecture_credit: 
+                        liber_credit = liber_item["자기관리"]
+                        missing_credit = liber_credit - lecture_credit
+                        rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                        del liber_item["자기관리"]
+                        delete_items.append(needcheck)
+                        
+                        liber_item["총합"] -= liber_credit    # 학점 기준 초과 시 반영
+                    else:
+                        break
+
+        for item in delete_items:
+            if item in lectures_dict:
+                lectures_dict.remove(item)
+        delete_items = []
+    
+        #창업 계산
+        for needcheck in lectures_dict[:]:
+            lecture_topic = needcheck['주제']
+            lecture_credit = Decimal(needcheck['학점'])
+
+            if lecture_topic in ["창업"]:
+
+                if len(stack_startup) == 0:
+                    stack_startup.append(1)
+                else:
+                    continue
+
+                for liber_item in user_liber_result:
+                    if "자기관리" in liber_item and liber_item["자기관리"] > lecture_credit:
+                        liber_credit = liber_item["자기관리"]
+                        missing_credit = liber_credit - lecture_credit
+                        liber_item["자기관리"] = missing_credit
+                        liber_item["총합"] -= lecture_credit
+                        delete_items.append(needcheck)
+
+                    elif "자기관리" in liber_item and liber_item["자기관리"] == lecture_credit: 
+                        del liber_item["자기관리"]
+                        delete_items.append(needcheck)
+                        liber_item["총합"] -= lecture_credit
+
+                    elif "자기관리" in liber_item and liber_item["자기관리"] < lecture_credit: 
+                        liber_credit = liber_item["자기관리"]
+                        missing_credit = liber_credit - lecture_credit
+                        rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                        del liber_item["자기관리"]
+                        delete_items.append(needcheck)
+                        
+                        liber_item["총합"] -= liber_credit    # 학점 기준 초과 시 반영
+                    else:
+                        break
+
+        for item in delete_items:
+            if item in lectures_dict:
+                lectures_dict.remove(item)
+        delete_items = []
+
+        #진로탐색 계산
+        for needcheck in lectures_dict[:]:
+            lecture_topic = needcheck['주제']
+            lecture_credit = Decimal(needcheck['학점'])
+
+            if lecture_topic in ["진로탐색"]:
+
+                if len(stack_search) == 0:
+                    stack_search.append(1)
+                elif len(stack_search) == 1:
+                    stack_search.append(1)
+                elif len(stack_search) == 2:
+                    stack_search.append(1)
+                else:
+                    continue
+
+                for liber_item in user_liber_result:
+                    if "자기관리" in liber_item and liber_item["자기관리"] > lecture_credit:
+                        liber_credit = liber_item["자기관리"]
+                        missing_credit = liber_credit - lecture_credit
+                        liber_item["자기관리"] = missing_credit
+                        liber_item["총합"] -= lecture_credit
+                        delete_items.append(needcheck)
+
+                    elif "자기관리" in liber_item and liber_item["자기관리"] == lecture_credit: 
+                        del liber_item["자기관리"]
+                        delete_items.append(needcheck)
+                        liber_item["총합"] -= lecture_credit
+
+                    elif "자기관리" in liber_item and liber_item["자기관리"] < lecture_credit: 
+                        liber_credit = liber_item["자기관리"]
+                        missing_credit = liber_credit - lecture_credit
+                        rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                        del liber_item["자기관리"]
+                        delete_items.append(needcheck)
+                        
+                        liber_item["총합"] -= liber_credit    # 학점 기준 초과 시 반영
+                    else:
+                        break
+
+        for item in delete_items:
+            if item in lectures_dict:
+                lectures_dict.remove(item)
+        delete_items = []
+
+    #의과, 헬스케어, 사범, 휴먼서비스의 경우
+    else:
+        #논리적사고와글쓰기, 외국어 확인
+        for needcheck in lectures_dict[:]:
+            lecture_topic = needcheck['주제']
+            lecture_credit = Decimal(needcheck['학점'])
+
+            for liber_item in user_liber_result:
+                if lecture_topic in liber_item:
+                    liber_credit = liber_item[lecture_topic]
+
+                    if lecture_credit < liber_credit:
+                        missing_credit = liber_credit - lecture_credit
+                        liber_item[lecture_topic] = missing_credit
+
+                        delete_items.append(needcheck)
+
+                        liber_item['총합'] -= lecture_credit
+
+                    elif lecture_credit > liber_credit:
+                        del liber_item[lecture_topic]
+                        missing_credit = liber_credit - lecture_credit
+                        rest_total += abs(missing_credit)  # 초과 학점 일반선택 학점 추가
+
+                        delete_items.append(needcheck)
+
+                        liber_item['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                    elif lecture_credit == liber_credit:
+                        del liber_item[lecture_topic]
+                        liber_item['총합'] -= liber_credit
+
+                        delete_items.append(needcheck)
+
+                else:
+                    break
+
+        for item in delete_items:
+            if item in lectures_dict:
+                lectures_dict.remove(item)
+        delete_items = []
+
+        #계열기초 먼저 계산
+        for needcheck in lectures_dict[:]:
+            lecture_topic = needcheck['주제']
+            lecture_credit = Decimal(needcheck['학점'])
+
+            if lecture_topic in ["계열기초"]:
+
+                if len(stack_major_base) == 0:
+                    stack_major_base.append(1)
+                elif len(stack_major_base) == 1:
+                    stack_major_base.append(1)
+                else:
+                    continue
+
+                for liber_item in user_liber_result:
+                    if "자기관리" in liber_item and liber_item["자기관리"] > lecture_credit:
+                        liber_credit = liber_item["자기관리"]
+                        missing_credit = liber_credit - lecture_credit
+                        liber_item["자기관리"] = missing_credit
+                        liber_item["총합"] -= lecture_credit
+                        delete_items.append(needcheck)
+
+                    elif "자기관리" in liber_item and liber_item["자기관리"] == lecture_credit: 
+                        del liber_item["자기관리"]
+                        delete_items.append(needcheck)
+                        liber_item["총합"] -= lecture_credit
+
+                    elif "자기관리" in liber_item and liber_item["자기관리"] < lecture_credit: 
+                        liber_credit = liber_item["자기관리"]
+                        missing_credit = liber_credit - lecture_credit
+                        rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                        del liber_item["자기관리"]
+                        delete_items.append(needcheck)
+                        
+                        liber_item["총합"] -= liber_credit    # 학점 기준 초과 시 반영
+                    else:
+                        break
+
+        for item in delete_items:
+            if item in lectures_dict:
+                lectures_dict.remove(item)
+        delete_items = []
+
+        #창의 계산
+        for needcheck in lectures_dict[:]:
+            lecture_topic = needcheck['주제']
+            lecture_credit = Decimal(needcheck['학점'])
+
+            if lecture_topic in ["창의성"]:
+
+                if len(stack_creative) == 0:
+                    stack_creative.append(1)
+                else:
+                    continue
+
+                for liber_item in user_liber_result:
+                    if "자기관리" in liber_item and liber_item["자기관리"] > lecture_credit:
+                        liber_credit = liber_item["자기관리"]
+                        missing_credit = liber_credit - lecture_credit
+                        liber_item["자기관리"] = missing_credit
+                        liber_item["총합"] -= lecture_credit
+                        delete_items.append(needcheck)
+
+                    elif "자기관리" in liber_item and liber_item["자기관리"] == lecture_credit: 
+                        del liber_item["자기관리"]
+                        delete_items.append(needcheck)
+                        liber_item["총합"] -= lecture_credit
+
+                    elif "자기관리" in liber_item and liber_item["자기관리"] < lecture_credit: 
+                        liber_credit = liber_item["자기관리"]
+                        missing_credit = liber_credit - lecture_credit
+                        rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                        del liber_item["자기관리"]
+                        delete_items.append(needcheck)
+                        
+                        liber_item["총합"] -= liber_credit    # 학점 기준 초과 시 반영
+                    else:
+                        break
+                    
+        for item in delete_items:
+            if item in lectures_dict:
+                lectures_dict.remove(item)
+        delete_items = []
+
+        #창업 계산
+        for needcheck in lectures_dict[:]:
+            lecture_topic = needcheck['주제']
+            lecture_credit = Decimal(needcheck['학점'])
+
+            if lecture_topic in ["창업"]:
+
+                if len(stack_startup) == 0:
+                    stack_startup.append(1)
+                else:
+                    continue
+
+                for liber_item in user_liber_result:
+                    if "자기관리" in liber_item and liber_item["자기관리"] > lecture_credit:
+                        liber_credit = liber_item["자기관리"]
+                        missing_credit = liber_credit - lecture_credit
+                        liber_item["자기관리"] = missing_credit
+                        liber_item["총합"] -= lecture_credit
+                        delete_items.append(needcheck)
+
+                    elif "자기관리" in liber_item and liber_item["자기관리"] == lecture_credit: 
+                        del liber_item["자기관리"]
+                        delete_items.append(needcheck)
+                        liber_item["총합"] -= lecture_credit
+
+                    elif "자기관리" in liber_item and liber_item["자기관리"] < lecture_credit: 
+                        liber_credit = liber_item["자기관리"]
+                        missing_credit = liber_credit - lecture_credit
+                        rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                        del liber_item["자기관리"]
+                        delete_items.append(needcheck)
+                        
+                        liber_item["총합"] -= liber_credit    # 학점 기준 초과 시 반영
+                    else:
+                        break
+                    
+        for item in delete_items:
+            if item in lectures_dict:
+                lectures_dict.remove(item)
+        delete_items = []
+
+        #진로탐색 계산
+        for needcheck in lectures_dict[:]:
+            lecture_topic = needcheck['주제']
+            lecture_credit = Decimal(needcheck['학점'])
+
+            if lecture_topic in ["진로탐색"]:
+
+                if len(stack_search) == 0:
+                    stack_search.append(1)
+                else:
+                    continue
+
+                for liber_item in user_liber_result:
+                    if "자기관리" in liber_item and liber_item["자기관리"] > lecture_credit:
+                        liber_credit = liber_item["자기관리"]
+                        missing_credit = liber_credit - lecture_credit
+                        liber_item["자기관리"] = missing_credit
+                        liber_item["총합"] -= lecture_credit
+                        delete_items.append(needcheck)
+
+                    elif "자기관리" in liber_item and liber_item["자기관리"] == lecture_credit: 
+                        del liber_item["자기관리"]
+                        delete_items.append(needcheck)
+                        liber_item["총합"] -= lecture_credit
+
+                    elif "자기관리" in liber_item and liber_item["자기관리"] < lecture_credit: 
+                        liber_credit = liber_item["자기관리"]
+                        missing_credit = liber_credit - lecture_credit
+                        rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                        del liber_item["자기관리"]
+                        delete_items.append(needcheck)
+                        
+                        liber_item["총합"] -= liber_credit    # 학점 기준 초과 시 반영
+                    else:
+                        break
+                    
+        for item in delete_items:
+            if item in lectures_dict:
+                lectures_dict.remove(item)
+        delete_items = []
+
+    print("일선 확인", rest_total)
+    return lectures_dict, user_liber_result, rest_total
+
+#24, 25년도 교양 기초 계산
+def GE_basic_calculate_2025(lecture_dict, user_liber_result, rest_total):
+    lectures_dict = [] #매개변수 담을 리스트
+    user_liber_result = user_liber_result['base_result'] #[{'논리적사고와글쓰기': Decimal('2.0'), '외국어': Decimal('4.0'), '자기관리': Decimal('6.0'), '총합': Decimal('12.0')}]
+    lectures_dict = lecture_dict #기이수 과목목록
+
+    delete_items = []
+    rest_total = rest_total
+
+    #논리적사고와글쓰기
+    stack_write = []
+    #계열기초
+    stack_major_base = []
+    #창의성
+    stack_creative = []
+    #창업
+    stack_startup = []
+    #진로탐색
+    stack_search = []
+
+    #디지털소통 계산
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        for liber_item in user_liber_result:
+            if lecture_topic in liber_item:
+                liber_credit = liber_item[lecture_topic]
+
+                if lecture_credit < liber_credit:
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item[lecture_topic] = missing_credit
+
+                    delete_items.append(needcheck)
+
+                    liber_item['총합'] -= lecture_credit
+
+                elif lecture_credit > liber_credit:
+                    del liber_item[lecture_topic]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit)  # 초과 학점 일반선택 학점 추가
+
+                    delete_items.append(needcheck)
+
+                    liber_item['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                elif lecture_credit == liber_credit:
+                    del liber_item[lecture_topic]
+                    liber_item['총합'] -= liber_credit
+
+                    delete_items.append(needcheck)
+
+            else:
+                break
+
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+    delete_items = []
+
+    #논사글, 외국어 계산
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        if lecture_topic in ["논리적사고와글쓰기"]:
+
+            if len(stack_write) == 0:
+                stack_write.append(1)
+            else:
+                continue
+
+            for liber_item in user_liber_result:
+                if "소통" in liber_item and liber_item["소통"] > lecture_credit:
+                    liber_credit = liber_item["소통"]
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item["소통"] = missing_credit
+                    liber_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "소통" in liber_item and liber_item["소통"] == lecture_credit: 
+                    del liber_item["소통"]
+                    delete_items.append(needcheck)
+                    liber_item["총합"] -= lecture_credit
+
+                elif "소통" in liber_item and liber_item["소통"] < lecture_credit: 
+                    liber_credit = liber_item["소통"]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del liber_item["소통"]
+                    delete_items.append(needcheck)
+                    
+                    liber_item["총합"] -= liber_credit    # 학점 기준 초과 시 반영
+                else:
+                    break
+                
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+    delete_items = []
+
+    #논사글, 외국어 계산
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        if lecture_topic in ["외국어"]:
+
+            for liber_item in user_liber_result:
+                if "소통" in liber_item and liber_item["소통"] > lecture_credit:
+                    liber_credit = liber_item["소통"]
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item["소통"] = missing_credit
+                    liber_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "소통" in liber_item and liber_item["소통"] == lecture_credit: 
+                    del liber_item["소통"]
+                    delete_items.append(needcheck)
+                    liber_item["총합"] -= lecture_credit
+
+                elif "소통" in liber_item and liber_item["소통"] < lecture_credit: 
+                    liber_credit = liber_item["소통"]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del liber_item["소통"]
+                    delete_items.append(needcheck)
+                    
+                    liber_item["총합"] -= liber_credit    # 학점 기준 초과 시 반영
+                else:
+                    break
+                
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+    delete_items = []
+
+    #계열기초 계산
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        if lecture_topic in ["계열기초"]:
+
+            if len(stack_major_base) == 0:
+                stack_major_base.append(1)
+            else:
+                continue
+
+            for liber_item in user_liber_result:
+                if "자기관리" in liber_item and liber_item["자기관리"] > lecture_credit:
+                    liber_credit = liber_item["자기관리"]
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item["자기관리"] = missing_credit
+                    liber_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "자기관리" in liber_item and liber_item["자기관리"] == lecture_credit: 
+                    del liber_item["자기관리"]
+                    delete_items.append(needcheck)
+                    liber_item["총합"] -= lecture_credit
+
+                elif "자기관리" in liber_item and liber_item["자기관리"] < lecture_credit: 
+                    liber_credit = liber_item["자기관리"]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del liber_item["자기관리"]
+                    delete_items.append(needcheck)
+                    
+                    liber_item["총합"] -= liber_credit    # 학점 기준 초과 시 반영
+                else:
+                    break
+                
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+    delete_items = []
+
+    #창의 계산
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        if lecture_topic in ["창의성"]:
+
+            if len(stack_creative) == 0:
+                stack_creative.append(1)
+            else:
+                continue
+
+            for liber_item in user_liber_result:
+                if "자기관리" in liber_item and liber_item["자기관리"] > lecture_credit:
+                    liber_credit = liber_item["자기관리"]
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item["자기관리"] = missing_credit
+                    liber_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "자기관리" in liber_item and liber_item["자기관리"] == lecture_credit: 
+                    del liber_item["자기관리"]
+                    delete_items.append(needcheck)
+                    liber_item["총합"] -= lecture_credit
+
+                elif "자기관리" in liber_item and liber_item["자기관리"] < lecture_credit: 
+                    liber_credit = liber_item["자기관리"]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del liber_item["자기관리"]
+                    delete_items.append(needcheck)
+                    
+                    liber_item["총합"] -= liber_credit    # 학점 기준 초과 시 반영
+                else:
+                    break
+                
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+    delete_items = []
+
+    #창업 계산
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        if lecture_topic in ["창업"]:
+
+            if len(stack_startup) == 0:
+                stack_startup.append(1)
+            else:
+                continue
+
+            for liber_item in user_liber_result:
+                if "자기관리" in liber_item and liber_item["자기관리"] > lecture_credit:
+                    liber_credit = liber_item["자기관리"]
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item["자기관리"] = missing_credit
+                    liber_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "자기관리" in liber_item and liber_item["자기관리"] == lecture_credit: 
+                    del liber_item["자기관리"]
+                    delete_items.append(needcheck)
+                    liber_item["총합"] -= lecture_credit
+
+                elif "자기관리" in liber_item and liber_item["자기관리"] < lecture_credit: 
+                    liber_credit = liber_item["자기관리"]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del liber_item["자기관리"]
+                    delete_items.append(needcheck)
+                    
+                    liber_item["총합"] -= liber_credit    # 학점 기준 초과 시 반영
+                else:
+                    break
+                
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+    delete_items = []
+
+    #진로탐색 계산
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        if lecture_topic in ["진로탐색"]:
+
+            if len(stack_search) == 0:
+                stack_search.append(1)
+            elif len(stack_search) == 1:
+                stack_search.append(1)
+            else:
+                continue
+
+            for liber_item in user_liber_result:
+                if "자기관리" in liber_item and liber_item["자기관리"] > lecture_credit:
+                    liber_credit = liber_item["자기관리"]
+                    missing_credit = liber_credit - lecture_credit
+                    liber_item["자기관리"] = missing_credit
+                    liber_item["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "자기관리" in liber_item and liber_item["자기관리"] == lecture_credit: 
+                    del liber_item["자기관리"]
+                    delete_items.append(needcheck)
+                    liber_item["총합"] -= lecture_credit
+
+                elif "자기관리" in liber_item and liber_item["자기관리"] < lecture_credit: 
+                    liber_credit = liber_item["자기관리"]
+                    missing_credit = liber_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del liber_item["자기관리"]
+                    delete_items.append(needcheck)
+                    
+                    liber_item["총합"] -= liber_credit    # 학점 기준 초과 시 반영
+                else:
+                    break
+                
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+    delete_items = []
+
+    print("일선 계산확인", rest_total)
+    return lectures_dict, user_liber_result, rest_total

@@ -14,7 +14,8 @@ from .liber_calculate import user_liberrequire_get
 from .liber_calculate import liber_human_calculate
 from .liber_calculate import are_you_human
 from .liber_calculate import GE_fusion_calculate
-from .liber_calculate import GE_basic_calculate
+from .liber_calculate import GE_basic_calculate_2023
+from .liber_calculate import GE_basic_calculate_2025
 import logging
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
@@ -243,15 +244,26 @@ def general_check(request):
 
     #졸업요건 검사로직
     if (year > '2022'):
-        lecture_dict_human_result, liber_human_item = liber_human_calculate(lecture_dict, user_liber_result)
-        print("교양 인성 계산", lecture_dict_human_result)
-        print("교양 인성 영역", liber_human_item)
-        lecture_dict_fusion_result, liber_fusion_item = GE_fusion_calculate(lecture_dict_human_result, user_liber_result)
-        print("교양 융합 계산", lecture_dict_fusion_result)
-        print("교양 융합 영역", liber_fusion_item)
-        lecture_dict_basic_result, liber_basic_item = GE_basic_calculate(lecture_dict_fusion_result, user_liber_result, home_collage, year)
-        print("교양 기초 계산", lecture_dict_basic_result)
-        print("교양 기초 영역", liber_basic_item)
+        lecture_dict_human_result, liber_human_item, rest_total = liber_human_calculate(lecture_dict, user_liber_result)
+        # print("교양 인성 계산", lecture_dict_human_result)
+        # print("교양 인성 영역", liber_human_item)
+        print("교양 인성 일선 학점 확인", rest_total)
+        lecture_dict_fusion_result, liber_fusion_item, rest_total = GE_fusion_calculate(lecture_dict_human_result, user_liber_result, rest_total)
+        # print("교양 융합 계산", lecture_dict_fusion_result)
+        # print("교양 융합 영역", liber_fusion_item)
+        print("교양 융합 일선 학점 확인", rest_total)
+
+        if (year == '2023'):
+            lecture_dict_basic_result, liber_basic_item, rest_total = GE_basic_calculate_2023(lecture_dict_fusion_result, user_liber_result, home_collage, rest_total)
+            # print("교양 기초 계산", lecture_dict_basic_result)
+            # print("교양 기초 영역", liber_basic_item)
+            print("교양 기초 일선 학점 확인", rest_total)
+        else:
+            lecture_dict_basic_result, liber_basic_item, rest_total = GE_basic_calculate_2025(lecture_dict_fusion_result, user_liber_result, rest_total)
+            # print("교양 기초 계산", lecture_dict_basic_result)
+            # print("교양 기초 영역", liber_basic_item)
+            print("교양 기초일선 학점 확인", rest_total)
+
     else:    
         result = check_db_mydone_liber(user_id) 
 

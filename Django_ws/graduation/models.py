@@ -79,6 +79,7 @@ class liberRequire(models.Model):
     문제해결 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
     융합비고 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1)
     트리니티아카데미 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
+    디지털소통 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
 
     def __str__(self):
         return f"{self.lecture_name} ({self.year}-{self.semester} {self.lecture_type})"
