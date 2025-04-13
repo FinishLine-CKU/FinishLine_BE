@@ -56,20 +56,30 @@ def select_graduation_standard(student_id):
 def calculate_sub_major(student_id):
     done_sub_major = pop_user_sub_major(student_id)  # 복수/부전공 이수학점
     sub_major_standard, standard_id= select_graduation_standard(student_id)  # 복수/부전공 기준학점
-
-    lack_sub_major = sub_major_standard - done_sub_major
     done_sub_major_rest = 0
 
-    # 복수/부전공 초과 이수
-    if lack_sub_major < 0:
-        done_sub_major_rest = abs(lack_sub_major)  # 복수/부전공에서 일선으로 빠지는 학점
+    # 복수/부전공 대상자
+    if sub_major_standard:
+
+        lack_sub_major = sub_major_standard - done_sub_major
+
+        # 복수/부전공 초과 이수
+        if lack_sub_major < 0:
+            done_sub_major_rest = abs(lack_sub_major)  # 복수/부전공에서 일선으로 빠지는 학점
+            lack_sub_major = 0
+    
+    # 복수/부전공 비대상자
+    else:
+        done_sub_major_rest = done_sub_major  # 복수/부전공 과목 일선
+        done_sub_major = 0
         lack_sub_major = 0
     
-    User.objects.filter(student_id = student_id).update(
-        done_sub_major = done_sub_major,
-        done_sub_major_rest = done_sub_major_rest,
-        lack_sub_major = lack_sub_major)
 
-    print('테스트입니다. : ', lack_sub_major, done_sub_major, standard_id)   # 복/부전공 기준학점 / None
+    User.objects.filter(student_id = student_id).update(
+            done_sub_major = done_sub_major,
+            done_sub_major_rest = done_sub_major_rest,
+            lack_sub_major = lack_sub_major)
+
+    # print('테스트입니다. : ', lack_sub_major, done_sub_major, standard_id)   # 복/부전공 기준학점 / None
         
     return lack_sub_major, done_sub_major, standard_id

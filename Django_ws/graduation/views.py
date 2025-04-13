@@ -19,7 +19,8 @@ from .models import NowLectureData
 from .serializers import MyDoneLectureSerializer
 from .serializers import AllLectureDataSerializer
 from .serializers import NowLectureDataSerializer
-from .major_calculate import need_credit
+from .major_calculate import calculate_major
+from .sub_major_calculate import calculate_sub_major
 from .micro_degree_calculate import need_micro_degree
 import io
 
@@ -247,84 +248,87 @@ def general_check(request):
 def test_major(request):
     data = request.data
     student_id = data.get('student_id')
-    result = need_credit(student_id)
-    if len(result) == 4:
-        lack_major, done_major, id, lack_sub_major = need_credit(student_id)
-        major = User.objects.filter(student_id = student_id).values_list('major', flat=True)
-        done_major_rest = User.objects.filter(student_id = student_id).values_list('done_major_rest', flat=True)
-        done_rest = User.objects.filter(student_id = student_id).values_list('done_rest', flat=True)
-        gradu = Standard.objects.filter(index = id).first()
+    sub_major_type = User.objects.filter(student_id = student_id).values_list('sub_major_type', flat=True)
+    # 복수/부전공 이수 X
+    if sub_major_type == '':
+        lack_major, done_major, standard_id = calculate_major(student_id)
+        lack_sub_major, done_sub_major, standard_id,  = calculate_sub_major(student_id)
+        major, done_major_rest, done_sub_major_rest, done_rest = User.objects.filter(student_id = student_id).values_list('major', 'done_major_rest', 'done_sub_major_rest', 'done_rest').first()
+        standard = Standard.objects.filter(index = standard_id).first()
 
-        if gradu.rest_standard == None:
+        if standard.rest_standard == None:
             data = {
-                'major' : major[0], # 전공
+                'major' : major, # 전공
                 'lackMajor' : lack_major, # 부족학점
                 'doneMajor' : done_major, # 이수한 학점
-                'totalStandard' : gradu.total_standard, # 졸업 총 학점
-                'majorStandard' : gradu.major_standard, # 전공 총 학점
-                'essentialGEStandard' : gradu.essential_GE_standatd, # 교양필수 총 학점
-                'choiceGEStandard' : gradu.choice_GE_standard, # 교양필수 총 학점
+                'totalStandard' : standard.total_standard, # 졸업기준 총 학점
+                'majorStandard' : standard.major_standard, # 졸업기준 전공 학점
+                'essentialGEStandard' : standard.essential_GE_standatd, # 졸업기준 교양필수 학점
+                'choiceGEStandard' : standard.choice_GE_standard, # 졸업기준 교양선택 학점
                 'restStandard' : 0,
-                'doneMajorRest' : done_major_rest[0],
+                'doneMajorRest' : done_major_rest,
+                'doneSubMajorRest' : done_sub_major_rest,
                 'lackSubMajor' : lack_sub_major,
-                'doneRest' : done_rest[0]
+                'doneRest' : done_rest
             },
         else:
             data = {
-                'major' : major[0], # 전공
+                'major' : major, # 전공
                 'lackMajor' : lack_major, # 부족학점
                 'doneMajor' : done_major, # 이수한 학점
-                'totalStandard' : gradu.total_standard, # 졸업 총 학점
-                'majorStandard' : gradu.major_standard, # 전공 총 학점
-                'essentialGEStandard' : gradu.essential_GE_standatd, # 교양필수 총 학점
-                'choiceGEStandard' : gradu.choice_GE_standard, # 교양필수 총 학점
-                'restStandard' : gradu.rest_standard,
-                'doneMajorRest' : done_major_rest[0],
+                'totalStandard' : standard.total_standard, # 졸업 총 학점
+                'majorStandard' : standard.major_standard, # 전공 총 학점
+                'essentialGEStandard' : standard.essential_GE_standatd, # 교양필수 총 학점
+                'choiceGEStandard' : standard.choice_GE_standard, # 교양필수 총 학점
+                'restStandard' : standard.rest_standard,
+                'doneMajorRest' : done_major_rest,
+                'doneSubMajorRest' : done_sub_major_rest,
                 'lackSubMajor' : lack_sub_major,
-                'doneRest' : done_rest[0]
+                'doneRest' : done_rest
             }
     else:
         # 추가 전공자 결과 반환
-        lack_major, done_major, id, lack_sub_major, done_sub_major = need_credit(student_id)
-        major = User.objects.filter(student_id = student_id).values_list('major', flat=True)
-        done_major_rest = User.objects.filter(student_id = student_id).values_list('done_major_rest', flat=True)
-        done_rest = User.objects.filter(student_id = student_id).values_list('done_rest', flat=True)
-        gradu = Standard.objects.filter(index = id).first()
+        lack_major, done_major, standard_id = calculate_major(student_id)
+        lack_sub_major, done_sub_major, standard_id,  = calculate_sub_major(student_id)
+        major, done_major_rest, done_sub_major_rest, done_rest = User.objects.filter(student_id = student_id).values_list('major', 'done_major_rest', 'done_sub_major_rest', 'done_rest').first()
+        standard = Standard.objects.filter(index = standard_id).first()
 
         # 의학과, 간호학과, 건축학, 건축공학 전공
-        if gradu.rest_standard == None:
+        if standard.rest_standard == None:
             data = {
-                'major' : major[0], # 전공
+                'major' : major, # 전공
                 'lackMajor' : lack_major, # 부족학점
                 'doneMajor' : done_major, # 이수한 학점
-                'totalStandard' : gradu.total_standard, # 졸업 기준 학점
-                'majorStandard' : gradu.major_standard, # 전공 기준 학점
-                'essentialGEStandard' : gradu.essential_GE_standatd, # 교양필수 기준 학점
-                'choiceGEStandard' : gradu.choice_GE_standard, # 교양필수 기준 학점
+                'totalStandard' : standard.total_standard, # 졸업 기준 학점
+                'majorStandard' : standard.major_standard, # 전공 기준 학점
+                'essentialGEStandard' : standard.essential_GE_standatd, # 교양필수 기준 학점
+                'choiceGEStandard' : standard.choice_GE_standard, # 교양필수 기준 학점
                 'restStandard' : 0,
                 'lackSubMajor' : lack_sub_major, # 부족 추가전공 학점
                 'doneSubMajor' : done_sub_major, # 이수한 추가전공 학점
-                'subMajorStandard' : gradu.sub_major_standard, # 추가전공 기준 학점
-                'subMajorType' : gradu.sub_major_type,
-                'doneMajorRest' : done_major_rest[0],
-                'doneRest' : done_rest[0]
+                'subMajorStandard' : standard.sub_major_standard, # 추가전공 기준 학점
+                'subMajorType' : standard.sub_major_type,
+                'doneMajorRest' : done_major_rest,
+                'doneSubMajorRest' : done_sub_major_rest,
+                'doneRest' : done_rest
             },
         else:
             data = {
-                'major' : major[0], # 전공
+                'major' : major, # 전공
                 'lackMajor' : lack_major, # 부족학점
                 'doneMajor' : done_major, # 이수한 학점
-                'totalStandard' : gradu.total_standard, # 졸업 기준 학점
-                'majorStandard' : gradu.major_standard, # 전공 기준 학점
-                'essentialGEStandard' : gradu.essential_GE_standatd, # 교양필수 기준 학점
-                'choiceGEStandard' : gradu.choice_GE_standard, # 교양필수 기준 학점
-                'restStandard' : gradu.rest_standard,
+                'totalStandard' : standard.total_standard, # 졸업 기준 학점
+                'majorStandard' : standard.major_standard, # 전공 기준 학점
+                'essentialGEStandard' : standard.essential_GE_standatd, # 교양필수 기준 학점
+                'choiceGEStandard' : standard.choice_GE_standard, # 교양필수 기준 학점
+                'restStandard' : standard.rest_standard,
                 'lackSubMajor' : lack_sub_major, # 부족 추가전공 학점
                 'doneSubMajor' : done_sub_major, # 이수한 추가전공 학점
-                'subMajorStandard' : gradu.sub_major_standard, # 추가전공 기준 학점
-                'subMajorType' : gradu.sub_major_type,
-                'doneMajorRest' : done_major_rest[0],
-                'doneRest' : done_rest[0]
+                'subMajorStandard' : standard.sub_major_standard, # 추가전공 기준 학점
+                'subMajorType' : standard.sub_major_type,
+                'doneMajorRest' : done_major_rest,
+                'doneSubMajorRest' : done_sub_major_rest,
+                'doneRest' : done_rest
             }
     print(data)
     return Response (data)

@@ -6,7 +6,7 @@ from user.models import VisitorCount
 from graduation.models import Standard
 from graduation.models import MyDoneLecture
 from graduation.liberCheck import check_db_mydone_liber
-from graduation.major_calculate import user_graduation_standard
+from graduation.major_calculate import select_graduation_standard
 from rest_framework.response import Response
 from django.http import HttpResponse
 from datetime import timedelta, datetime, timezone
@@ -110,7 +110,7 @@ def check_register(request):    # 로그인
 
             else:   # 졸업 검사 이력이 있다면
                 result = check_db_mydone_liber(student_id)  # 교양 부족학점
-                standard = user_graduation_standard(student_id) # 기준 가져오기
+                standard = select_graduation_standard(student_id) # 기준 가져오기
                 std = Standard.objects.filter(index = standard[-1]).first()
                 if user.done_general_rest == None:
                     done_general_rest = 0
