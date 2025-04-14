@@ -6,7 +6,7 @@ from user.models import VisitorCount
 from graduation.models import Standard
 from graduation.models import MyDoneLecture
 from graduation.liberCheck import check_db_mydone_liber
-from graduation.major_calculate import user_graduation_standard
+from graduation.major_calculate import select_graduation_standard
 from rest_framework.response import Response
 from django.http import HttpResponse
 from datetime import timedelta, datetime, timezone
@@ -105,39 +105,48 @@ def check_register(request):    # 로그인
                     "교양필수 부족 학점": None,
                     "교양선택 부족 학점": None
                 }
-                needNormalTotalCredit = None,
-                needTotalCredit = None
+                lack_rest_total = None,
+                lack_total = None
 
             else:   # 졸업 검사 이력이 있다면
                 result = check_db_mydone_liber(student_id)  # 교양 부족학점
-                standard = user_graduation_standard(student_id) # 기준 가져오기
-                std = Standard.objects.filter(index = standard[-1]).first()
-                if user.done_general_rest == None:
-                    done_general_rest = 0
-                else:
-                    done_general_rest = user.done_general_rest
+                standard = select_graduation_standard(student_id) # 기준 가져오기
+                standard_id = Standard.objects.filter(index = standard[-1]).first()
                 if user.done_major_rest == None:
                     done_major_rest = 0
                 else:
                     done_major_rest = user.done_major_rest
-                if user.done_micro_degree == None:
-                    done_micro_degree = 0
+                if user.done_sub_major_rest == None:
+                    done_sub_major_rest = 0
                 else:
-                    done_micro_degree = user.done_micro_degree
+                    done_sub_major_rest = user.done_sub_major_rest
+                if user.done_general_rest == None:
+                    done_general_rest = 0
+                else:
+                    done_general_rest = user.done_general_rest
+                if user.done_MD == None:
+                    done_MD = 0
+                else:
+                    done_MD = user.done_MD
+                if standard_id.rest_standard == None:
+                    rest_standard = 0
+                else:
+                    rest_standard = standard_id.rest_standard
+
+                lack_rest_total = rest_standard - (done_major_rest + done_sub_major_rest + done_general_rest + done_MD)
+
+                if lack_rest_total < 0:
+                    lack_rest_total = 0
                 
-                needNormalTotalCredit = std.rest_credit - (done_general_rest + done_major_rest + done_micro_degree)
-                if needNormalTotalCredit < 0:
-                    needNormalTotalCredit = 0
-                
-                user.need_rest = needNormalTotalCredit  # 부족한 일선 총 학점 저장
+                user.need_rest = lack_rest_total  # 부족한 일선 총 학점 저장
                 user.save()
 
-                if user.need_sub_major == None:
-                    need_sub_major = 0
+                if user.lack_sub_major == None:
+                    lack_sub_major = 0
                 else:
-                    need_sub_major = user.need_sub_major
+                    lack_sub_major = user.lack_sub_major
 
-                needTotalCredit = needNormalTotalCredit + user.need_major + user.need_general + need_sub_major   # 부족한 학점 총계
+                lack_total = lack_rest_total + user.lack_major + user.need_general + lack_sub_major   # 부족한 학점 총계
 
 
             if check_password(password, user.password):
@@ -148,11 +157,11 @@ def check_register(request):    # 로그인
                     'name' : user.name,
                     'testing' : user.done_major,
                     'uploadPDF' : upload_pdf,
-                    'needEsseCredit' : result.get("교양필수 부족 학점", []),
-                    'needChoiceCredit' : result.get("교양선택 부족 학점", []),
-                    'need_sub_major' : user.need_sub_major,
-                    'needNormalTotalCredit' : needNormalTotalCredit,
-                    'needTotalCredit' : needTotalCredit
+                    'lackEssentialGE' : result.get("교양필수 부족 학점", []),
+                    'lackChoiceGE' : result.get("교양선택 부족 학점", []),
+                    'lackSubMajor' : user.lack_sub_major,
+                    'lackRestTotal' : lack_rest_total,
+                    'lackTotal' : lack_total
                 }
             else:
                 error = '학번 또는 비밀번호가 올바르지 않습니다.'
@@ -242,7 +251,7 @@ def lack_credit(request):
     student_id = data.get('student_id')
     if student_id:
         user = User.objects.filter(student_id = student_id).first()
-        data = {'need_major' : user.need_major}
+        data = {'lackMajor' : user.lack_major}
     else:
         error = '회원정보를 불러오지 못했습니다. 잠시 후 다시 시도해주세요.'
         data = {'error' : error}
