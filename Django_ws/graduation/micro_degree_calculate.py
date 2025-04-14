@@ -42,9 +42,9 @@ def user_graduation_standard(student_id):
     
 def need_micro_degree(student_id):
     standard = user_graduation_standard(student_id) # 소단위전공 졸업 기준 
-    done_micro_degree = pop_user_micro_degree(student_id) # 소단위전공 총 이수학점
+    done_MD = pop_user_micro_degree(student_id) # 소단위전공 총 이수학점
     major_standard = standard[0]    # 소단위전공 기준 학점
     # if major_standard == None:
-    User.objects.filter(student_id = student_id).update(done_micro_degree = done_micro_degree)
+    User.objects.filter(student_id = student_id).update(done_MD = done_MD)
 
-    return done_micro_degree # 전공부족학점, 전공이수학점, 졸업 요건 인덱스
+    return done_MD # 전공부족학점, 전공이수학점, 졸업 요건 인덱스

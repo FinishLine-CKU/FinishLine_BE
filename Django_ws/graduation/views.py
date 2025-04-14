@@ -19,7 +19,8 @@ from .models import NowLectureData
 from .serializers import MyDoneLectureSerializer
 from .serializers import AllLectureDataSerializer
 from .serializers import NowLectureDataSerializer
-from .major_calculate import need_credit
+from .major_calculate import calculate_major
+from .sub_major_calculate import calculate_sub_major
 from .micro_degree_calculate import need_micro_degree
 import io
 
@@ -233,13 +234,13 @@ def general_check(request):
     return Response({
         'message': 'Files processed successfully',
         'general_data': {
-            '교양필수_부족_학점': result.get("교양필수 부족 학점", []), #
-            '교양선택_부족_학점': result.get("교양선택 부족 학점", []), #
-            '교양필수_부족_영역': result.get("교양필수 부족 영역", []), 
-            '교양선택_부족_영역': result.get("교양선택 부족 영역", []), 
-            '교양필수_이수_학점': result.get("교양필수 이수 학점", []), 
-            '교양선택_이수_학점': result.get("교양선택 이수 학점", []), 
-            '일반선택_이수_학점': result.get("일반선택 이수 학점", []), 
+            'lackEssentialGE': result.get("교양필수 부족 학점", []), #
+            'lackChoiceGE': result.get("교양선택 부족 학점", []), #
+            'lackEssentialGETopic': result.get("교양필수 부족 영역", []), 
+            'lackChoiceGETopic': result.get("교양선택 부족 영역", []), 
+            'doneEssentialGE': result.get("교양필수 이수 학점", []), 
+            'doneChoiceGE': result.get("교양선택 이수 학점", []), 
+            'doneGERest': result.get("일반선택 이수 학점", []), 
         }
     })
 
@@ -247,85 +248,41 @@ def general_check(request):
 def test_major(request):
     data = request.data
     student_id = data.get('student_id')
-    result = need_credit(student_id)
-    if len(result) == 4:
-        need_major, user_major, id, need_sub_major = need_credit(student_id)
-        major = User.objects.filter(student_id = student_id).values_list('major', flat=True)
-        done_major_rest = User.objects.filter(student_id = student_id).values_list('done_major_rest', flat=True)
-        done_rest = User.objects.filter(student_id = student_id).values_list('done_rest', flat=True)
-        gradu = Standard.objects.filter(index = id).first()
+    sub_major_type = User.objects.filter(student_id = student_id).values_list('sub_major_type', flat=True)
 
-        if gradu.rest_credit == None:
-            data = {
-                'major_info' : major[0], # 전공
-                'need_major' : need_major, # 부족학점
-                'user_major' : user_major, # 이수한 학점
-                'total_credit' : gradu.total_credit, # 졸업 총 학점
-                'major_credit' : gradu.major_credit, # 전공 총 학점
-                'general_essential_credit' : gradu.general_essential_credit, # 교양필수 총 학점
-                'general_selection_credit' : gradu.general_selection_credit, # 교양필수 총 학점
-                'rest_credit' : 0,
-                'done_major_rest' : done_major_rest[0],
-                'need_sub_major' : need_sub_major,
-                'done_rest' : done_rest[0]
-            },
-        else:
-            data = {
-                'major_info' : major[0], # 전공
-                'need_major' : need_major, # 부족학점
-                'user_major' : user_major, # 이수한 학점
-                'total_credit' : gradu.total_credit, # 졸업 총 학점
-                'major_credit' : gradu.major_credit, # 전공 총 학점
-                'general_essential_credit' : gradu.general_essential_credit, # 교양필수 총 학점
-                'general_selection_credit' : gradu.general_selection_credit, # 교양필수 총 학점
-                'rest_credit' : gradu.rest_credit,
-                'done_major_rest' : done_major_rest[0],
-                'need_sub_major' : need_sub_major,
-                'done_rest' : done_rest[0]
-            }
-    else:
-        # 추가 전공자 결과 반환
-        need_major, user_major, id, need_sub_major, user_sub_major = need_credit(student_id)
-        major = User.objects.filter(student_id = student_id).values_list('major', flat=True)
-        done_major_rest = User.objects.filter(student_id = student_id).values_list('done_major_rest', flat=True)
-        done_rest = User.objects.filter(student_id = student_id).values_list('done_rest', flat=True)
-        gradu = Standard.objects.filter(index = id).first()
+    lack_major, done_major, standard_id = calculate_major(student_id)
+    lack_sub_major, done_sub_major, standard_id,  = calculate_sub_major(student_id)
+    major, done_major_rest, done_sub_major_rest, done_rest = User.objects.filter(student_id = student_id).values_list('major', 'done_major_rest', 'done_sub_major_rest', 'done_rest').first()
+    standard = Standard.objects.filter(index = standard_id).first()
+    sub_major_standard = standard.sub_major_standard
+    rest_standard = standard.rest_standard
 
-        # 의학과, 간호학과, 건축학, 건축공학 전공
-        if gradu.rest_credit == None:
-            data = {
-                'major_info' : major[0], # 전공
-                'need_major' : need_major, # 부족학점
-                'user_major' : user_major, # 이수한 학점
-                'total_credit' : gradu.total_credit, # 졸업 기준 학점
-                'major_credit' : gradu.major_credit, # 전공 기준 학점
-                'general_essential_credit' : gradu.general_essential_credit, # 교양필수 기준 학점
-                'general_selection_credit' : gradu.general_selection_credit, # 교양필수 기준 학점
-                'rest_credit' : 0,
-                'need_sub_major' : need_sub_major, # 부족 추가전공 학점
-                'user_sub_major' : user_sub_major, # 이수한 추가전공 학점
-                'sub_major_credit' : gradu.sub_major_credit, # 추가전공 기준 학점
-                'sub_major_type' : gradu.sub_major_type,
-                'done_major_rest' : done_major_rest[0],
-                'done_rest' : done_rest[0]
-            },
-        else:
-            data = {
-                'major_info' : major[0], # 전공
-                'need_major' : need_major, # 부족학점
-                'user_major' : user_major, # 이수한 학점
-                'total_credit' : gradu.total_credit, # 졸업 기준 학점
-                'major_credit' : gradu.major_credit, # 전공 기준 학점
-                'general_essential_credit' : gradu.general_essential_credit, # 교양필수 기준 학점
-                'general_selection_credit' : gradu.general_selection_credit, # 교양필수 기준 학점
-                'rest_credit' : gradu.rest_credit,
-                'need_sub_major' : need_sub_major, # 부족 추가전공 학점
-                'user_sub_major' : user_sub_major, # 이수한 추가전공 학점
-                'sub_major_credit' : gradu.sub_major_credit, # 추가전공 기준 학점
-                'sub_major_type' : gradu.sub_major_type,
-                'done_major_rest' : done_major_rest[0],
-                'done_rest' : done_rest[0]
-            }
+    # 의과대학 (일선 제거)
+    if rest_standard == None:
+        rest_standard = 0
+
+    # 복수/부전공 미이수
+    if sub_major_type == '':
+        done_sub_major = 0
+        sub_major_standard = 0
+
+    data = {
+        'major' : major,  # 전공명
+        'subMajorType' : standard.sub_major_type,
+        'doneMajor' : done_major,  # 전공 이수 학점
+        'doneSubMajor' : done_sub_major,
+        'doneMajorRest' : done_major_rest,  # 전공 > 일선 학점
+        'doneSubMajorRest' : done_sub_major_rest,  # 복수/부전공 > 일선 학점
+        'doneRest' : done_rest,  # 일선 이수 학점 (이수구분 = 일선)
+        'totalStandard' : standard.total_standard,  # 졸업기준 총 학점
+        'majorStandard' : standard.major_standard,  # 졸업기준 전공 학점
+        'subMajorStandard' : sub_major_standard,
+        'essentialGEStandard' : standard.essential_GE_standatd,  # 졸업기준 교양필수 학점
+        'choiceGEStandard' : standard.choice_GE_standard,  # 졸업기준 교양선택 학점
+        'restStandard' : rest_standard,  # 졸업기준 일선 학점
+        'lackMajor' : lack_major,  # 전공 부족 학점
+        'lackSubMajor' : lack_sub_major  # 복수/부전공 부족 학점
+    }
     print(data)
     return Response (data)
 
@@ -335,9 +292,9 @@ def test_micro_degree(request):
     student_id = data.get('student_id')
     result = need_micro_degree(student_id)
     if (result == 0) or (result == None) :
-        data = {'done_micro_degree' : 0 }
+        data = {'doneMD' : 0 }
     else:
-        data = {'done_micro_degree' : result}
+        data = {'doneMD' : result}
     print(data)
     return Response (data)
 
