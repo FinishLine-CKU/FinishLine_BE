@@ -249,7 +249,8 @@ def test_major(request):
     data = request.data
     student_id = data.get('student_id')
     sub_major_type = User.objects.filter(student_id = student_id).values_list('sub_major_type', flat=True)
-    # 복수/부전공 이수 X
+    
+    # 복수/부전공 이수 여부
     if sub_major_type == '':
         lack_major, done_major, standard_id = calculate_major(student_id)
         lack_sub_major, done_sub_major, standard_id,  = calculate_sub_major(student_id)
@@ -258,33 +259,33 @@ def test_major(request):
 
         if standard.rest_standard == None:
             data = {
-                'major' : major, # 전공
-                'lackMajor' : lack_major, # 부족학점
-                'doneMajor' : done_major, # 이수한 학점
-                'totalStandard' : standard.total_standard, # 졸업기준 총 학점
-                'majorStandard' : standard.major_standard, # 졸업기준 전공 학점
-                'essentialGEStandard' : standard.essential_GE_standatd, # 졸업기준 교양필수 학점
-                'choiceGEStandard' : standard.choice_GE_standard, # 졸업기준 교양선택 학점
-                'restStandard' : 0,
-                'doneMajorRest' : done_major_rest,
-                'doneSubMajorRest' : done_sub_major_rest,
-                'lackSubMajor' : lack_sub_major,
-                'doneRest' : done_rest
+                'major' : major,  # 전공명
+                'doneMajor' : done_major,  # 전공 이수 학점
+                'doneMajorRest' : done_major_rest,  # 전공 > 일선 학점
+                'doneSubMajorRest' : done_sub_major_rest,  # 복수/부전공 > 일선 학점
+                'doneRest' : done_rest,  # 일선 이수 학점 (이수구분 = 일선)
+                'totalStandard' : standard.total_standard,  # 졸업기준 총 학점
+                'majorStandard' : standard.major_standard,  # 졸업기준 전공 학점
+                'essentialGEStandard' : standard.essential_GE_standatd,  # 졸업기준 교양필수 학점
+                'choiceGEStandard' : standard.choice_GE_standard,  # 졸업기준 교양선택 학점
+                'restStandard' : 0,  # 졸업기준 일선 학점
+                'lackMajor' : lack_major,  # 전공 부족 학점
+                'lackSubMajor' : lack_sub_major  # 복수/부전공 부족 학점
             },
         else:
             data = {
-                'major' : major, # 전공
-                'lackMajor' : lack_major, # 부족학점
-                'doneMajor' : done_major, # 이수한 학점
-                'totalStandard' : standard.total_standard, # 졸업 총 학점
-                'majorStandard' : standard.major_standard, # 전공 총 학점
-                'essentialGEStandard' : standard.essential_GE_standatd, # 교양필수 총 학점
-                'choiceGEStandard' : standard.choice_GE_standard, # 교양필수 총 학점
-                'restStandard' : standard.rest_standard,
-                'doneMajorRest' : done_major_rest,
-                'doneSubMajorRest' : done_sub_major_rest,
-                'lackSubMajor' : lack_sub_major,
-                'doneRest' : done_rest
+                'major' : major,  # 전공명
+                'doneMajor' : done_major,  # 전공 이수 학점
+                'doneMajorRest' : done_major_rest,  # 전공 > 일선 학점
+                'doneSubMajorRest' : done_sub_major_rest,  # 복수/부전공 > 일선 학점
+                'doneRest' : done_rest,  # 일선 이수 학점 (이수구분 = 일선)
+                'totalStandard' : standard.total_standard,  # 졸업기준 총 학점
+                'majorStandard' : standard.major_standard,  # 졸업기준 전공 학점
+                'essentialGEStandard' : standard.essential_GE_standatd,  # 졸업기준 교양필수 학점
+                'choiceGEStandard' : standard.choice_GE_standard,  # 졸업기준 교양선택 학점
+                'restStandard' : standard.rest_standard,  # 졸업기준 일선 학점
+                'lackMajor' : lack_major,  # 전공 부족 학점
+                'lackSubMajor' : lack_sub_major  # 복수/부전공 부족 학점
             }
     else:
         # 추가 전공자 결과 반환
@@ -296,39 +297,39 @@ def test_major(request):
         # 의학과, 간호학과, 건축학, 건축공학 전공
         if standard.rest_standard == None:
             data = {
-                'major' : major, # 전공
-                'lackMajor' : lack_major, # 부족학점
-                'doneMajor' : done_major, # 이수한 학점
-                'totalStandard' : standard.total_standard, # 졸업 기준 학점
-                'majorStandard' : standard.major_standard, # 전공 기준 학점
-                'essentialGEStandard' : standard.essential_GE_standatd, # 교양필수 기준 학점
-                'choiceGEStandard' : standard.choice_GE_standard, # 교양필수 기준 학점
-                'restStandard' : 0,
-                'lackSubMajor' : lack_sub_major, # 부족 추가전공 학점
-                'doneSubMajor' : done_sub_major, # 이수한 추가전공 학점
-                'subMajorStandard' : standard.sub_major_standard, # 추가전공 기준 학점
+                'major' : major,  # 전공명
                 'subMajorType' : standard.sub_major_type,
-                'doneMajorRest' : done_major_rest,
-                'doneSubMajorRest' : done_sub_major_rest,
-                'doneRest' : done_rest
+                'doneMajor' : done_major,  # 전공 이수 학점
+                'doneSubMajor' : done_sub_major,  # 복수/부전공 이수 학점
+                'doneMajorRest' : done_major_rest,  # 전공 > 일선 학점
+                'doneSubMajorRest' : done_sub_major_rest,  # 복수/부전공 > 일선 학점
+                'doneRest' : done_rest,  # 일선 이수 학점 (이수구분 = 일선)
+                'totalStandard' : standard.total_standard,  # 졸업기준 총 학점
+                'majorStandard' : standard.major_standard,  # 졸업기준 전공 학점
+                'subMajorStandard' : standard.sub_major_standard,  # 졸업기준 복수/부전공 학점
+                'essentialGEStandard' : standard.essential_GE_standatd,  # 졸업기준 교양필수 학점
+                'choiceGEStandard' : standard.choice_GE_standard,  # 졸업기준 교양선택 학점
+                'restStandard' : 0,  # 졸업기준 일선 학점
+                'lackMajor' : lack_major,  # 전공 부족 학점
+                'lackSubMajor' : lack_sub_major  # 복수/부전공 부족 학점
             },
         else:
             data = {
-                'major' : major, # 전공
-                'lackMajor' : lack_major, # 부족학점
-                'doneMajor' : done_major, # 이수한 학점
-                'totalStandard' : standard.total_standard, # 졸업 기준 학점
-                'majorStandard' : standard.major_standard, # 전공 기준 학점
-                'essentialGEStandard' : standard.essential_GE_standatd, # 교양필수 기준 학점
-                'choiceGEStandard' : standard.choice_GE_standard, # 교양필수 기준 학점
-                'restStandard' : standard.rest_standard,
-                'lackSubMajor' : lack_sub_major, # 부족 추가전공 학점
-                'doneSubMajor' : done_sub_major, # 이수한 추가전공 학점
-                'subMajorStandard' : standard.sub_major_standard, # 추가전공 기준 학점
+                'major' : major,  # 전공명
                 'subMajorType' : standard.sub_major_type,
-                'doneMajorRest' : done_major_rest,
-                'doneSubMajorRest' : done_sub_major_rest,
-                'doneRest' : done_rest
+                'doneMajor' : done_major,  # 전공 이수 학점
+                'doneSubMajor' : done_sub_major,  # 복수/부전공 이수 학점
+                'doneMajorRest' : done_major_rest,  # 전공 > 일선 학점
+                'doneSubMajorRest' : done_sub_major_rest,  # 복수/부전공 > 일선 학점
+                'doneRest' : done_rest,  # 일선 이수 학점 (이수구분 = 일선)
+                'totalStandard' : standard.total_standard,  # 졸업기준 총 학점
+                'majorStandard' : standard.major_standard,  # 졸업기준 전공 학점
+                'subMajorStandard' : standard.sub_major_standard,  # 졸업기준 복수/부전공 학점
+                'essentialGEStandard' : standard.essential_GE_standatd,  # 졸업기준 교양필수 학점
+                'choiceGEStandard' : standard.choice_GE_standard,  # 졸업기준 교양선택 학점
+                'restStandard' : standard.rest_standard,  # 졸업기준 일선 학점
+                'lackMajor' : lack_major,  # 전공 부족 학점
+                'lackSubMajor' : lack_sub_major  # 복수/부전공 부족 학점
             }
     print(data)
     return Response (data)
