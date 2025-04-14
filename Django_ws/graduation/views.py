@@ -249,13 +249,14 @@ def test_major(request):
     data = request.data
     student_id = data.get('student_id')
     sub_major_type = User.objects.filter(student_id = student_id).values_list('sub_major_type', flat=True)
+
+    lack_major, done_major, standard_id = calculate_major(student_id)
+    lack_sub_major, done_sub_major, standard_id,  = calculate_sub_major(student_id)
+    major, done_major_rest, done_sub_major_rest, done_rest = User.objects.filter(student_id = student_id).values_list('major', 'done_major_rest', 'done_sub_major_rest', 'done_rest').first()
+    standard = Standard.objects.filter(index = standard_id).first()
     
     # 복수/부전공 이수 여부 (X)
     if sub_major_type == '':
-        lack_major, done_major, standard_id = calculate_major(student_id)
-        lack_sub_major, done_sub_major, standard_id,  = calculate_sub_major(student_id)
-        major, done_major_rest, done_sub_major_rest, done_rest = User.objects.filter(student_id = student_id).values_list('major', 'done_major_rest', 'done_sub_major_rest', 'done_rest').first()
-        standard = Standard.objects.filter(index = standard_id).first()
 
         if standard.rest_standard == None:
             data = {
@@ -289,10 +290,6 @@ def test_major(request):
             }
     else:
         # 추가 전공자 결과 반환
-        lack_major, done_major, standard_id = calculate_major(student_id)
-        lack_sub_major, done_sub_major, standard_id,  = calculate_sub_major(student_id)
-        major, done_major_rest, done_sub_major_rest, done_rest = User.objects.filter(student_id = student_id).values_list('major', 'done_major_rest', 'done_sub_major_rest', 'done_rest').first()
-        standard = Standard.objects.filter(index = standard_id).first()
 
         # 의학과, 간호학과, 건축학, 건축공학 전공
         if standard.rest_standard == None:
@@ -300,13 +297,13 @@ def test_major(request):
                 'major' : major,  # 전공명
                 'subMajorType' : standard.sub_major_type,
                 'doneMajor' : done_major,  # 전공 이수 학점
-                'doneSubMajor' : done_sub_major,  # 복수/부전공 이수 학점
+                'doneSubMajor' : done_sub_major,  
                 'doneMajorRest' : done_major_rest,  # 전공 > 일선 학점
                 'doneSubMajorRest' : done_sub_major_rest,  # 복수/부전공 > 일선 학점
                 'doneRest' : done_rest,  # 일선 이수 학점 (이수구분 = 일선)
                 'totalStandard' : standard.total_standard,  # 졸업기준 총 학점
                 'majorStandard' : standard.major_standard,  # 졸업기준 전공 학점
-                'subMajorStandard' : standard.sub_major_standard,  # 졸업기준 복수/부전공 학점
+                'subMajorStandard' : standard.sub_major_standard,  
                 'essentialGEStandard' : standard.essential_GE_standatd,  # 졸업기준 교양필수 학점
                 'choiceGEStandard' : standard.choice_GE_standard,  # 졸업기준 교양선택 학점
                 'restStandard' : 0,  # 졸업기준 일선 학점
@@ -324,7 +321,7 @@ def test_major(request):
                 'doneRest' : done_rest,  # 일선 이수 학점 (이수구분 = 일선)
                 'totalStandard' : standard.total_standard,  # 졸업기준 총 학점
                 'majorStandard' : standard.major_standard,  # 졸업기준 전공 학점
-                'subMajorStandard' : standard.sub_major_standard,  # 졸업기준 복수/부전공 학점
+                'subMajorStandard' : standard.sub_major_standard,  
                 'essentialGEStandard' : standard.essential_GE_standatd,  # 졸업기준 교양필수 학점
                 'choiceGEStandard' : standard.choice_GE_standard,  # 졸업기준 교양선택 학점
                 'restStandard' : standard.rest_standard,  # 졸업기준 일선 학점
