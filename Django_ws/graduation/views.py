@@ -250,7 +250,7 @@ def test_major(request):
     student_id = data.get('student_id')
     sub_major_type = User.objects.filter(student_id = student_id).values_list('sub_major_type', flat=True)
     
-    # 복수/부전공 이수 여부
+    # 복수/부전공 이수 여부 (X)
     if sub_major_type == '':
         lack_major, done_major, standard_id = calculate_major(student_id)
         lack_sub_major, done_sub_major, standard_id,  = calculate_sub_major(student_id)

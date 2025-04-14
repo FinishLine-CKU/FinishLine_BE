@@ -111,21 +111,30 @@ def check_register(request):    # 로그인
             else:   # 졸업 검사 이력이 있다면
                 result = check_db_mydone_liber(student_id)  # 교양 부족학점
                 standard = select_graduation_standard(student_id) # 기준 가져오기
-                std = Standard.objects.filter(index = standard[-1]).first()
-                if user.done_general_rest == None:
-                    done_general_rest = 0
-                else:
-                    done_general_rest = user.done_general_rest
+                standard_id = Standard.objects.filter(index = standard[-1]).first()
                 if user.done_major_rest == None:
                     done_major_rest = 0
                 else:
                     done_major_rest = user.done_major_rest
+                if user.done_sub_major_rest == None:
+                    done_sub_major_rest = 0
+                else:
+                    done_sub_major_rest = user.done_sub_major_rest
+                if user.done_general_rest == None:
+                    done_general_rest = 0
+                else:
+                    done_general_rest = user.done_general_rest
                 if user.done_MD == None:
                     done_MD = 0
                 else:
                     done_MD = user.done_MD
-                
-                lack_rest_total = std.rest_standard - (done_general_rest + done_major_rest + done_MD)
+                if standard_id.rest_standard == None:
+                    rest_standard = 0
+                else:
+                    rest_standard = standard_id.rest_standard
+
+                lack_rest_total = rest_standard - (done_major_rest + done_sub_major_rest + done_general_rest + done_MD)
+
                 if lack_rest_total < 0:
                     lack_rest_total = 0
                 
