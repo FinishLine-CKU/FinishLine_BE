@@ -12,93 +12,13 @@ def check_db_mydone_liber(user_id):
     student_id = user_id
     year = student_id[:4]   # 학번 전처리 (년도 추출)  ex) 2020xxxx > 2020
 
-
-    ################################### 기이과목 목록 중 교양 과목 추출 (이수구분 : 교양, 교선, 교필) ###################################
-
-    # mydone_lecture_list = MyDoneLecture.objects.filter(user_id=student_id, lecture_type__in=['교양', '교선', '교필'])
-    # lectures_dict = []
-    # complete_liber_total_credit = 0
-    # complete_general_esse_credit = 0 
-    # complete_general_choice_credit = 0
-
-    # for lecture in mydone_lecture_list:
-    #     lecture_data = {
-    #         '교과목명': lecture.lecture_name,
-    #         '주제': lecture.lecture_topic,
-    #         '학점': lecture.credit
-    #     }
-    #     lectures_dict.append(lecture_data)
-
-    # for data in lectures_dict[:]:
-    #     complete_liber_total_credit += data['학점'] # 교양과목 총 이수 학점
-
-    # for data in lectures_dict[:]:
-    #     if data['주제'] in {'인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', '창의적사고와코딩', '외국어', 'MSC교과군', '철학적인간학', '신학적인간학'}:
-    #         complete_general_esse_credit += data['학점']    # 교양필수 총 이수 학점
-    #     else:
-    #         complete_general_choice_credit += data['학점']  # 교양선택 총 이수 학점
-
-    # # print(f"{user_id} 학생 {year}년도 교양 기이수과목 데이터 : ")
-    # # pprint.pprint(lectures_dict, width=80, sort_dicts=False)
-
-
-
-    ################################### 교양 교육과정 기준 학점 및 주제 추출 (18 ~ 22년도 : 트리니티 이전) ###################################
-
-    # filtered_data = liberRequire.objects.filter(연도=year).values()
-
-    # # 교양필수 주제 (18 ~ 22년도 : 트리니티 이전)
-    # ness_data = {'인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', '창의적사고와코딩', '외국어', 'MSC교과군', '철학적인간학', '신학적인간학'}
-    
-    # # 교양선택 주제 (18 ~ 22년도 : 트리니티 이전)
-    # choice_data = {'고전탐구', '사유와지혜', '가치와실천', '상상력과표현', '인문융합', '균형1', '균형2', '균형3', '균형4', '계열기초'}
-    
-    # cleaned_data = [
-    #     {key: value for key, value in item.items() if key not in ['liber_id', '연도'] and value != 0}
-    #     for item in filtered_data
-    # ]
-
-    # ness_result = [{key: value for key, value in item.items() if key in ness_data} for item in cleaned_data]
-    # choice_result = [{key: value for key, value in item.items() if key in choice_data} for item in cleaned_data]
-    
-    # ness_result = [
-    #     {key: value for key, value in item.items() if key in ness_data}
-    #     for item in cleaned_data
-    # ]
-
-    # choice_result = [
-    #     {key: value for key, value in item.items() if key in choice_data}
-    #     for item in cleaned_data
-    # ]
-
-    # for item in ness_result:
-    #     total_sum = sum(Decimal(value) for value in item.values())  
-    #     item['총합'] = total_sum 
-
-    # for item in choice_result:
-    #     total_sum = sum(Decimal(value) for value in item.values()) 
-    #     item['총합'] = total_sum 
-
-    # print("이수해야 하는 교필 기준 (주제 및 학점) : ")
-    # pprint.pprint(ness_result[:], width=80, sort_dicts=False)
-
-    # print("이수해야 하는 교선 기준 (주제 및 학점) : ")
-    # pprint.pprint(choice_result[:], width=80, sort_dicts=False)
-
-
-    ######################################################## 교필 영역 계산 ########################################################
-
-    ######################### '인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', '창의적사고와코딩' ##########################
-    #################################### '외국어', 'MSC교과군', '철학적인간학', '신학적인간학' #####################################
-
-
     #교양 이수학점 계산 및 교양 과목 추출
     lecture_dict, liber_credit = mydone_liber_get(user_id)
     lectures_dict = []
     lectures_dict = lecture_dict
-    complete_liber_total_credit = liber_credit['complete_liber_total_credit']
-    complete_general_esse_credit = liber_credit['complete_general_esse_credit']
-    complete_general_choice_credit = liber_credit['complete_general_choice_credit']
+    complete_liber_total_credit = liber_credit['done_GE']
+    complete_general_esse_credit = liber_credit['done_essential_GE']
+    complete_general_choice_credit = liber_credit['done_choice_GE']
 
     #교양 필수, 선택 영역 추출
     user_liber_result = user_liberrequire_get(year)

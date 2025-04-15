@@ -232,38 +232,47 @@ def upload_pdf(request):
 @api_view(['POST'])
 def general_check(request):
     user_id = request.data.get('user_id')
-    user_major = User.objects.filter(student_id=user_id).values('major').first() #{'major': '03300111'}
+    user_major = User.objects.filter(student_id=user_id).values('major').first()
     year = user_id[:4]
 
+
+    #18~25학년도까지 공통 함수 => 소속 단과대학, 전체 교양 과목, 사용자 교양요건 추출
+
     #소속 단과대학 추출
-    home_collage = are_you_human(user_major) #단과대학 추출 일반
+    home_collage = are_you_human(user_major)
     #전체과목 데이터 추출
-    lecture_dict, liber_credit = mydone_liber_get(user_id)
+    lecture_dict, GE_total = mydone_liber_get(user_id)
     #사용자 교양요건 추출
-    user_liber_result = user_liberrequire_get(year, home_collage)
+    user_GE_standard = user_liberrequire_get(year, home_collage)
+
+    #================================================================================
 
     #졸업요건 검사로직
+
+    #트리니티일 경우
     if (year > '2022'):
-        lecture_dict_human_result, liber_human_item, rest_total = liber_human_calculate(lecture_dict, user_liber_result)
-        # print("교양 인성 계산", lecture_dict_human_result)
-        # print("교양 인성 영역", liber_human_item)
-        print("교양 인성 일선 학점 확인", rest_total)
-        lecture_dict_fusion_result, liber_fusion_item, rest_total = GE_fusion_calculate(lecture_dict_human_result, user_liber_result, rest_total)
-        # print("교양 융합 계산", lecture_dict_fusion_result)
-        # print("교양 융합 영역", liber_fusion_item)
-        print("교양 융합 일선 학점 확인", rest_total)
+
+        #23년도부터 25년도까지 교양인성, 교양융합은 동일 함수 내에서 작동
+
+        lecture_dict_result, GE_standard_result, rest_total = liber_human_calculate(lecture_dict, user_GE_standard)
+
+        lecture_dict_result, GE_standard_result, rest_total = GE_fusion_calculate(lecture_dict_result, GE_standard_result, rest_total)
+
 
         if (year == '2023'):
-            lecture_dict_basic_result, liber_basic_item, rest_total = GE_basic_calculate_2023(lecture_dict_fusion_result, user_liber_result, home_collage, rest_total)
-            # print("교양 기초 계산", lecture_dict_basic_result)
-            # print("교양 기초 영역", liber_basic_item)
-            print("교양 기초 일선 학점 확인", rest_total)
-        else:
-            lecture_dict_basic_result, liber_basic_item, rest_total = GE_basic_calculate_2025(lecture_dict_fusion_result, user_liber_result, rest_total)
-            # print("교양 기초 계산", lecture_dict_basic_result)
-            # print("교양 기초 영역", liber_basic_item)
-            print("교양 기초일선 학점 확인", rest_total)
 
+            #23년도 교양기초일때에만 다른 연도와 분리된 함수 사용
+
+            lecture_dict_result, GE_standard_result, rest_total = GE_basic_calculate_2023(lecture_dict_result, GE_standard_result, home_collage, rest_total)
+
+        else:
+
+            #23년도가 아닐떄에는 기존 교양기초 함수 사용
+    
+            lecture_dict_result, GE_standard_result, rest_total = GE_basic_calculate_2025(lecture_dict_result, GE_standard_result, rest_total)
+
+
+    #트리니티가 아닐 경우(기존 로직)
     else:    
         result = check_db_mydone_liber(user_id) 
 
