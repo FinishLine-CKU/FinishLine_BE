@@ -72,8 +72,6 @@ def select_user_standard(student_id):
         sub_major_type = None
 
     MD_standard, rest_standard = Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values_list('MD_standard', 'rest_standard').first()
-    
-    print('소단위 전공 기준: ', MD_standard)
 
     return MD_standard, rest_standard
 
