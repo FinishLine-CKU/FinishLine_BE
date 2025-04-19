@@ -87,7 +87,7 @@ class Standard(models.Model):
     essential_GE_standatd = models.DecimalField(max_digits=4, decimal_places=1)
     choice_GE_standard = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
     rest_standard = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
-    micro_degree_credit = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
+    MD_standard = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
     
     def __str__(self):
         return self.college
