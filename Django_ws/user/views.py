@@ -105,7 +105,8 @@ def check_register(request):    # 로그인
                     "교양필수 부족 학점": None,
                     "교양선택 부족 학점": None
                 }
-                lack_rest_total = None,
+                lack_MD = None
+                lack_rest_total = None
                 lack_total = None
 
             else:   # 졸업 검사 이력이 있다면

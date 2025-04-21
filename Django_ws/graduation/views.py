@@ -272,7 +272,7 @@ def test_major(request):
         'totalStandard' : standard.total_standard,  # 졸업기준 총 학점
         'majorStandard' : standard.major_standard,  # 졸업기준 전공 학점
         'subMajorStandard' : sub_major_standard,
-        'essentialGEStandard' : standard.essential_GE_standatd,  # 졸업기준 교양필수 학점
+        'essentialGEStandard' : standard.essential_GE_standard,  # 졸업기준 교양필수 학점
         'choiceGEStandard' : standard.choice_GE_standard,  # 졸업기준 교양선택 학점
         'lackMajor' : lack_major,  # 전공 부족 학점
         'lackSubMajor' : lack_sub_major  # 복수/부전공 부족 학점
