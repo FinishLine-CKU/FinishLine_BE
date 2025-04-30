@@ -21,7 +21,7 @@ from .serializers import AllLectureDataSerializer
 from .serializers import NowLectureDataSerializer
 from .major_calculate import calculate_major
 from .sub_major_calculate import calculate_sub_major
-from .micro_degree_calculate import need_micro_degree
+from .micro_degree_calculate import calculate_lack_MD
 import io
 
 logger = logging.getLogger(__name__)
@@ -255,11 +255,6 @@ def test_major(request):
     major, done_major_rest, done_sub_major_rest, done_rest = User.objects.filter(student_id = student_id).values_list('major', 'done_major_rest', 'done_sub_major_rest', 'done_rest').first()
     standard = Standard.objects.filter(index = standard_id).first()
     sub_major_standard = standard.sub_major_standard
-    rest_standard = standard.rest_standard
-
-    # 의과대학 (일선 제거)
-    if rest_standard == None:
-        rest_standard = 0
 
     # 복수/부전공 미이수
     if sub_major_type == '':
@@ -277,9 +272,8 @@ def test_major(request):
         'totalStandard' : standard.total_standard,  # 졸업기준 총 학점
         'majorStandard' : standard.major_standard,  # 졸업기준 전공 학점
         'subMajorStandard' : sub_major_standard,
-        'essentialGEStandard' : standard.essential_GE_standatd,  # 졸업기준 교양필수 학점
+        'essentialGEStandard' : standard.essential_GE_standard,  # 졸업기준 교양필수 학점
         'choiceGEStandard' : standard.choice_GE_standard,  # 졸업기준 교양선택 학점
-        'restStandard' : rest_standard,  # 졸업기준 일선 학점
         'lackMajor' : lack_major,  # 전공 부족 학점
         'lackSubMajor' : lack_sub_major  # 복수/부전공 부족 학점
     }
@@ -290,11 +284,22 @@ def test_major(request):
 def test_micro_degree(request):
     data = request.data
     student_id = data.get('student_id')
-    result = need_micro_degree(student_id)
-    if (result == 0) or (result == None) :
-        data = {'doneMD' : 0 }
-    else:
-        data = {'doneMD' : result}
+    done_MD, done_MD_rest, MD_standard, rest_standard, lack_MD = calculate_lack_MD(student_id)
+
+    # 의과대학 (일선 제거)
+    if rest_standard == None:
+        rest_standard = 0
+
+    if done_MD == None:
+        done_MD = 0
+    
+    data = {
+        'doneMD' : done_MD,
+        'doneMDRest' : done_MD_rest,
+        'MDStandard' : MD_standard,
+        'restStandard' : rest_standard,
+        'lackMD' : lack_MD
+    }
+
     print(data)
     return Response (data)
-
