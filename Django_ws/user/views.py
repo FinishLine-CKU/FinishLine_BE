@@ -5,13 +5,8 @@ from .models import User
 from user.models import VisitorCount
 from graduation.models import Standard
 from graduation.models import MyDoneLecture
-<<<<<<< HEAD
 from graduation.GE_calculate_2018 import GE_all_calculate_notrinity
-from graduation.major_calculate import user_graduation_standard
-=======
-from graduation.liberCheck import check_db_mydone_liber
 from graduation.major_calculate import select_user_standard
->>>>>>> f5db08332a251a796365cc32fa425e04d6c73f79
 from rest_framework.response import Response
 from django.http import HttpResponse
 from datetime import timedelta, datetime, timezone
@@ -115,20 +110,10 @@ def check_register(request):    # 로그인
                 lack_total = None
 
             else:   # 졸업 검사 이력이 있다면
-<<<<<<< HEAD
                 result = GE_all_calculate_notrinity(student_id)  # 교양 부족학점
-                standard = user_graduation_standard(student_id) # 기준 가져오기
-                std = Standard.objects.filter(index = standard[-1]).first()
-                if user.done_general_rest == None:
-                    done_general_rest = 0
-                else:
-                    done_general_rest = user.done_general_rest
-=======
-                result = check_db_mydone_liber(student_id)  # 교양 부족학점
                 standard = select_user_standard(student_id) # 기준 가져오기
                 standard_id = Standard.objects.filter(index = standard[-1]).first()
 
->>>>>>> f5db08332a251a796365cc32fa425e04d6c73f79
                 if user.done_major_rest == None:
                     done_major_rest = 0
                 else:
