@@ -8,11 +8,11 @@ from io import BytesIO
 from .extract import extract_from_pdf_table
 from .extract import save_pdf_data_to_db
 from .extract import extract_major_from_pdf_table
-from .GE_calculate_2018 import GE_all_calculate_notrinity
-from .GE_calculate_trinity import get_user_GE
-from .GE_calculate_trinity import get_user_GE_standard
+from .GE_calculate import GE_all_calculate
+from .GE_calculate import get_user_GE
+from .GE_calculate import get_user_GE_standard
 from .GE_calculate_trinity import GE_humanism_calculate
-from .GE_calculate_trinity import find_user_college
+from .GE_calculate import find_user_college
 from .GE_calculate_trinity import GE_fusion_calculate
 from .GE_calculate_trinity import GE_basic_calculate_2023
 from .GE_calculate_trinity import GE_basic_calculate_2025
@@ -275,16 +275,16 @@ def general_check(request):
 
     #트리니티가 아닐 경우(기존 로직)
     else:    
-        result = GE_all_calculate_notrinity(user_id) 
+        result = GE_all_calculate(user_id) 
 
     data = {
-            '교양필수_부족_학점': result.get("교양필수 부족 학점", []),
-            '교양선택_부족_학점': result.get("교양선택 부족 학점", []), 
-            '교양필수_부족_영역': result.get("교양필수 부족 영역", []), 
-            '교양선택_부족_영역': result.get("교양선택 부족 영역", []), 
-            '교양필수_이수_학점': result.get("교양필수 이수 학점", []), 
-            '교양선택_이수_학점': result.get("교양선택 이수 학점", []), 
-            '일반선택_이수_학점': result.get("일반선택 이수 학점", []), 
+            'lackEssentialGE': result.get("lackEssentialGE", []),
+            'lackChoiceGE': result.get("lackChoiceGE", []), 
+            'lackEssentialGETopic': result.get("lackEssentialGETopic", []), 
+            'lackChoiceGETopic': result.get("lackChoiceGETopic", []), 
+            'doneEssentialGE': result.get("doneEssentialGE", []), 
+            'doneChoiceGE': result.get("doneChoiceGE", []), 
+            'doneGERest': result.get("doneGERest", []), 
     }
 
     return Response({

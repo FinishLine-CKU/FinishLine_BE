@@ -1,190 +1,6 @@
 from .models import MyDoneLecture
-from .models import liberRequire
+from .models import GEStandard
 from decimal import Decimal
-
-#사용자 소속 대학 추출
-def find_user_college(user_major):
-    human_service = ['032709*', '032708*', '032705*', '032703*', '032702*']
-    medical_collage = ['030503*', '030501*', '030502*', '032801*', '032802*', '030702*', '030704*', '030705*', '030707*', '030709*', '030710*']
-    user_home = user_major['major']
-
-    if user_home in human_service:
-        home_collage = '1' #휴먼서비스
-    elif user_home in medical_collage:
-        home_collage = '2' #의과, 헬스케어, 사범
-    else:
-        home_collage = '3' #일반
-
-    return home_collage
-
-
-#사용자 교양 이수학점 계산
-def get_user_GE(user_id):
-    student_id = user_id
-    year = student_id[:4]
-
-    mydone_lecture_list = MyDoneLecture.objects.filter(user_id=student_id, lecture_type__in=['교양', '교선', '교필'])
-    lectures_dict = []
-    done_GE = 0 #교양 총 학점 complete_liber_total_credit
-    done_humanism_GE = 0 #교양 인성 총 학점 complete_general_human_credit
-    done_basic_GE = 0 #교양 기초 총 학점 complete_general_base_credit
-    done_fusion_GE = 0 #교양 융합 총 학점 complete_general_merge_credit
-    done_essential_GE = 0 #complete_general_esse_credit
-    done_choice_GE = 0 #complete_general_choice_credit
-
-    for lecture in mydone_lecture_list:
-        lecture_data = {
-            '교과목명': lecture.lecture_name,
-            '주제': lecture.lecture_topic,
-            '학점': lecture.credit
-            }
-        lectures_dict.append(lecture_data)
-
-    for less_item in lectures_dict:
-        if less_item['주제'] == 'VERUM인성':
-            less_item['주제'] = 'VERUM캠프'
-    
-    #트리니티라면
-    if (year > '2022'):
-
-        for data in lectures_dict[:]:
-            done_GE += data['학점'] # 교양과목 총 이수 학점
-
-        for data in lectures_dict[:]:
-            if data['주제'] in {'VERUM캠프', '봉사활동', '인간학'}:
-                done_humanism_GE += data['학점']    # 교양인성 총 이수 학점
-            elif data['주제'] in {'소통', '논리적사고와글쓰기', '외국어', '디지털소통', '자기관리', '진로탐색', '창의성', '창업', '계열기초'}:
-                done_basic_GE += data['학점']  # 교양기초 총 이수 학점
-            elif data['주제'] in {'정치와경제', '심리와건강', '정보와기술', '인간과문학', '역사와사회', '철학과예술', '자연과환경', '수리와과학', '언어와문화'}:
-                done_fusion_GE += data['학점'] #교양융합 총 이수 학점
-
-        data = {"done_GE": done_GE,
-                "done_humanism_GE": done_humanism_GE, 
-                "done_basic_GE": done_basic_GE,
-                "done_fusion_GE": done_fusion_GE}
-    
-    #트리니티 이전이라면
-    else:
-
-        for data in lectures_dict[:]:
-            done_GE += data['학점'] # 교양과목 총 이수 학점
-
-        for data in lectures_dict[:]:
-            if data['주제'] in {'인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', '창의적사고와코딩', '외국어', 'MSC교과군', '철학적인간학', '신학적인간학'}:
-                done_essential_GE += data['학점']    # 교양필수 총 이수 학점
-            else:
-                done_choice_GE += data['학점']  # 교양선택 총 이수 학점
-
-        data = {
-            "done_GE": done_GE,
-            "done_essential_GE": done_essential_GE,
-            "done_choice_GE": done_choice_GE
-        }
-
-    return lectures_dict, data
-
-
-#사용자 교양요건 추출
-def get_user_GE_standard(year, home_collage):
-    filtered_data = liberRequire.objects.filter(연도=year).values()
-    if(int(year) > 2022):
-
-        #교양인성
-        if(home_collage == '1'):
-            humanism_GE_data = {'인간학'}
-        #일반대학이고 23학번이라면 트리니티아카데미를 교양 요건으로 설정한다
-        elif(home_collage == '3' and year == '2023'):
-            humanism_GE_data = {'인간학', '트리니티아카데미'}
-        else:
-            humanism_GE_data = {'인간학', '봉사활동', 'VERUM캠프'}
-
-        #교양기초
-        basic_GE_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
-
-        #교양융합
-        if(year == '2025'):
-            fusion_GE_data = {'정보활용', '창의융합', '문제해결', '융합비고'}
-        else:
-            fusion_GE_data = {'정보활용', '창의융합', '문제해결'}
-
-        cleaned_data = [
-            {key: value for key, value in item.items() if key not in ['liber_id', '연도'] and value != 0}
-            for item in filtered_data
-        ]
-        humanism_GE_standard = [{key: value for key, value in item.items() if key in humanism_GE_data} for item in cleaned_data]
-        basic_GE_standard = [{key: value for key, value in item.items() if key in basic_GE_data} for item in cleaned_data]
-        fusion_GE_standard = [{key: value for key, value in item.items() if key in fusion_GE_data} for item in cleaned_data]
-
-        humanism_GE_standard = [
-            {key: value for key, value in item.items() if key in humanism_GE_data}
-            for item in cleaned_data
-        ]
-
-        basic_GE_standard = [
-            {key: value for key, value in item.items() if key in basic_GE_data}
-            for item in cleaned_data
-        ]
-
-        fusion_GE_standard = [
-            {key: value for key, value in item.items() if key in fusion_GE_data}
-            for item in cleaned_data
-        ]
-
-        for item in humanism_GE_standard:
-            total_sum = sum(Decimal(value) for value in item.values())  
-            item['총합'] = total_sum 
-
-        for item in basic_GE_standard:
-            total_sum = sum(Decimal(value) for value in item.values()) 
-            item['총합'] = total_sum 
-
-        for item in fusion_GE_standard:
-            total_sum = sum(Decimal(value) for value in item.values()) 
-            item['총합'] = total_sum 
-
-        data = {"humanism_GE_standard": humanism_GE_standard,
-                "basic_GE_standard": basic_GE_standard,
-                "fusion_GE_standard": fusion_GE_standard}
-
-    else:
-        # 교양필수 주제 (18 ~ 22년도 : 트리니티 이전)
-        essential_GE_data = {'인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', '창의적사고와코딩', '외국어', 'MSC교과군', '철학적인간학', '신학적인간학', 'VERUM인성'}
-        
-        # 교양선택 주제 (18 ~ 22년도 : 트리니티 이전)
-        choice_GE_data = {'고전탐구', '사유와지혜', '가치와실천', '상상력과표현', '인문융합', '균형1', '균형2', '균형3', '균형4', '계열기초'}
-        
-        cleaned_data = [
-            {key: value for key, value in item.items() if key not in ['liber_id', '연도'] and value != 0}
-            for item in filtered_data
-        ]
-
-        essential_GE_standard = [{key: value for key, value in item.items() if key in essential_GE_data} for item in cleaned_data]
-        chocie_GE_standard = [{key: value for key, value in item.items() if key in choice_GE_data} for item in cleaned_data]
-        
-        essential_GE_standard = [
-            {key: value for key, value in item.items() if key in essential_GE_data}
-            for item in cleaned_data
-        ]
-
-        chocie_GE_standard = [
-            {key: value for key, value in item.items() if key in choice_GE_data}
-            for item in cleaned_data
-        ]
-
-        for item in essential_GE_standard:
-            total_sum = sum(Decimal(value) for value in item.values())  
-            item['총합'] = total_sum 
-
-        for item in chocie_GE_standard:
-            total_sum = sum(Decimal(value) for value in item.values()) 
-            item['총합'] = total_sum 
-
-        data = {"essential_GE_standard":  essential_GE_standard,
-                "chocie_GE_standard": chocie_GE_standard}
-
-    print("교양요건 추출", data)
-    return data
-
 
 #교양 인성 계산
 def GE_humanism_calculate(lecture_dict, user_GE_standard):
@@ -281,7 +97,6 @@ def GE_humanism_calculate(lecture_dict, user_GE_standard):
 
     print("DEF 교양 인성 일선 확인", rest_total)
     return lectures_dict, user_GE_standard, rest_total
-
 
 #교양 융합 계산
 def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total):
@@ -744,7 +559,6 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total):
     delete_items = []
     print("DEF교양 융합 일선 확인", rest_total)
     return lectures_dict, user_GE_standard, rest_total
-
 
 #23년도 교양 기초 계산
 def GE_basic_calculate_2023(lecture_dict, user_GE_standard, home_collage, rest_total):
