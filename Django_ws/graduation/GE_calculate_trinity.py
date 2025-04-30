@@ -3,7 +3,7 @@ from .models import liberRequire
 from decimal import Decimal
 
 #사용자 소속 대학 추출
-def are_you_human(user_major):
+def find_user_college(user_major):
     human_service = ['032709*', '032708*', '032705*', '032703*', '032702*']
     medical_collage = ['030503*', '030501*', '030502*', '032801*', '032802*', '030702*', '030704*', '030705*', '030707*', '030709*', '030710*']
     user_home = user_major['major']
@@ -19,7 +19,7 @@ def are_you_human(user_major):
 
 
 #사용자 교양 이수학점 계산
-def mydone_liber_get(user_id):
+def get_user_GE(user_id):
     student_id = user_id
     year = student_id[:4]
 
@@ -85,7 +85,7 @@ def mydone_liber_get(user_id):
 
 
 #사용자 교양요건 추출
-def user_liberrequire_get(year, home_collage):
+def get_user_GE_standard(year, home_collage):
     filtered_data = liberRequire.objects.filter(연도=year).values()
     if(int(year) > 2022):
 
@@ -187,7 +187,7 @@ def user_liberrequire_get(year, home_collage):
 
 
 #교양 인성 계산
-def liber_human_calculate(lecture_dict, user_GE_standard):
+def GE_humanism_calculate(lecture_dict, user_GE_standard):
     lectures_dict = [] #매개변수 담을 리스트
     user_GE_standard = user_GE_standard['humanism_GE_standard'] #[{'인간학': Decimal('4.0'), '트리니티아카데미': Decimal('2.0'), '총합': Decimal('6.0')}]
     lectures_dict = lecture_dict #기이수 과목목록

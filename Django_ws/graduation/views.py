@@ -8,14 +8,14 @@ from io import BytesIO
 from .extract import extract_from_pdf_table
 from .extract import save_pdf_data_to_db
 from .extract import extract_major_from_pdf_table
-from .liberCheck import check_db_mydone_liber
-from .liber_calculate import mydone_liber_get
-from .liber_calculate import user_liberrequire_get
-from .liber_calculate import liber_human_calculate
-from .liber_calculate import are_you_human
-from .liber_calculate import GE_fusion_calculate
-from .liber_calculate import GE_basic_calculate_2023
-from .liber_calculate import GE_basic_calculate_2025
+from .GE_calculate_2018 import GE_all_calculate_notrinity
+from .GE_calculate_trinity import get_user_GE
+from .GE_calculate_trinity import get_user_GE_standard
+from .GE_calculate_trinity import GE_humanism_calculate
+from .GE_calculate_trinity import find_user_college
+from .GE_calculate_trinity import GE_fusion_calculate
+from .GE_calculate_trinity import GE_basic_calculate_2023
+from .GE_calculate_trinity import GE_basic_calculate_2025
 import logging
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
@@ -239,11 +239,11 @@ def general_check(request):
     #18~25학년도까지 공통 함수 => 소속 단과대학, 전체 교양 과목, 사용자 교양요건 추출
 
     #소속 단과대학 추출
-    home_collage = are_you_human(user_major)
+    home_collage = find_user_college(user_major)
     #전체과목 데이터 추출
-    lecture_dict, GE_total = mydone_liber_get(user_id)
+    lecture_dict, GE_total = get_user_GE(user_id)
     #사용자 교양요건 추출
-    user_GE_standard = user_liberrequire_get(year, home_collage)
+    user_GE_standard = get_user_GE_standard(year, home_collage)
 
     #================================================================================
 
@@ -254,7 +254,7 @@ def general_check(request):
 
         #23년도부터 25년도까지 교양인성, 교양융합은 동일 함수 내에서 작동
 
-        lecture_dict_result, GE_standard_result, rest_total = liber_human_calculate(lecture_dict, user_GE_standard)
+        lecture_dict_result, GE_standard_result, rest_total = GE_humanism_calculate(lecture_dict, user_GE_standard)
 
         lecture_dict_result, GE_standard_result, rest_total = GE_fusion_calculate(lecture_dict_result, GE_standard_result, rest_total)
 
@@ -274,7 +274,7 @@ def general_check(request):
 
     #트리니티가 아닐 경우(기존 로직)
     else:    
-        result = check_db_mydone_liber(user_id) 
+        result = GE_all_calculate_notrinity(user_id) 
 
     data = {
             '교양필수_부족_학점': result.get("교양필수 부족 학점", []),

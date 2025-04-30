@@ -5,15 +5,15 @@ from user.models import User
 from .models import MyDoneLecture
 from graduation.models import Standard
 from .models import liberRequire
-from .liber_calculate import mydone_liber_get
-from .liber_calculate import user_liberrequire_get
+from .GE_calculate_trinity import get_user_GE
+from .GE_calculate_trinity import get_user_GE_standard
 
-def check_db_mydone_liber(user_id):
+def GE_all_calculate_notrinity(user_id):
     student_id = user_id
     year = student_id[:4]   # 학번 전처리 (년도 추출)  ex) 2020xxxx > 2020
 
     #교양 이수학점 계산 및 교양 과목 추출
-    lecture_dict, liber_credit = mydone_liber_get(user_id)
+    lecture_dict, liber_credit = get_user_GE(user_id)
     lectures_dict = []
     lectures_dict = lecture_dict
     complete_liber_total_credit = liber_credit['done_GE']
@@ -21,7 +21,7 @@ def check_db_mydone_liber(user_id):
     complete_general_choice_credit = liber_credit['done_choice_GE']
 
     #교양 필수, 선택 영역 추출
-    user_liber_result = user_liberrequire_get(year)
+    user_liber_result = get_user_GE_standard(year)
     ness_result = user_liber_result['ness_result']
     choice_result = user_liber_result['choice_result']
     
