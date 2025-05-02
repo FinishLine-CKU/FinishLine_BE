@@ -1,5 +1,8 @@
-from .models import MyDoneLecture
-from .models import GEStandard
+from user.models import User
+from .GE_calculate import get_user_GE
+from .GE_calculate import get_user_GE_standard
+from .GE_calculate import find_user_college
+from .GE_calculate import calculate_and_save_standard
 from decimal import Decimal
 
 #교양 인성 계산
@@ -16,7 +19,6 @@ def GE_humanism_calculate(lecture_dict, user_GE_standard):
     for needcheck in lectures_dict[:]:
         lecture_topic = needcheck['주제']
         lecture_credit = Decimal(needcheck['학점'])
-        print("DEF 교양 인성 과목 검수 하는 순서", needcheck)
 
         for GE_standard in user_GE_standard:
             if lecture_topic in GE_standard:
@@ -95,7 +97,6 @@ def GE_humanism_calculate(lecture_dict, user_GE_standard):
             lectures_dict.remove(item)
     delete_items = []
 
-    print("DEF 교양 인성 일선 확인", rest_total)
     return lectures_dict, user_GE_standard, rest_total
 
 #교양 융합 계산
@@ -124,7 +125,6 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total):
 
         #각 영역이 사용자가 들은 과목에 들어가 있다면 해당 영역의 교양요건 계산 (정보활용)
         if lecture_topic in ["정치와경제"]:
-            print("DEF 교양 융합 정보활용-정치와경제", needcheck)
 
             #해당 주제 stack에 값이 들어갔는지를 확인
             if len(stack_economy) == 0:
@@ -158,7 +158,6 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total):
                     continue
 
         if lecture_topic in ["심리와건강"]:
-            print("DEF 교양 융합 정보활용-심리와건강", needcheck)
 
             if len(stack_health) == 0:
                 stack_health.append(1)
@@ -190,7 +189,6 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total):
                     continue
 
         if lecture_topic in ["정보와기술"]:
-            print("DEF 교양 융합 정보활용-정보와기술", needcheck)
 
             if len(stack_tech) == 0:
                 stack_tech.append(1)
@@ -232,7 +230,6 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total):
         lecture_credit = Decimal(needcheck['학점'])
 
         if lecture_topic in ["인간과문학"]:
-            print("DEF 교양 융합 정보활용", needcheck)
 
             if len(stack_lit) == 0:
                 stack_lit.append(1)
@@ -264,7 +261,6 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total):
                     continue
 
         if lecture_topic in ["역사와사회"]:
-            print("DEF 교양 융합 정보활용", needcheck)
 
             if len(stack_society) == 0:
                 stack_society.append(1)
@@ -296,7 +292,6 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total):
                     continue
 
         if lecture_topic in ["철학과예술"]:
-            print("DEF 교양 융합 정보활용", needcheck)
 
             if len(stack_art) == 0:
                 stack_art.append(1)
@@ -338,7 +333,6 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total):
         lecture_credit = Decimal(needcheck['학점'])
 
         if lecture_topic in ["자연과환경"]:
-            print("DEF 교양 융합 정보활용", needcheck)
 
             if len(stack_env) == 0:
                 stack_env.append(1)
@@ -370,7 +364,6 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total):
                     continue
 
         if lecture_topic in ["수리와과학"]:
-            print("DEF 교양 융합 정보활용", needcheck)
 
             if len(stack_science) == 0:
                 stack_science.append(1)
@@ -402,7 +395,6 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total):
                     continue
 
         if lecture_topic in ["언어와문화"]:
-            print("DEF 교양 융합 정보활용", needcheck)
 
             if len(stack_culture) == 0:
                 stack_culture.append(1)
@@ -709,11 +701,23 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, home_collage, rest_t
             if lecture_topic in ["진로탐색"]:
 
                 if len(stack_search) == 0:
-                    stack_search.append(1)
+                    if lecture_credit == 2:
+                        stack_search.append(1)
+                        stack_search.append(1)
+                    else:
+                        stack_search.append(1)
                 elif len(stack_search) == 1:
-                    stack_search.append(1)
+                    if lecture_credit == 2:
+                        stack_search.append(1)
+                        stack_search.append(1)
+                    else:
+                        stack_search.append(1)
                 elif len(stack_search) == 2:
-                    stack_search.append(1)
+                    if lecture_credit == 2:
+                        stack_search.append(1)
+                        stack_search.append(1)
+                    else:
+                        stack_search.append(1)
                 else:
                     continue
 
@@ -954,8 +958,7 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, home_collage, rest_t
                 lectures_dict.remove(item)
         delete_items = []
 
-    print("일선 확인", rest_total)
-    return lectures_dict, user_GE_standard, rest_total
+    return lectures_dict, user_GE_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search
 
 #24, 25년도 교양 기초 계산
 def GE_basic_calculate_2025(lecture_dict, user_GE_standard, rest_total):
@@ -1260,5 +1263,167 @@ def GE_basic_calculate_2025(lecture_dict, user_GE_standard, rest_total):
             lectures_dict.remove(item)
     delete_items = []
 
-    print("일선 계산확인", rest_total)
     return lectures_dict, user_GE_standard, rest_total
+
+#일반선택 학점, 교양 이수 학점 계산 후 result로 전달
+def rest_and_done_calculate(GE_total, lecture_dict_result, rest_total):
+    done_humanism_GE = GE_total['done_humanism_GE']
+    done_basic_GE = GE_total['done_basic_GE']
+    done_fusion_GE = GE_total['done_fusion_GE']
+
+    #일선학점 계산
+    rest_total_last = Decimal('0.0')
+    for item in lecture_dict_result:
+        rest_total_last += item['학점']
+
+    rest_total_credit = rest_total_last + rest_total
+
+    return done_humanism_GE, done_basic_GE, done_fusion_GE, rest_total_credit
+
+#교양 부족학점, 부족 영역 계산
+def lack_GE_calculate(GE_humansim_standard, GE_fusion_standard, GE_basic_standard):
+    lack_GE_humansim_total = GE_humansim_standard[0]['총합']
+    lack_GE_fusion_total = GE_fusion_standard[0]['총합']
+    lack_GE_basic_total = GE_basic_standard[0]['총합']
+
+    return lack_GE_humansim_total, lack_GE_fusion_total, lack_GE_basic_total
+
+#트리티니 교양 계산 컨트롤타워
+def GE_trinity_calculate(user_id):
+    year = user_id[:4]
+
+    user_major = User.objects.filter(student_id=user_id).values('major').first()
+
+    #18~25학년도까지 공통 함수 => 소속 단과대학, 전체 교양 과목, 사용자 교양요건 추출
+
+    #소속 단과대학 추출
+    home_collage = find_user_college(user_major)
+    #전체과목 데이터 추출
+    lecture_dict, GE_total = get_user_GE(user_id)
+    #사용자 교양요건 추출
+    user_GE_standard = get_user_GE_standard(year, home_collage)
+        
+    lecture_dict_result, GE_humansim_standard, rest_total = GE_humanism_calculate(lecture_dict, user_GE_standard)
+    lecture_dict_result, GE_fusion_standard, rest_total = GE_fusion_calculate(lecture_dict_result, user_GE_standard, rest_total)
+
+
+    if (year == '2023'):
+        #23년도 교양기초일때에만 다른 연도와 분리된 함수 사용
+        lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search = GE_basic_calculate_2023(lecture_dict_result, user_GE_standard, home_collage, rest_total)
+
+    else:
+        #23년도가 아닐떄에는 기존 교양기초 함수 사용
+        lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search = GE_basic_calculate_2025(lecture_dict_result, user_GE_standard, rest_total)
+        
+    #일반선택 학점 및 교양 이수 학점 계산
+    done_humanism_GE, done_basic_GE, done_fusion_GE, rest_total = rest_and_done_calculate(GE_total, lecture_dict_result, rest_total)
+
+    #교양 부족 학점
+    lack_GE_humansim_total, lack_GE_fusion_total, lack_GE_basic_total = lack_GE_calculate(GE_humansim_standard, GE_fusion_standard, GE_basic_standard)
+
+    lack_GE_humansim_topic = GE_humansim_standard[0]
+    lack_GE_fusion_topic = GE_fusion_standard[0]
+    lack_GE_basic_topic = GE_basic_standard[0]
+
+    #총합 제거
+    lack_GE_humansim_topic.pop('총합')
+    lack_GE_fusion_topic.pop('총합')
+    lack_GE_basic_topic.pop('총합')
+
+    #교양 기초 소분류 제목으로 변경
+    changed_lack_GE_basic_topic = {}
+    for key in lack_GE_basic_topic:
+        if '자기관리' in key:
+    
+            if year == '2023':
+                 #23학번 일반학과
+                if home_collage == '3':
+                    new_key = '진로, 창의, 창업'
+                    excluded = []
+
+                    if len(stack_search) == 2:
+                        excluded.append('진로')
+                    if len(stack_creative) == 1:
+                        excluded.append('창의')
+                    if len(stack_startup) == 1:
+                        excluded.append('창업')
+                    
+                    topic = ['진로', '창의', '창업']
+                    topic = [t for t in topic if t not in excluded]
+                    new_key = ', '.join(topic)
+
+                #23학번 휴먼서비스, 의과대학
+                else:
+                    new_key = '진로, 창의, 창업, 계열기초'
+                    excluded = []
+
+                    if len(stack_search) == 2:
+                        excluded.append('진로')
+                    if len(stack_creative) == 1:
+                        excluded.append('창의')
+                    if len(stack_startup) == 1:
+                        excluded.append('창업')
+                    if len(stack_major_base) == 2:
+                        excluded.append('계열기초')
+                    
+                    topic = ['진로', '창의', '창업', '계열기초']
+                    topic = [t for t in topic if t not in excluded]
+                    new_key = ', '.join(topic)
+
+            #24, 25학번
+            else:
+                    new_key = '진로, 창의, 창업, 계열기초'
+                    excluded = []
+
+                    if len(stack_search) == 2:
+                        excluded.append('진로')
+                    if len(stack_creative) == 1:
+                        excluded.append('창의')
+                    if len(stack_startup) == 1:
+                        excluded.append('창업')
+                    if len(stack_major_base) == 1:
+                        excluded.append('계열기초')
+                    
+                    topic = ['진로', '창의', '창업', '계열기초']
+                    topic = [t for t in topic if t not in excluded]
+                    new_key = ', '.join(topic)
+
+            changed_lack_GE_basic_topic[new_key] = lack_GE_basic_topic[key]
+        else:
+            changed_lack_GE_basic_topic[key] = lack_GE_basic_topic[key]
+
+    #교양 융합 소분류 제목으로 변경
+    lack_GE_choice_topic = {}
+    for key in lack_GE_fusion_topic:
+        if '정보활용' in key:
+            lack_GE_choice_topic['정치와경제, 심리와건강, 정보와기술'] = lack_GE_fusion_topic[key]
+        elif '창의융합' in key:
+            lack_GE_choice_topic['인간과문학, 역사와사회, 철학과예술'] = lack_GE_fusion_topic[key]
+        elif '문제해결' in key:
+            lack_GE_choice_topic['자연과환경, 수리와과학, 언어와문화'] = lack_GE_fusion_topic[key]
+
+    #교양 인성, 기초 => 교양 필수로 병합
+    lack_GE_essential_topic = lack_GE_humansim_topic | changed_lack_GE_basic_topic
+
+
+    #DB에 저장할 교양 이수 학점, 교양 부족 학점, 일반선택 학점, 학번번
+    done_GE = GE_total['done_GE']
+    lack_total_GE = lack_GE_humansim_total + lack_GE_basic_total + lack_GE_fusion_total
+
+    #DB에 저장
+    calculate_and_save_standard(done_GE, lack_total_GE, rest_total, user_id)
+
+    data = {
+            'lackEssentialGE': lack_GE_humansim_total + lack_GE_basic_total,
+            'lackChoiceGE': lack_GE_fusion_total, 
+
+            'lackEssentialGETopic': lack_GE_essential_topic, 
+            'lackChoiceGETopic': lack_GE_choice_topic, 
+
+            'doneEssentialGE': done_humanism_GE + done_basic_GE, 
+            'doneChoiceGE': done_fusion_GE, 
+
+            'doneGERest': rest_total, 
+    }
+
+    return data

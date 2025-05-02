@@ -51,7 +51,7 @@ class MyDoneLecture(models.Model):
     
 #교양 요건 연도별 기준표
 class GEStandard(models.Model):
-    liber_id = models.AutoField(primary_key=True)
+    GEStandard_id = models.AutoField(primary_key=True)
     연도 = models.CharField(max_length=5, blank=True, null=True)
     인간학 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
     봉사활동 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 

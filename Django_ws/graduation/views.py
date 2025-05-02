@@ -9,13 +9,7 @@ from .extract import extract_from_pdf_table
 from .extract import save_pdf_data_to_db
 from .extract import extract_major_from_pdf_table
 from .GE_calculate import GE_all_calculate
-from .GE_calculate import get_user_GE
-from .GE_calculate import get_user_GE_standard
-from .GE_calculate_trinity import GE_humanism_calculate
-from .GE_calculate import find_user_college
-from .GE_calculate_trinity import GE_fusion_calculate
-from .GE_calculate_trinity import GE_basic_calculate_2023
-from .GE_calculate_trinity import GE_basic_calculate_2025
+from .GE_calculate_trinity import GE_trinity_calculate
 import logging
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
@@ -233,18 +227,7 @@ def upload_pdf(request):
 @api_view(['POST'])
 def general_check(request):
     user_id = request.data.get('user_id')
-    user_major = User.objects.filter(student_id=user_id).values('major').first()
     year = user_id[:4]
-
-
-    #18~25학년도까지 공통 함수 => 소속 단과대학, 전체 교양 과목, 사용자 교양요건 추출
-
-    #소속 단과대학 추출
-    home_collage = find_user_college(user_major)
-    #전체과목 데이터 추출
-    lecture_dict, GE_total = get_user_GE(user_id)
-    #사용자 교양요건 추출
-    user_GE_standard = get_user_GE_standard(year, home_collage)
 
     #================================================================================
 
@@ -252,40 +235,31 @@ def general_check(request):
 
     #트리니티일 경우
     if (year > '2022'):
+        result = GE_trinity_calculate(user_id)
 
-        #23년도부터 25년도까지 교양인성, 교양융합은 동일 함수 내에서 작동
-
-        lecture_dict_result, GE_standard_result, rest_total = GE_humanism_calculate(lecture_dict, user_GE_standard)
-
-        lecture_dict_result, GE_standard_result, rest_total = GE_fusion_calculate(lecture_dict_result, GE_standard_result, rest_total)
-
-
-        if (year == '2023'):
-
-            #23년도 교양기초일때에만 다른 연도와 분리된 함수 사용
-
-            lecture_dict_result, GE_standard_result, rest_total = GE_basic_calculate_2023(lecture_dict_result, GE_standard_result, home_collage, rest_total)
-
-        else:
-
-            #23년도가 아닐떄에는 기존 교양기초 함수 사용
-    
-            lecture_dict_result, GE_standard_result, rest_total = GE_basic_calculate_2025(lecture_dict_result, GE_standard_result, rest_total)
-
+        data = {
+                'lackEssentialGE': result.get("lackEssentialGE", []),
+                'lackChoiceGE': result.get("lackChoiceGE", []), 
+                'lackEssentialGETopic': result.get("lackEssentialGETopic", []), 
+                'lackChoiceGETopic': result.get("lackChoiceGETopic", []), 
+                'doneEssentialGE': result.get("doneEssentialGE", []), 
+                'doneChoiceGE': result.get("doneChoiceGE", []), 
+                'doneGERest': result.get("doneGERest", []), 
+        }
 
     #트리니티가 아닐 경우(기존 로직)
     else:    
         result = GE_all_calculate(user_id) 
 
-    data = {
-            'lackEssentialGE': result.get("lackEssentialGE", []),
-            'lackChoiceGE': result.get("lackChoiceGE", []), 
-            'lackEssentialGETopic': result.get("lackEssentialGETopic", []), 
-            'lackChoiceGETopic': result.get("lackChoiceGETopic", []), 
-            'doneEssentialGE': result.get("doneEssentialGE", []), 
-            'doneChoiceGE': result.get("doneChoiceGE", []), 
-            'doneGERest': result.get("doneGERest", []), 
-    }
+        data = {
+                'lackEssentialGE': result.get("lackEssentialGE", []),
+                'lackChoiceGE': result.get("lackChoiceGE", []), 
+                'lackEssentialGETopic': result.get("lackEssentialGETopic", []), 
+                'lackChoiceGETopic': result.get("lackChoiceGETopic", []), 
+                'doneEssentialGE': result.get("doneEssentialGE", []), 
+                'doneChoiceGE': result.get("doneChoiceGE", []), 
+                'doneGERest': result.get("doneGERest", []), 
+        }
 
     return Response({
         'message': 'Files processed successfully',

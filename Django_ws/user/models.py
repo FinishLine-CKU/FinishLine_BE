@@ -15,7 +15,7 @@ class User(models.Model):
     lack_GE = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     lack_sub_major = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     lack_MD = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
-    need_rest = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
+    lack_rest = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_major = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_GE = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_GE_rest = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)

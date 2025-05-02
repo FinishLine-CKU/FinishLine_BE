@@ -1,15 +1,13 @@
-import pprint
 from django.db import IntegrityError
 from decimal import Decimal
 from user.models import User
 from .models import MyDoneLecture
-from graduation.models import Standard
 from .models import GEStandard
 
 #사용자 소속 대학 추출
 def find_user_college(user_major):
-    human_service = ['032709*', '032708*', '032705*', '032703*', '032702*']
-    medical_collage = ['030503*', '030501*', '030502*', '032801*', '032802*', '030702*', '030704*', '030705*', '030707*', '030709*', '030710*']
+    human_service = ['032709*', '032708*', '032705*', '032703*', '032702*', '032710*'] #휴먼서비스
+    medical_collage = ['030503*', '030501*', '030502*', '032801*', '032802*', '030702*', '030701*', '030704*', '030705*', '030707*', '030709*', '030710*'] #의과, 헬스케어, 사범
     user_home = user_major['major']
 
     if user_home in human_service:
@@ -100,8 +98,13 @@ def get_user_GE_standard(year, home_collage):
         else:
             humanism_GE_data = {'인간학', '봉사활동', 'VERUM캠프'}
 
-        #교양기초
-        basic_GE_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
+        if (home_collage != '3' and year == '2023'):
+            filtered_data = GEStandard.objects.filter(연도='2023B').values()
+            #교양기초
+            basic_GE_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
+        elif (home_collage == '3' and year == '2023'):
+            #교양기초
+            basic_GE_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
 
         #교양융합
         if(year == '2025'):
