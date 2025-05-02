@@ -98,11 +98,14 @@ def get_user_GE_standard(year, home_college):
         else:
             humanism_GE_data = {'인간학', '봉사활동', 'VERUM캠프'}
 
-        if (home_college != 'regular' and year == '2023'):
+        basic_GE_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
+
+        if (home_college == 'human_service' and year == '2023'):
             filtered_data = GEStandard.objects.filter(연도='2023B').values()
             #교양기초
             basic_GE_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
-        elif (home_college == 'regular' and year == '2023'):
+        elif (home_college == 'medical_collage' and year == '2023'):
+            filtered_data = GEStandard.objects.filter(연도='2023B').values()
             #교양기초
             basic_GE_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
 
@@ -113,7 +116,7 @@ def get_user_GE_standard(year, home_college):
             fusion_GE_data = {'정보활용', '창의융합', '문제해결'}
 
         cleaned_data = [
-            {key: value for key, value in item.items() if key not in ['liber_id', '연도'] and value != 0}
+            {key: value for key, value in item.items() if key not in ['GEStandard_id', '연도'] and value != 0}
             for item in filtered_data
         ]
         humanism_GE_standard = [{key: value for key, value in item.items() if key in humanism_GE_data} for item in cleaned_data]
