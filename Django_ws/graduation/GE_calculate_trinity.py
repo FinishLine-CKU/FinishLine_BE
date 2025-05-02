@@ -433,7 +433,6 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total):
     #각 영역이 사용자가 들은 과목에 들어가 있다면 해당 영역의 교양요건 계산 (융합비고) => 교양 요건에 융합비고가 있는 경우에만 작동
     for GE_standard in user_GE_standard:
         if '융합비고' in GE_standard:
-            print("융합비고 들어왔는지")
 
             stack_info = []
             stack_fusion = []
@@ -447,7 +446,6 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total):
 
                     if len(stack_info) == 0:
                         stack_info.append(1)
-                        print("DEF 교양 융합 융합비고", needcheck)
                     else:
                         continue
 
@@ -549,7 +547,7 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total):
         if item in lectures_dict:
             lectures_dict.remove(item)
     delete_items = []
-    print("DEF교양 융합 일선 확인", rest_total)
+
     return lectures_dict, user_GE_standard, rest_total
 
 #23년도 교양 기초 계산
@@ -1276,9 +1274,9 @@ def rest_and_done_calculate(GE_total, lecture_dict_result, rest_total):
     for item in lecture_dict_result:
         rest_total_last += item['학점']
 
-    rest_total_credit = rest_total_last + rest_total
+    rest_total_topic = rest_total_last + rest_total
 
-    return done_humanism_GE, done_basic_GE, done_fusion_GE, rest_total_credit
+    return done_humanism_GE, done_basic_GE, done_fusion_GE, rest_total_topic
 
 #교양 부족학점, 부족 영역 계산
 def lack_GE_calculate(GE_humansim_standard, GE_fusion_standard, GE_basic_standard):
@@ -1304,19 +1302,21 @@ def GE_trinity_calculate(user_id):
     user_GE_standard = get_user_GE_standard(year, home_collage)
         
     lecture_dict_result, GE_humansim_standard, rest_total = GE_humanism_calculate(lecture_dict, user_GE_standard)
+
     lecture_dict_result, GE_fusion_standard, rest_total = GE_fusion_calculate(lecture_dict_result, user_GE_standard, rest_total)
 
 
     if (year == '2023'):
         #23년도 교양기초일때에만 다른 연도와 분리된 함수 사용
         lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search = GE_basic_calculate_2023(lecture_dict_result, user_GE_standard, home_collage, rest_total)
-
     else:
         #23년도가 아닐떄에는 기존 교양기초 함수 사용
         lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search = GE_basic_calculate_2025(lecture_dict_result, user_GE_standard, rest_total)
-        
     #일반선택 학점 및 교양 이수 학점 계산
-    done_humanism_GE, done_basic_GE, done_fusion_GE, rest_total = rest_and_done_calculate(GE_total, lecture_dict_result, rest_total)
+    done_humanism_GE, done_basic_GE, done_fusion_GE, rest_total_topic = rest_and_done_calculate(GE_total, lecture_dict_result, rest_total)
+
+    #최종 일반선택 학점 = 로직 후 일반선택 학점 + 남은 교양과목 총합
+    rest_total = rest_total_topic
 
     #교양 부족 학점
     lack_GE_humansim_total, lack_GE_fusion_total, lack_GE_basic_total = lack_GE_calculate(GE_humansim_standard, GE_fusion_standard, GE_basic_standard)
@@ -1337,7 +1337,7 @@ def GE_trinity_calculate(user_id):
     
             if year == '2023':
                  #23학번 일반학과
-                if home_collage == '3':
+                if home_collage == 'regular':
                     new_key = '진로, 창의, 창업'
                     excluded = []
 
@@ -1393,20 +1393,20 @@ def GE_trinity_calculate(user_id):
             changed_lack_GE_basic_topic[key] = lack_GE_basic_topic[key]
 
     #교양 융합 소분류 제목으로 변경
-    lack_GE_choice_topic = {}
+    changed_lack_GE_fusion_topic = {}
     for key in lack_GE_fusion_topic:
         if '정보활용' in key:
-            lack_GE_choice_topic['정치와경제, 심리와건강, 정보와기술'] = lack_GE_fusion_topic[key]
+            changed_lack_GE_fusion_topic['정치와경제, 심리와건강, 정보와기술'] = lack_GE_fusion_topic[key]
         elif '창의융합' in key:
-            lack_GE_choice_topic['인간과문학, 역사와사회, 철학과예술'] = lack_GE_fusion_topic[key]
+            changed_lack_GE_fusion_topic['인간과문학, 역사와사회, 철학과예술'] = lack_GE_fusion_topic[key]
         elif '문제해결' in key:
-            lack_GE_choice_topic['자연과환경, 수리와과학, 언어와문화'] = lack_GE_fusion_topic[key]
+            changed_lack_GE_fusion_topic['자연과환경, 수리와과학, 언어와문화'] = lack_GE_fusion_topic[key]
 
     #교양 인성, 기초 => 교양 필수로 병합
-    lack_GE_essential_topic = lack_GE_humansim_topic | changed_lack_GE_basic_topic
+    lack_GE_essential_topic = lack_GE_humansim_topic | changed_lack_GE_basic_topic | changed_lack_GE_fusion_topic
 
 
-    #DB에 저장할 교양 이수 학점, 교양 부족 학점, 일반선택 학점, 학번번
+    #DB에 저장할 교양 이수 학점, 교양 부족 학점, 일반선택 학점, 학번
     done_GE = GE_total['done_GE']
     lack_total_GE = lack_GE_humansim_total + lack_GE_basic_total + lack_GE_fusion_total
 
@@ -1414,14 +1414,14 @@ def GE_trinity_calculate(user_id):
     calculate_and_save_standard(done_GE, lack_total_GE, rest_total, user_id)
 
     data = {
-            'lackEssentialGE': lack_GE_humansim_total + lack_GE_basic_total,
-            'lackChoiceGE': lack_GE_fusion_total, 
+            'lackEssentialGE': lack_total_GE,
+            'lackChoiceGE': None, 
 
             'lackEssentialGETopic': lack_GE_essential_topic, 
-            'lackChoiceGETopic': lack_GE_choice_topic, 
+            'lackChoiceGETopic': None, 
 
-            'doneEssentialGE': done_humanism_GE + done_basic_GE, 
-            'doneChoiceGE': done_fusion_GE, 
+            'doneEssentialGE': done_humanism_GE + done_basic_GE + done_fusion_GE, 
+            'doneChoiceGE': None, 
 
             'doneGERest': rest_total, 
     }

@@ -11,13 +11,13 @@ def find_user_college(user_major):
     user_home = user_major['major']
 
     if user_home in human_service:
-        home_collage = '1' #휴먼서비스
+        home_college = 'human_service' #휴먼서비스
     elif user_home in medical_collage:
-        home_collage = '2' #의과, 헬스케어, 사범
+        home_college = 'medical_collage' #의과, 헬스케어, 사범
     else:
-        home_collage = '3' #일반
+        home_college = 'regular' #일반
 
-    return home_collage
+    return home_college
 
 #사용자 교양 이수학점 계산
 def get_user_GE(user_id):
@@ -85,24 +85,24 @@ def get_user_GE(user_id):
     return lectures_dict, data
 
 #사용자 교양요건 추출
-def get_user_GE_standard(year, home_collage):
+def get_user_GE_standard(year, home_college):
     filtered_data = GEStandard.objects.filter(연도=year).values()
     if(int(year) > 2022):
 
         #교양인성
-        if(home_collage == '1'):
+        if(home_college == 'human_service'):
             humanism_GE_data = {'인간학'}
         #일반대학이고 23학번이라면 트리니티아카데미를 교양 요건으로 설정한다
-        elif(home_collage == '3' and year == '2023'):
+        elif(home_college == 'regular' and year == '2023'):
             humanism_GE_data = {'인간학', '트리니티아카데미'}
         else:
             humanism_GE_data = {'인간학', '봉사활동', 'VERUM캠프'}
 
-        if (home_collage != '3' and year == '2023'):
+        if (home_college != 'regular' and year == '2023'):
             filtered_data = GEStandard.objects.filter(연도='2023B').values()
             #교양기초
             basic_GE_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
-        elif (home_collage == '3' and year == '2023'):
+        elif (home_college == 'regular' and year == '2023'):
             #교양기초
             basic_GE_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
 
@@ -761,8 +761,8 @@ def calculate_and_save_standard(done_GE, lack_total_GE, rest_total, student_id):
             raise ValueError("user_id와 student_id가 일치하지 않습니다.")
         
         user.done_GE = done_GE
-        user.lack_GE = lack_total_GE
-        user.done_GE_rest = rest_total
+        user.lack_GE = lack_total_GE #부족한 교양 학점
+        user.done_GE_rest = rest_total #교양 이수 일선 넘어가는 학점
 
         
         user.save()
