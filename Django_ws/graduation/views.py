@@ -237,29 +237,19 @@ def general_check(request):
     if (year > '2022'):
         result = GE_trinity_calculate(user_id)
 
-        data = {
-                'lackEssentialGE': result.get("lackEssentialGE", []),
-                'lackChoiceGE': result.get("lackChoiceGE", []), 
-                'lackEssentialGETopic': result.get("lackEssentialGETopic", []), 
-                'lackChoiceGETopic': result.get("lackChoiceGETopic", []), 
-                'doneEssentialGE': result.get("doneEssentialGE", []), 
-                'doneChoiceGE': result.get("doneChoiceGE", []), 
-                'doneGERest': result.get("doneGERest", []), 
-        }
-
     #트리니티가 아닐 경우(기존 로직)
     else:    
         result = GE_all_calculate(user_id) 
 
-        data = {
-                'lackEssentialGE': result.get("lackEssentialGE", []),
-                'lackChoiceGE': result.get("lackChoiceGE", []), 
-                'lackEssentialGETopic': result.get("lackEssentialGETopic", []), 
-                'lackChoiceGETopic': result.get("lackChoiceGETopic", []), 
-                'doneEssentialGE': result.get("doneEssentialGE", []), 
-                'doneChoiceGE': result.get("doneChoiceGE", []), 
-                'doneGERest': result.get("doneGERest", []), 
-        }
+    data = {
+            'lackEssentialGE': result.get("lackEssentialGE", []),
+            'lackChoiceGE': result.get("lackChoiceGE", []), 
+            'lackEssentialGETopic': result.get("lackEssentialGETopic", []), 
+            'lackChoiceGETopic': result.get("lackChoiceGETopic", []), 
+            'doneEssentialGE': result.get("doneEssentialGE", []), 
+            'doneChoiceGE': result.get("doneChoiceGE", []), 
+            'doneGERest': result.get("doneGERest", []), 
+    }
 
     return Response({
         'message': 'Files processed successfully',
