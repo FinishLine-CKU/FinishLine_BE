@@ -27,7 +27,7 @@ def find_user_college(user_major):
 #사용자 교양 이수학점 계산
 def get_user_GE(user_id):
     student_id = user_id
-    year = student_id[:4]
+    year = int(student_id[:4])
 
     mydone_lecture_list = MyDoneLecture.objects.filter(user_id=student_id, lecture_type__in=['교양', '교선', '교필'])
     lectures_dict = []
@@ -51,7 +51,7 @@ def get_user_GE(user_id):
             less_item['주제'] = 'VERUM캠프'
     
     #트리니티라면
-    if (year > '2022'):
+    if (year > 2022):
 
         for data in lectures_dict[:]:
             done_GE += data['학점'] # 교양과목 총 이수 학점
