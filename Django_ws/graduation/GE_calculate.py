@@ -4,20 +4,25 @@ from user.models import User
 from .models import MyDoneLecture
 from .models import GEStandard
 
-#사용자 소속 대학 추출
+# 소속 대학 분류
 def find_user_college(user_major):
-    human_service = ['032709*', '032708*', '032705*', '032703*', '032702*', '032710*'] #휴먼서비스
-    medical_collage = ['030503*', '030501*', '030502*', '032801*', '032802*', '030702*', '030701*', '030704*', '030705*', '030707*', '030709*', '030710*'] #의과, 헬스케어, 사범
-    user_home = user_major['major']
+    medical_college = ['030501*', '030503*']  # 의예과(1~2학년) / 의학과(3~6학년)
+    health_care_college = ['032801*', '032802*']  # 임상병리학과 / 치위생학과
+    human_service_college = ['032703*', '032705*', '032708*', '032709*', '032710*', '032702*']  # 산림치유, 언어재활, 중독재활/중독재활상담/복지상담, 통합치유/스마트통합치유, 해양치유레저, 치매전문재활
+    education_college = ['030701*', '030704*', '030710*', '030709*', '030702*', '030705*', '030707*']  # 국어교육과, 수학교육과, 역사교육과, 영어교육과, 지리교육과, 체육교육과, 컴퓨터교육과
 
-    if user_home in human_service:
-        home_college = 'human_service' #휴먼서비스
-    elif user_home in medical_collage:
-        home_college = 'medical_collage' #의과, 헬스케어, 사범
+    major = user_major['major']
+
+    if major in human_service_college:
+        user_college = 'human_service'
+
+    elif major in (medical_college + health_care_college + education_college):
+        user_college = 'regular'
+
     else:
-        home_college = 'regular' #일반
+        user_college = 'trinity'
 
-    return home_college
+    return user_college
 
 #사용자 교양 이수학점 계산
 def get_user_GE(user_id):
@@ -85,26 +90,26 @@ def get_user_GE(user_id):
     return lectures_dict, data
 
 #사용자 교양요건 추출
-def get_user_GE_standard(year, home_college):
+def get_user_GE_standard(year, user_college):
     filtered_data = GEStandard.objects.filter(연도=year).values()
     if(int(year) > 2022):
 
         #교양인성
-        if(home_college == 'human_service'):
+        if(user_college == 'human_service'):
             humanism_GE_data = {'인간학'}
         #일반대학이고 23학번이라면 트리니티아카데미를 교양 요건으로 설정한다
-        elif(home_college == 'regular' and year == '2023'):
+        elif(user_college == 'trinity' and year == '2023'):
             humanism_GE_data = {'인간학', '트리니티아카데미'}
         else:
             humanism_GE_data = {'인간학', '봉사활동', 'VERUM캠프'}
 
         basic_GE_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
 
-        if (home_college == 'human_service' and year == '2023'):
+        if (user_college == 'human_service' and year == '2023'):
             filtered_data = GEStandard.objects.filter(연도='2023B').values()
             #교양기초
             basic_GE_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
-        elif (home_college == 'medical_collage' and year == '2023'):
+        elif (user_college == 'regular' and year == '2023'):
             filtered_data = GEStandard.objects.filter(연도='2023B').values()
             #교양기초
             basic_GE_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
@@ -197,7 +202,7 @@ def get_user_GE_standard(year, home_college):
 def GE_all_calculate(user_id):
     student_id = user_id
     year = student_id[:4]   # 학번 전처리 (년도 추출)  ex) 2020xxxx > 2020
-    home_college = 0
+    user_college = 0
 
     #교양 이수학점 계산 및 교양 과목 추출
     lecture_dict, liber_credit = get_user_GE(user_id)
@@ -208,7 +213,7 @@ def GE_all_calculate(user_id):
     done_choice_GE = liber_credit['done_choice_GE']
 
     #교양 필수, 선택 영역 추출
-    user_GE_standard = get_user_GE_standard(year, home_college)
+    user_GE_standard = get_user_GE_standard(year, user_college)
     essential_GE_standard = user_GE_standard['essential_GE_standard']
     chocie_GE_standard = user_GE_standard['chocie_GE_standard']
     

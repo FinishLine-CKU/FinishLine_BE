@@ -551,7 +551,7 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total):
     return lectures_dict, user_GE_standard, rest_total
 
 #23년도 교양 기초 계산
-def GE_basic_calculate_2023(lecture_dict, user_GE_standard, home_collage, rest_total):
+def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_total):
     lectures_dict = [] #매개변수 담을 리스트
     user_GE_standard = user_GE_standard['basic_GE_standard'] #[{'논리적사고와글쓰기': Decimal('2.0'), '외국어': Decimal('4.0'), '자기관리': Decimal('6.0'), '총합': Decimal('12.0')}]
     lectures_dict = lecture_dict #기이수 과목목록
@@ -568,8 +568,8 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, home_collage, rest_t
     #진로탐색
     stack_search = []
 
-    #일반대학의 경우
-    if (home_collage == '3'):
+    # 트리니티자유대학
+    if (user_college == 'trinity'):
         for needcheck in lectures_dict[:]:
             lecture_topic = needcheck['주제']
             lecture_credit = Decimal(needcheck['학점'])
@@ -1295,11 +1295,11 @@ def GE_trinity_calculate(user_id):
     #18~25학년도까지 공통 함수 => 소속 단과대학, 전체 교양 과목, 사용자 교양요건 추출
 
     #소속 단과대학 추출
-    home_collage = find_user_college(user_major)
+    user_college = find_user_college(user_major)
     #전체과목 데이터 추출
     lecture_dict, GE_total = get_user_GE(user_id)
     #사용자 교양요건 추출
-    user_GE_standard = get_user_GE_standard(year, home_collage)
+    user_GE_standard = get_user_GE_standard(year, user_college)
         
     lecture_dict_result, GE_humanism_standard, rest_total = GE_humanism_calculate(lecture_dict, user_GE_standard)
 
@@ -1308,7 +1308,7 @@ def GE_trinity_calculate(user_id):
 
     if (year == '2023'):
         #23년도 교양기초일때에만 다른 연도와 분리된 함수 사용
-        lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search = GE_basic_calculate_2023(lecture_dict_result, user_GE_standard, home_collage, rest_total)
+        lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search = GE_basic_calculate_2023(lecture_dict_result, user_GE_standard, user_college, rest_total)
     else:
         #23년도가 아닐떄에는 기존 교양기초 함수 사용
         lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search = GE_basic_calculate_2025(lecture_dict_result, user_GE_standard, rest_total)
@@ -1346,7 +1346,7 @@ def GE_trinity_calculate(user_id):
     
             if year == '2023':
                  #23학번 일반학과
-                if home_collage == 'regular':
+                if user_college == 'trinity':
                     new_key = '진로, 창의성, 창업'
                     excluded = []
 
