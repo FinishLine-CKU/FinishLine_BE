@@ -1347,45 +1347,43 @@ def GE_trinity_calculate(user_id):
             if year == '2023':
                  #23학번 일반학과
                 if user_college == 'trinity':
-                    new_key = '진로, 창의성, 창업'
+                    new_key = '진로탐색, 창의성, 창업'
                     excluded = []
 
                     if len(stack_search) == 2:
-                        excluded.append('진로')
+                        excluded.append('진로탐색색')
                     if len(stack_creative) == 1:
                         excluded.append('창의성')
                     if len(stack_startup) == 1:
                         excluded.append('창업')
                     
-                    topic = ['진로', '창의성', '창업']
+                    topic = ['진로탐색', '창의성', '창업']
                     topic = [t for t in topic if t not in excluded]
                     new_key = ', '.join(topic)
 
                 #23학번 휴먼서비스, 의과대학
                 else:
-                    new_key = '진로, 창의성, 창업'
+                    new_key = '진로탐색, 창의성, 창업'
                     excluded = []
 
                     if len(stack_search) == 2:
-                        excluded.append('진로')
+                        excluded.append('진로탐색')
                     if len(stack_creative) == 1:
                         excluded.append('창의성')
                     if len(stack_startup) == 1:
                         excluded.append('창업')
-                    if len(stack_major_base) == 2:
-                        excluded.append('계열기초')
                     
-                    topic = ['진로', '창의성', '창업']
+                    topic = ['진로탐색', '창의성', '창업']
                     topic = [t for t in topic if t not in excluded]
                     new_key = ', '.join(topic)
 
             #24, 25학번
             else:
-                    new_key = '진로, 창의성, 창업, 계열기초'
+                    new_key = '진로탐색, 창의성, 창업, 계열기초'
                     excluded = []
 
                     if len(stack_search) == 2:
-                        excluded.append('진로')
+                        excluded.append('진로탐색')
                     if len(stack_creative) == 1:
                         excluded.append('창의성')
                     if len(stack_startup) == 1:
@@ -1393,7 +1391,7 @@ def GE_trinity_calculate(user_id):
                     if len(stack_major_base) == 1:
                         excluded.append('계열기초')
                     
-                    topic = ['진로', '창의성', '창업', '계열기초']
+                    topic = ['진로탐색', '창의성', '창업', '계열기초']
                     topic = [t for t in topic if t not in excluded]
                     new_key = ', '.join(topic)
 
