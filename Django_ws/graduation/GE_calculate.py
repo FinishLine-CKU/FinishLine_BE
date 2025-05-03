@@ -24,19 +24,19 @@ def find_user_college(user_major):
 
     return user_college
 
-#사용자 교양 이수학점 계산
+# 교양 이수학점 계산
 def get_user_GE(user_id):
     student_id = user_id
     year = int(student_id[:4])
 
     mydone_lecture_list = MyDoneLecture.objects.filter(user_id=student_id, lecture_type__in=['교양', '교선', '교필'])
     lectures_dict = []
-    done_GE = 0 #교양 총 학점 complete_liber_total_credit
-    done_humanism_GE = 0 #교양 인성 총 학점 complete_general_human_credit
-    done_basic_GE = 0 #교양 기초 총 학점 complete_general_base_credit
-    done_fusion_GE = 0 #교양 융합 총 학점 complete_general_merge_credit
-    done_essential_GE = 0 #complete_general_esse_credit
-    done_choice_GE = 0 #complete_general_choice_credit
+    done_GE = 0 
+    done_humanism_GE = 0  
+    done_basic_GE = 0  
+    done_fusion_GE = 0  
+    done_essential_GE = 0  
+    done_choice_GE = 0  
 
     for lecture in mydone_lecture_list:
         lecture_data = {
@@ -50,34 +50,37 @@ def get_user_GE(user_id):
         if less_item['주제'] == 'VERUM인성':
             less_item['주제'] = 'VERUM캠프'
     
-    #트리니티라면
+    # 23 ~ 25학번
     if (year > 2022):
-
         for data in lectures_dict[:]:
-            done_GE += data['학점'] # 교양과목 총 이수 학점
+            done_GE += data['학점']  # 교양과목 총 이수 학점
 
         for data in lectures_dict[:]:
             if data['주제'] in {'VERUM캠프', '봉사활동', '인간학'}:
-                done_humanism_GE += data['학점']    # 교양인성 총 이수 학점
+                done_humanism_GE += data['학점']  # 교양인성 총 이수 학점
+
             elif data['주제'] in {'소통', '논리적사고와글쓰기', '외국어', '디지털소통', '자기관리', '진로탐색', '창의성', '창업', '계열기초'}:
                 done_basic_GE += data['학점']  # 교양기초 총 이수 학점
+
             elif data['주제'] in {'정치와경제', '심리와건강', '정보와기술', '인간과문학', '역사와사회', '철학과예술', '자연과환경', '수리와과학', '언어와문화'}:
-                done_fusion_GE += data['학점'] #교양융합 총 이수 학점
+                done_fusion_GE += data['학점']  #교양융합 총 이수 학점
 
-        data = {"done_GE": done_GE,
-                "done_humanism_GE": done_humanism_GE, 
-                "done_basic_GE": done_basic_GE,
-                "done_fusion_GE": done_fusion_GE}
-    
-    #트리니티 이전이라면
+        data = {
+            "done_GE": done_GE,
+            "done_humanism_GE": done_humanism_GE, 
+            "done_basic_GE": done_basic_GE,
+            "done_fusion_GE": done_fusion_GE
+        }
+
+    # 18 ~ 22학번
     else:
-
         for data in lectures_dict[:]:
-            done_GE += data['학점'] # 교양과목 총 이수 학점
+            done_GE += data['학점']  # 교양과목 총 이수 학점
 
         for data in lectures_dict[:]:
             if data['주제'] in {'인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', '창의적사고와코딩', '외국어', 'MSC교과군', '철학적인간학', '신학적인간학'}:
-                done_essential_GE += data['학점']    # 교양필수 총 이수 학점
+                done_essential_GE += data['학점']  # 교양필수 총 이수 학점
+                
             else:
                 done_choice_GE += data['학점']  # 교양선택 총 이수 학점
 
@@ -89,34 +92,34 @@ def get_user_GE(user_id):
 
     return lectures_dict, data
 
-#사용자 교양요건 추출
+# 교양 졸업 요건 추출
 def get_user_GE_standard(year, user_college):
-    filtered_data = GEStandard.objects.filter(연도=year).values()
-    if(int(year) > 2022):
+    if (year == '2023' and (user_college == 'human_service' or user_college == 'regular')):
+        filtered_data = GEStandard.objects.filter(연도='2023B').values()
 
-        #교양인성
+    else:
+        filtered_data = GEStandard.objects.filter(연도=year).values()
+
+    # 23 ~ 25학번
+    if(int(year) > 2022):
+        
+        # 교양인성 영역
         if(user_college == 'human_service'):
             humanism_GE_data = {'인간학'}
-        #일반대학이고 23학번이라면 트리니티아카데미를 교양 요건으로 설정한다
-        elif(user_college == 'trinity' and year == '2023'):
+
+        elif(year == '2023' and user_college == 'trinity'):
             humanism_GE_data = {'인간학', '트리니티아카데미'}
+
         else:
             humanism_GE_data = {'인간학', '봉사활동', 'VERUM캠프'}
 
+        # 교양기초 영역
         basic_GE_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
 
-        if (user_college == 'human_service' and year == '2023'):
-            filtered_data = GEStandard.objects.filter(연도='2023B').values()
-            #교양기초
-            basic_GE_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
-        elif (user_college == 'regular' and year == '2023'):
-            filtered_data = GEStandard.objects.filter(연도='2023B').values()
-            #교양기초
-            basic_GE_data = {'소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통'}
-
-        #교양융합
+        # 교양융합 영역
         if(year == '2025'):
             fusion_GE_data = {'정보활용', '창의융합', '문제해결', '융합비고'}
+            
         else:
             fusion_GE_data = {'정보활용', '창의융합', '문제해결'}
 
@@ -159,6 +162,7 @@ def get_user_GE_standard(year, user_college):
                 "basic_GE_standard": basic_GE_standard,
                 "fusion_GE_standard": fusion_GE_standard}
 
+    # 18 ~ 22학번
     else:
         # 교양필수 주제 (18 ~ 22년도 : 트리니티 이전)
         essential_GE_data = {'인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', '창의적사고와코딩', '외국어', 'MSC교과군', '철학적인간학', '신학적인간학', 'VERUM인성'}
