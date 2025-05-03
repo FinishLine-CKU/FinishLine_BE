@@ -162,7 +162,7 @@ def get_user_GE_standard(year, home_college):
         choice_GE_data = {'고전탐구', '사유와지혜', '가치와실천', '상상력과표현', '인문융합', '균형1', '균형2', '균형3', '균형4', '계열기초'}
         
         cleaned_data = [
-            {key: value for key, value in item.items() if key not in ['liber_id', '연도'] and value != 0}
+            {key: value for key, value in item.items() if key not in ['GEStandard_id', '연도'] and value != 0}
             for item in filtered_data
         ]
 
