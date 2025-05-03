@@ -1389,6 +1389,11 @@ def GE_trinity_calculate(user_id):
                     new_key = ', '.join(topic)
 
             changed_lack_GE_basic_topic[new_key] = lack_GE_basic_topic[key]
+
+        elif '소통' in key:
+            new_key = '논리적사고와글쓰기, 외국어'
+            changed_lack_GE_basic_topic[new_key] = lack_GE_basic_topic[key]
+
         else:
             changed_lack_GE_basic_topic[key] = lack_GE_basic_topic[key]
 
