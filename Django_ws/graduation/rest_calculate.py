@@ -4,14 +4,14 @@
 from graduation.models import MyDoneLecture
 
 
-def pop_rest_credit(student_id):
-    user_major_lectures = list(MyDoneLecture.objects.filter(
-    lecture_type__in = ['일선'],
-    user_id = student_id
+def pop_done_rest(student_id):
+    user_rest_data = list(MyDoneLecture.objects.filter(
+        lecture_type__in = ['일선'],
+        user_id = student_id
     ).values_list('credit', flat=True))
 
-    user_credit = sum(user_major_lectures)
+    done_rest = sum(user_rest_data)
 
-    print('일선 분류 과목 총 이수학점: ', user_credit)
+    print('일선 분류 과목 총 이수학점: ', done_rest)
 
-    return user_credit
+    return done_rest

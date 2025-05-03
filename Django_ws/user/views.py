@@ -5,8 +5,9 @@ from .models import User
 from user.models import VisitorCount
 from graduation.models import Standard
 from graduation.models import MyDoneLecture
-from graduation.liberCheck import check_db_mydone_liber
-from graduation.major_calculate import select_graduation_standard
+from graduation.GE_calculate import GE_all_calculate
+from graduation.GE_calculate_trinity import GE_trinity_calculate
+from graduation.major_calculate import select_user_standard
 from rest_framework.response import Response
 from django.http import HttpResponse
 from datetime import timedelta, datetime, timezone
@@ -62,10 +63,10 @@ def register_info(request):    # 회원가입
                 student_id = student_id,
                 sub_major_type = sub_major_type,
                 sub_major = sub_major,
-                micro_degree = micro_degree,
+                MD = micro_degree,
                 password = make_password(password)
             )
-            print(f'Success Sign Up! \n회원가입 일시(KST): {user.date_time_joined} \n이름: {user.name} \n전공코드: {user.major} \n학번: {user.student_id} \n비밀번호: {user.password} \n추가전공 종류: {user.sub_major_type} \n추가전공 코드: {user.sub_major} \n소단위전공: {user.micro_degree}')
+            print(f'Success Sign Up! \n회원가입 일시(KST): {user.date_time_joined} \n이름: {user.name} \n전공코드: {user.major} \n학번: {user.student_id} \n비밀번호: {user.password} \n추가전공 종류: {user.sub_major_type} \n추가전공 코드: {user.sub_major} \n소단위전공: {user.MD}')
             return Response (True)
         except Exception as e:
             print(f'DB 저장 오류: {repr(e)}')
@@ -95,50 +96,67 @@ def check_register(request):    # 로그인
     data = request.data
     student_id = data.get('studentId')
     password = data.get('password')
+    year = student_id[:4]
 
     if student_id and password:
         if User.objects.filter(student_id = student_id).exists():
             user = User.objects.filter(student_id = student_id).first()
             upload_pdf = MyDoneLecture.objects.filter(user_id = student_id).exists()    # 기이수과목 DB 확인
             if user.done_major == None:
-                result = {
-                    "교양필수 부족 학점": None,
-                    "교양선택 부족 학점": None
-                }
-                lack_rest_total = None,
+                if year > '2022':
+                    result = {
+                        "교양 인성, 기초 부족 학점": None,
+                        "교양 융합 부족 학점": None
+                    }
+                else:
+                    result = {
+                        "교양필수 부족 학점": None,
+                        "교양선택 부족 학점": None
+                    }
+                lack_MD = None
+                lack_rest_total = None
                 lack_total = None
 
             else:   # 졸업 검사 이력이 있다면
-                result = check_db_mydone_liber(student_id)  # 교양 부족학점
-                standard = select_graduation_standard(student_id) # 기준 가져오기
+                if year > '2022':
+                    result = GE_trinity_calculate(student_id)  # 교양 부족학점
+                else:
+                    result = GE_all_calculate(student_id)  # 교양 부족학점
+
+                standard = select_user_standard(student_id) # 기준 가져오기
                 standard_id = Standard.objects.filter(index = standard[-1]).first()
+
                 if user.done_major_rest == None:
                     done_major_rest = 0
                 else:
                     done_major_rest = user.done_major_rest
+
                 if user.done_sub_major_rest == None:
                     done_sub_major_rest = 0
                 else:
                     done_sub_major_rest = user.done_sub_major_rest
-                if user.done_general_rest == None:
-                    done_general_rest = 0
+
+                if user.done_GE_rest == None:
+                    done_GE_rest = 0
                 else:
-                    done_general_rest = user.done_general_rest
-                if user.done_MD == None:
-                    done_MD = 0
+                    done_GE_rest = user.done_GE_rest
+                    
+                if user.done_MD_rest == None:
+                    done_MD_rest = 0
                 else:
-                    done_MD = user.done_MD
+                    done_MD_rest = user.done_MD_rest
+
                 if standard_id.rest_standard == None:
                     rest_standard = 0
                 else:
                     rest_standard = standard_id.rest_standard
 
-                lack_rest_total = rest_standard - (done_major_rest + done_sub_major_rest + done_general_rest + done_MD)
+                lack_rest_total = rest_standard - (done_major_rest + done_sub_major_rest + done_GE_rest + done_MD_rest)
 
                 if lack_rest_total < 0:
                     lack_rest_total = 0
                 
-                user.need_rest = lack_rest_total  # 부족한 일선 총 학점 저장
+                user.lack_rest = lack_rest_total  # 부족한 일선 총 학점 저장
                 user.save()
 
                 if user.lack_sub_major == None:
@@ -146,7 +164,12 @@ def check_register(request):    # 로그인
                 else:
                     lack_sub_major = user.lack_sub_major
 
-                lack_total = lack_rest_total + user.lack_major + user.need_general + lack_sub_major   # 부족한 학점 총계
+                if user.lack_MD == None:
+                    lack_MD = 0
+                else:
+                    lack_MD = user.lack_MD
+
+                lack_total = + user.lack_major + lack_sub_major + user.lack_GE + lack_MD + lack_rest_total  # 부족한 학점 총계
 
 
             if check_password(password, user.password):
@@ -157,9 +180,10 @@ def check_register(request):    # 로그인
                     'name' : user.name,
                     'testing' : user.done_major,
                     'uploadPDF' : upload_pdf,
-                    'lackEssentialGE' : result.get("교양필수 부족 학점", []),
-                    'lackChoiceGE' : result.get("교양선택 부족 학점", []),
+                    'lackEssentialGE' : result.get("lackEssentialGE", []),
+                    'lackChoiceGE' : result.get("lackChoiceGE", []),
                     'lackSubMajor' : user.lack_sub_major,
+                    'lackMD' : lack_MD,
                     'lackRestTotal' : lack_rest_total,
                     'lackTotal' : lack_total
                 }
@@ -188,8 +212,8 @@ def my_info(request):    # 마이페이지
         if user.sub_major_type and user.sub_major:
             data['sub_major_type'] = user.sub_major_type
             data['sub_major'] = user.sub_major
-        if user.micro_degree:
-            data['micro_degree'] = user.micro_degree
+        if user.MD:
+            data['micro_degree'] = user.MD
     else:
         error = '해당 없음',
         data = {'error' : error}
@@ -236,7 +260,7 @@ def change_info(request):    # 회원정보 수정
         user = User.objects.filter(student_id = student_id).first()
         user.sub_major_type = sub_major_type
         user.sub_major = sub_major
-        user.micro_degree = micro_degree
+        user.MD = micro_degree
         user.save()
         data = {'success' : 'success'}
     else:
