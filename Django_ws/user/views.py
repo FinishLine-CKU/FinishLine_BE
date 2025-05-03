@@ -5,7 +5,8 @@ from .models import User
 from user.models import VisitorCount
 from graduation.models import Standard
 from graduation.models import MyDoneLecture
-from graduation.liberCheck import check_db_mydone_liber
+from graduation.GE_calculate import GE_all_calculate
+from graduation.GE_calculate_trinity import GE_trinity_calculate
 from graduation.major_calculate import select_user_standard
 from rest_framework.response import Response
 from django.http import HttpResponse
@@ -95,22 +96,33 @@ def check_register(request):    # 로그인
     data = request.data
     student_id = data.get('studentId')
     password = data.get('password')
+    year = student_id[:4]
 
     if student_id and password:
         if User.objects.filter(student_id = student_id).exists():
             user = User.objects.filter(student_id = student_id).first()
             upload_pdf = MyDoneLecture.objects.filter(user_id = student_id).exists()    # 기이수과목 DB 확인
             if user.done_major == None:
-                result = {
-                    "교양필수 부족 학점": None,
-                    "교양선택 부족 학점": None
-                }
+                if year > '2022':
+                    result = {
+                        "교양 인성, 기초 부족 학점": None,
+                        "교양 융합 부족 학점": None
+                    }
+                else:
+                    result = {
+                        "교양필수 부족 학점": None,
+                        "교양선택 부족 학점": None
+                    }
                 lack_MD = None
                 lack_rest_total = None
                 lack_total = None
 
             else:   # 졸업 검사 이력이 있다면
-                result = check_db_mydone_liber(student_id)  # 교양 부족학점
+                if year > '2022':
+                    result = GE_trinity_calculate(student_id)  # 교양 부족학점
+                else:
+                    result = GE_all_calculate(student_id)  # 교양 부족학점
+
                 standard = select_user_standard(student_id) # 기준 가져오기
                 standard_id = Standard.objects.filter(index = standard[-1]).first()
 
@@ -124,10 +136,10 @@ def check_register(request):    # 로그인
                 else:
                     done_sub_major_rest = user.done_sub_major_rest
 
-                if user.done_general_rest == None:
-                    done_general_rest = 0
+                if user.done_GE_rest == None:
+                    done_GE_rest = 0
                 else:
-                    done_general_rest = user.done_general_rest
+                    done_GE_rest = user.done_GE_rest
                     
                 if user.done_MD_rest == None:
                     done_MD_rest = 0
@@ -139,12 +151,12 @@ def check_register(request):    # 로그인
                 else:
                     rest_standard = standard_id.rest_standard
 
-                lack_rest_total = rest_standard - (done_major_rest + done_sub_major_rest + done_general_rest + done_MD_rest)
+                lack_rest_total = rest_standard - (done_major_rest + done_sub_major_rest + done_GE_rest + done_MD_rest)
 
                 if lack_rest_total < 0:
                     lack_rest_total = 0
                 
-                user.need_rest = lack_rest_total  # 부족한 일선 총 학점 저장
+                user.lack_rest = lack_rest_total  # 부족한 일선 총 학점 저장
                 user.save()
 
                 if user.lack_sub_major == None:
@@ -157,7 +169,7 @@ def check_register(request):    # 로그인
                 else:
                     lack_MD = user.lack_MD
 
-                lack_total = + user.lack_major + lack_sub_major + user.need_general + lack_MD + lack_rest_total  # 부족한 학점 총계
+                lack_total = + user.lack_major + lack_sub_major + user.lack_GE + lack_MD + lack_rest_total  # 부족한 학점 총계
 
 
             if check_password(password, user.password):
@@ -168,8 +180,8 @@ def check_register(request):    # 로그인
                     'name' : user.name,
                     'testing' : user.done_major,
                     'uploadPDF' : upload_pdf,
-                    'lackEssentialGE' : result.get("교양필수 부족 학점", []),
-                    'lackChoiceGE' : result.get("교양선택 부족 학점", []),
+                    'lackEssentialGE' : result.get("lackEssentialGE", []),
+                    'lackChoiceGE' : result.get("lackChoiceGE", []),
                     'lackSubMajor' : user.lack_sub_major,
                     'lackMD' : lack_MD,
                     'lackRestTotal' : lack_rest_total,

@@ -8,7 +8,8 @@ from io import BytesIO
 from .extract import extract_from_pdf_table
 from .extract import save_pdf_data_to_db
 from .extract import extract_major_from_pdf_table
-from .liberCheck import check_db_mydone_liber
+from .GE_calculate import GE_all_calculate
+from .GE_calculate_trinity import GE_trinity_calculate
 import logging
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
@@ -226,22 +227,33 @@ def upload_pdf(request):
 @api_view(['POST'])
 def general_check(request):
     user_id = request.data.get('user_id')
+    year = user_id[:4]
 
-    # print(f"Received user_id: {user_id}")
-    result = check_db_mydone_liber(user_id) 
-    print(result)
+    #================================================================================
+
+    #졸업요건 검사로직
+
+    #트리니티일 경우
+    if (year > '2022'):
+        result = GE_trinity_calculate(user_id)
+
+    #트리니티가 아닐 경우(기존 로직)
+    else:    
+        result = GE_all_calculate(user_id) 
+
+    data = {
+            'lackEssentialGE': result.get("lackEssentialGE", []),
+            'lackChoiceGE': result.get("lackChoiceGE", []), 
+            'lackEssentialGETopic': result.get("lackEssentialGETopic", []), 
+            'lackChoiceGETopic': result.get("lackChoiceGETopic", []), 
+            'doneEssentialGE': result.get("doneEssentialGE", []), 
+            'doneChoiceGE': result.get("doneChoiceGE", []), 
+            'doneGERest': result.get("doneGERest", []), 
+    }
 
     return Response({
         'message': 'Files processed successfully',
-        'general_data': {
-            'lackEssentialGE': result.get("교양필수 부족 학점", []), #
-            'lackChoiceGE': result.get("교양선택 부족 학점", []), #
-            'lackEssentialGETopic': result.get("교양필수 부족 영역", []), 
-            'lackChoiceGETopic': result.get("교양선택 부족 영역", []), 
-            'doneEssentialGE': result.get("교양필수 이수 학점", []), 
-            'doneChoiceGE': result.get("교양선택 이수 학점", []), 
-            'doneGERest': result.get("일반선택 이수 학점", []), 
-        }
+        'general_data': (data)
     })
 
 @api_view(['POST'])

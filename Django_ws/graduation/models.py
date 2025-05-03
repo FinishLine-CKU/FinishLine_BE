@@ -50,8 +50,8 @@ class MyDoneLecture(models.Model):
         return f"{self.lecture_name} ({self.lecture_topic}) ({self.credit})"
     
 #교양 요건 연도별 기준표
-class liberRequire(models.Model):
-    liber_id = models.AutoField(primary_key=True)
+class GEStandard(models.Model):
+    GEStandard_id = models.AutoField(primary_key=True)
     연도 = models.CharField(max_length=5, blank=True, null=True)
     인간학 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
     봉사활동 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
@@ -72,6 +72,14 @@ class liberRequire(models.Model):
     계열기초 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
     철학적인간학 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
     신학적인간학 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
+    소통 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
+    자기관리 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
+    정보활용 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
+    창의융합 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
+    문제해결 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
+    융합비고 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1)
+    트리니티아카데미 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
+    디지털소통 = models.DecimalField(max_digits=3, blank=True, null=True, decimal_places=1) 
 
     def __str__(self):
         return f"{self.lecture_name} ({self.year}-{self.semester} {self.lecture_type})"
