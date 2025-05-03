@@ -6,7 +6,7 @@ from .models import GEStandard
 
 # 소속 대학 분류
 def find_user_college(user_major):
-    medical_college = ['030501*', '030502*', '030503*']  # 의예과(1~2학년) / 의학과(3~6학년) / 간호학과
+    medical_college = ['030501*', '030503*', '030502*']  # 의예과(1~2학년) / 의학과(3~6학년) / 간호학과
     health_care_college = ['032801*', '032802*']  # 임상병리학과 / 치위생학과
     human_service_college = ['032703*', '032705*', '032708*', '032709*', '032710*', '032702*']  # 산림치유, 언어재활, 중독재활/중독재활상담/복지상담, 통합치유/스마트통합치유, 해양치유레저, 치매전문재활
     education_college = ['030701*', '030704*', '030710*', '030709*', '030702*', '030705*', '030707*']  # 국어교육과, 수학교육과, 역사교육과, 영어교육과, 지리교육과, 체육교육과, 컴퓨터교육과
@@ -63,7 +63,7 @@ def get_user_GE(user_id):
                 done_basic_GE += data['학점']  # 교양기초 총 이수 학점
 
             elif data['주제'] in {'정치와경제', '심리와건강', '정보와기술', '인간과문학', '역사와사회', '철학과예술', '자연과환경', '수리와과학', '언어와문화'}:
-                done_fusion_GE += data['학점']  #교양융합 총 이수 학점
+                done_fusion_GE += data['학점']  # 교양융합 총 이수 학점
 
         data = {
             "done_GE": done_GE,
@@ -119,7 +119,7 @@ def get_user_GE_standard(year, user_college):
         # 교양융합 영역
         if(year == '2025'):
             fusion_GE_data = {'정보활용', '창의융합', '문제해결', '융합비고'}
-            
+
         else:
             fusion_GE_data = {'정보활용', '창의융합', '문제해결'}
 
@@ -202,13 +202,13 @@ def get_user_GE_standard(year, user_college):
     print("교양요건 추출", data)
     return data
 
-#사용자 교양 부족 영역 계산
+# 교양 부족 영역 계산
 def GE_all_calculate(user_id):
     student_id = user_id
     year = student_id[:4]   # 학번 전처리 (년도 추출)  ex) 2020xxxx > 2020
-    user_college = 0
+    user_college = ''
 
-    #교양 이수학점 계산 및 교양 과목 추출
+    # 교양 이수학점 계산 및 교양 과목 추출
     lecture_dict, liber_credit = get_user_GE(user_id)
     lectures_dict = []
     lectures_dict = lecture_dict
@@ -216,7 +216,7 @@ def GE_all_calculate(user_id):
     done_essential_GE = liber_credit['done_essential_GE']
     done_choice_GE = liber_credit['done_choice_GE']
 
-    #교양 필수, 선택 영역 추출
+    # 교양 필수, 선택 영역 추출
     user_GE_standard = get_user_GE_standard(year, user_college)
     essential_GE_standard = user_GE_standard['essential_GE_standard']
     chocie_GE_standard = user_GE_standard['chocie_GE_standard']
