@@ -1279,12 +1279,12 @@ def rest_and_done_calculate(GE_total, lecture_dict_result, rest_total):
     return done_humanism_GE, done_basic_GE, done_fusion_GE, rest_total_topic
 
 #교양 부족학점, 부족 영역 계산
-def lack_GE_calculate(GE_humansim_standard, GE_fusion_standard, GE_basic_standard):
-    lack_GE_humansim_total = GE_humansim_standard[0]['총합']
+def lack_GE_calculate(GE_humanism_standard, GE_fusion_standard, GE_basic_standard):
+    lack_GE_humanism_total = GE_humanism_standard[0]['총합']
     lack_GE_fusion_total = GE_fusion_standard[0]['총합']
     lack_GE_basic_total = GE_basic_standard[0]['총합']
 
-    return lack_GE_humansim_total, lack_GE_fusion_total, lack_GE_basic_total
+    return lack_GE_humanism_total, lack_GE_fusion_total, lack_GE_basic_total
 
 #트리티니 교양 계산 컨트롤타워
 def GE_trinity_calculate(user_id):
@@ -1301,7 +1301,7 @@ def GE_trinity_calculate(user_id):
     #사용자 교양요건 추출
     user_GE_standard = get_user_GE_standard(year, home_collage)
         
-    lecture_dict_result, GE_humansim_standard, rest_total = GE_humanism_calculate(lecture_dict, user_GE_standard)
+    lecture_dict_result, GE_humanism_standard, rest_total = GE_humanism_calculate(lecture_dict, user_GE_standard)
 
     lecture_dict_result, GE_fusion_standard, rest_total = GE_fusion_calculate(lecture_dict_result, user_GE_standard, rest_total)
 
@@ -1319,16 +1319,25 @@ def GE_trinity_calculate(user_id):
     rest_total = rest_total_topic
 
     #교양 부족 학점
-    lack_GE_humansim_total, lack_GE_fusion_total, lack_GE_basic_total = lack_GE_calculate(GE_humansim_standard, GE_fusion_standard, GE_basic_standard)
+    lack_GE_humanism_total, lack_GE_fusion_total, lack_GE_basic_total = lack_GE_calculate(GE_humanism_standard, GE_fusion_standard, GE_basic_standard)
 
-    lack_GE_humansim_topic = GE_humansim_standard[0]
+    lack_GE_humanism_topic = GE_humanism_standard[0]
     lack_GE_fusion_topic = GE_fusion_standard[0]
     lack_GE_basic_topic = GE_basic_standard[0]
 
     #총합 제거
-    lack_GE_humansim_topic.pop('총합')
+    lack_GE_humanism_topic.pop('총합')
     lack_GE_fusion_topic.pop('총합')
     lack_GE_basic_topic.pop('총합')
+
+    changed_lack_GE_humanism_topic = {}
+
+    for key in lack_GE_humanism_topic:
+        if 'VERUM캠프' in key and int(year) > 2022:
+            new_key = key.replace('VERUM캠프', 'VERUM인성')
+            changed_lack_GE_humanism_topic[new_key] = lack_GE_humanism_topic[key]
+        else:
+            changed_lack_GE_humanism_topic[key] = lack_GE_humanism_topic[key]
 
     #교양 기초 소분류 제목으로 변경
     changed_lack_GE_basic_topic = {}
@@ -1338,53 +1347,53 @@ def GE_trinity_calculate(user_id):
             if year == '2023':
                  #23학번 일반학과
                 if home_collage == 'regular':
-                    new_key = '진로, 창의, 창업'
+                    new_key = '진로, 창의성, 창업'
                     excluded = []
 
                     if len(stack_search) == 2:
                         excluded.append('진로')
                     if len(stack_creative) == 1:
-                        excluded.append('창의')
+                        excluded.append('창의성')
                     if len(stack_startup) == 1:
                         excluded.append('창업')
                     
-                    topic = ['진로', '창의', '창업']
+                    topic = ['진로', '창의성', '창업']
                     topic = [t for t in topic if t not in excluded]
                     new_key = ', '.join(topic)
 
                 #23학번 휴먼서비스, 의과대학
                 else:
-                    new_key = '진로, 창의, 창업, 계열기초'
+                    new_key = '진로, 창의성, 창업'
                     excluded = []
 
                     if len(stack_search) == 2:
                         excluded.append('진로')
                     if len(stack_creative) == 1:
-                        excluded.append('창의')
+                        excluded.append('창의성')
                     if len(stack_startup) == 1:
                         excluded.append('창업')
                     if len(stack_major_base) == 2:
                         excluded.append('계열기초')
                     
-                    topic = ['진로', '창의', '창업', '계열기초']
+                    topic = ['진로', '창의성', '창업']
                     topic = [t for t in topic if t not in excluded]
                     new_key = ', '.join(topic)
 
             #24, 25학번
             else:
-                    new_key = '진로, 창의, 창업, 계열기초'
+                    new_key = '진로, 창의성, 창업, 계열기초'
                     excluded = []
 
                     if len(stack_search) == 2:
                         excluded.append('진로')
                     if len(stack_creative) == 1:
-                        excluded.append('창의')
+                        excluded.append('창의성')
                     if len(stack_startup) == 1:
                         excluded.append('창업')
                     if len(stack_major_base) == 1:
                         excluded.append('계열기초')
                     
-                    topic = ['진로', '창의', '창업', '계열기초']
+                    topic = ['진로', '창의성', '창업', '계열기초']
                     topic = [t for t in topic if t not in excluded]
                     new_key = ', '.join(topic)
 
@@ -1408,12 +1417,12 @@ def GE_trinity_calculate(user_id):
             changed_lack_GE_fusion_topic['자연과환경, 수리와과학, 언어와문화'] = lack_GE_fusion_topic[key]
 
     #교양 인성, 기초 => 교양 필수로 병합
-    lack_GE_essential_topic = lack_GE_humansim_topic | changed_lack_GE_basic_topic | changed_lack_GE_fusion_topic
+    lack_GE_essential_topic = changed_lack_GE_humanism_topic | changed_lack_GE_basic_topic | changed_lack_GE_fusion_topic
 
 
     #DB에 저장할 교양 이수 학점, 교양 부족 학점, 일반선택 학점, 학번
     done_GE = GE_total['done_GE']
-    lack_total_GE = lack_GE_humansim_total + lack_GE_basic_total + lack_GE_fusion_total
+    lack_total_GE = lack_GE_humanism_total + lack_GE_basic_total + lack_GE_fusion_total
 
     #DB에 저장
     calculate_and_save_standard(done_GE, lack_total_GE, rest_total, user_id)
