@@ -1261,7 +1261,7 @@ def GE_basic_calculate_2025(lecture_dict, user_GE_standard, rest_total):
             lectures_dict.remove(item)
     delete_items = []
 
-    return lectures_dict, user_GE_standard, rest_total
+    return lectures_dict, user_GE_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search
 
 #일반선택 학점, 교양 이수 학점 계산 후 result로 전달
 def rest_and_done_calculate(GE_total, lecture_dict_result, rest_total):
