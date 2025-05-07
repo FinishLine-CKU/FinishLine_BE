@@ -1,0 +1,25 @@
+name: Backend Deploy
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Setting Permission
+        uses: appleboy/ssh-action@v1
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_KEY }}
+          port: 22
+          script: |
+            cd FinishLine_BE
+            source venv/bin/activate
+            git pull origin main
+            python Django_ws/manage.py migrate
+            systemctl restart gunicorn
+      
