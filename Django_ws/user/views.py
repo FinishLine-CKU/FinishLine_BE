@@ -15,7 +15,6 @@ from datetime import timedelta, datetime, timezone
 
 @api_view(['POST'])
 def student_auth(request):    # 재학생인증
-    non_target = ['국어교육과', '지리교육과', '수학교육과', '체육교육과', '컴퓨터교육과', '영어교육과', '역사교육과', '자율전공학부']
     data = request.data
     studentId = data.get('studentId')
     studentPW = data.get('studentPW')
@@ -27,11 +26,7 @@ def student_auth(request):    # 재학생인증
             error = '이미 가입된 회원입니다.'
             data = {'error' : error}
             print(f'Fail Student Auth.. \nerror: {data}')
-        elif int(student_id[:4]) >= 2023 or int(student_id[:4]) <= 2017:
-            error = '서비스 이용 대상이 아닙니다.'
-            data = {'error' : error}
-            print(f'Fail Student Auth.. \nerror: {data}')
-        elif major in non_target:
+        elif int(student_id[:4]) >= 2025 or int(student_id[:4]) <= 2017:
             error = '서비스 이용 대상이 아닙니다.'
             data = {'error' : error}
             print(f'Fail Student Auth.. \nerror: {data}')
