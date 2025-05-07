@@ -21,5 +21,5 @@ jobs:
             source venv/bin/activate
             git pull origin main
             python Django_ws/manage.py migrate
-            systemctl restart gunicorn
+            sudo systemctl restart gunicorn
       
