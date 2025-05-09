@@ -46,9 +46,9 @@ def get_user_GE(user_id):
             }
         lectures_dict.append(lecture_data)
 
-    for less_item in lectures_dict:
-        if less_item['주제'] == 'VERUM인성':
-            less_item['주제'] = 'VERUM캠프'
+    for changed_verum in lectures_dict:
+        if changed_verum['주제'] == 'VERUM인성':
+            changed_verum['주제'] = 'VERUM캠프'
     
     # 23 ~ 25학번
     if (year > 2022):
@@ -95,7 +95,10 @@ def get_user_GE(user_id):
 # 교양 졸업 요건 추출
 def get_user_GE_standard(year, user_college):
     if (year == '2023' and (user_college == 'human_service' or user_college == 'regular')):
-        filtered_data = GEStandard.objects.filter(연도='2023B').values()
+        filtered_data = GEStandard.objects.filter(GEStandard_id=12).values()  # 계열기초 4학점
+
+    elif (year == '2023' and user_college == 'trinity'):
+        filtered_data = GEStandard.objects.filter(GEStandard_id=11).values()
 
     else:
         filtered_data = GEStandard.objects.filter(연도=year).values()
