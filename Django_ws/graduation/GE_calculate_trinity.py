@@ -1105,6 +1105,10 @@ def GE_basic_calculate_2025(lecture_dict, user_GE_standard, rest_total):
 
             if len(stack_major_base) == 0:
                 stack_major_base.append(1)
+            elif len(stack_major_base) == 1:
+                stack_major_base.append(1)
+            elif len(stack_major_base) == 2:
+                stack_major_base.append(1)      
             else:
                 continue
 
@@ -1262,7 +1266,7 @@ def GE_basic_calculate_2025(lecture_dict, user_GE_standard, rest_total):
             lectures_dict.remove(item)
     delete_items = []
 
-    return lectures_dict, user_GE_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search
+    return lectures_dict, user_GE_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search, stack_write
 
 #일반선택 학점, 교양 이수 학점 계산 후 result로 전달
 def rest_and_done_calculate(GE_total, lecture_dict_result, rest_total):
@@ -1312,7 +1316,8 @@ def GE_trinity_calculate(user_id):
         lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search = GE_basic_calculate_2023(lecture_dict_result, user_GE_standard, user_college, rest_total)
     else:
         #23년도가 아닐떄에는 기존 교양기초 함수 사용
-        lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search = GE_basic_calculate_2025(lecture_dict_result, user_GE_standard, rest_total)
+        lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search, stack_write = GE_basic_calculate_2025(lecture_dict_result, user_GE_standard, rest_total)
+
     #일반선택 학점 및 교양 이수 학점 계산
     done_humanism_GE, done_basic_GE, done_fusion_GE, rest_total_topic = rest_and_done_calculate(GE_total, lecture_dict_result, rest_total)
 
@@ -1343,7 +1348,7 @@ def GE_trinity_calculate(user_id):
     #교양 기초 소분류 제목으로 변경
     changed_lack_GE_basic_topic = {}
     for key in lack_GE_basic_topic:
-        if '자기관리' in key:
+        if key == '자기관리':
     
             if year == '2023':
                  #23학번 일반학과
@@ -1389,7 +1394,7 @@ def GE_trinity_calculate(user_id):
                         excluded.append('창의성')
                     if len(stack_startup) == 1:
                         excluded.append('창업')
-                    if len(stack_major_base) == 1:
+                    if len(stack_major_base) == 3:
                         excluded.append('계열기초')
                     
                     topic = ['진로탐색', '창의성', '창업', '계열기초']
@@ -1398,8 +1403,17 @@ def GE_trinity_calculate(user_id):
 
             changed_lack_GE_basic_topic[new_key] = lack_GE_basic_topic[key]
 
-        elif '소통' in key:
+        elif key == '소통':
             new_key = '논리적사고와글쓰기, 외국어'
+            excluded = []
+
+            if len(stack_write) == 1:
+                excluded.append('논리적사고와글쓰기')
+            
+            topic = ['논리적사고와글쓰기', '외국어']
+            topic = [t for t in topic if t not in excluded]
+            new_key = ', '.join(topic)
+
             changed_lack_GE_basic_topic[new_key] = lack_GE_basic_topic[key]
 
         else:
