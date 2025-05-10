@@ -1106,7 +1106,9 @@ def GE_basic_calculate_2025(lecture_dict, user_GE_standard, rest_total):
             if len(stack_major_base) == 0:
                 stack_major_base.append(1)
             elif len(stack_major_base) == 1:
-                stack_major_base.append(1)   
+                stack_major_base.append(1)
+            elif len(stack_major_base) == 2:
+                stack_major_base.append(1)      
             else:
                 continue
 
@@ -1392,7 +1394,7 @@ def GE_trinity_calculate(user_id):
                         excluded.append('창의성')
                     if len(stack_startup) == 1:
                         excluded.append('창업')
-                    if len(stack_major_base) == 2:
+                    if len(stack_major_base) == 3:
                         excluded.append('계열기초')
                     
                     topic = ['진로탐색', '창의성', '창업', '계열기초']
