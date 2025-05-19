@@ -30,7 +30,7 @@ def scraping(studentId, studentPW):
 
         student_id = driver.find_element(By.XPATH, '//*[@id="contents"]/div[2]/table/tbody/tr[1]/td[1]').text
         name = driver.find_element(By.XPATH, '//*[@id="contents"]/div[2]/table/tbody/tr[2]/td[1]').text
-        major, grade = driver.find_element(By.XPATH, '//*[@id="contents"]/div[2]/table/tbody/tr[3]/td[2]').text.split()
+        major = driver.find_element(By.XPATH, '//*[@id="contents"]/div[2]/table/tbody/tr[3]/td[2]').text[:-2]
         driver.quit()
         return student_id, name, major
 
