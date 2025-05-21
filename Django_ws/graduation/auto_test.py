@@ -29,7 +29,6 @@ def auto_test(studentId, studentPW):
         driver.find_element(By.XPATH, '//a[text()="전체 성적조회"]').click()
 
         rows = driver.find_elements(By.XPATH, '//div[@class="dataArea"]/table[3]/tbody/tr')
-        major = driver.find_element(By.XPATH, '//th[text()="소속"]/following-sibling::td[1]').text[:-3]
 
         lectures_data = []
 
@@ -43,6 +42,34 @@ def auto_test(studentId, studentPW):
 
             if grade == 'N' or grade == 'F':
                 continue
+            
+
+            if area == '전공필수':
+                area = '전필'
+            elif area == '전공선택':
+                area = '전선'
+            elif area == '교양필수':
+                area = '교필'
+            elif area == '교양선택':
+                area = '교선'
+            elif area == '일반선택':
+                area = '일선'
+            elif area == '소단위전공':
+                area = '소전'
+            elif area == '복수전공':
+                area = '복전'
+            elif area == '부전공':
+                area = '부전'
+            elif area == '연계전공':
+                area = '연계'
+            elif area == '전공기초':
+                area = '전기'
+            elif area == '전공심화':
+                area = '전심'
+            elif area == '전공기초':
+                area = '전기'
+            elif area == '공통전공':
+                area = '공통'
 
             subject_data = {
                 '이수년도': year,
@@ -58,7 +85,6 @@ def auto_test(studentId, studentPW):
 
         driver.quit()
 
-        lectures_data.append(major)
         return lectures_data
 
     except UnexpectedAlertPresentException:

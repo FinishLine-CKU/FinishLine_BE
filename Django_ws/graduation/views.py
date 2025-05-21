@@ -327,11 +327,9 @@ def oneclick_test(request):
     result = auto_test(studentId, studentPW)
 
     if isinstance(result, list):
-        major = result.pop()
-        major_code = get_major_code(major)
-
         # 기이수과목 DB처리
-        saved_subjects = save_pdf_data_to_db(result, studentId[:4], major_code)
+        major = User.objects.filter(student_id=studentId).values_list('major', flat=True).first()
+        saved_subjects = save_pdf_data_to_db(result, studentId[:4], major)
 
         data = {'success' : True}
         print(f'Success OneClick Test!\n')
