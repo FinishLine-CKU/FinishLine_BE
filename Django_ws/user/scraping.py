@@ -26,11 +26,11 @@ def scraping(studentId, studentPW):
         driver.implicitly_wait(2)
 
         driver.find_element(By.XPATH, '//a[@class="snbmenu1"]').click()
-        driver.find_element(By.XPATH, '//a[text()="학생신상기록카드조회"]').click()
+        driver.find_element(By.XPATH, '//a[text()="전체 성적조회"]').click()
 
-        student_id = driver.find_element(By.XPATH, '//*[@id="contents"]/div[2]/table/tbody/tr[1]/td[1]').text
-        name = driver.find_element(By.XPATH, '//*[@id="contents"]/div[2]/table/tbody/tr[2]/td[1]').text
-        major = driver.find_element(By.XPATH, '//*[@id="contents"]/div[2]/table/tbody/tr[3]/td[2]').text[:-2]
+        student_id = driver.find_element(By.XPATH, '//th[text()="학번"]/following-sibling::td[1]').text
+        name = driver.find_element(By.XPATH, '//th[text()="성명"]/following-sibling::td[1]').text
+        major = driver.find_element(By.XPATH, '//th[text()="소속"]/following-sibling::td[1]').text[:-3]
         driver.quit()
         return student_id, name, major
 
