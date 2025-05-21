@@ -29,6 +29,7 @@ def auto_test(studentId, studentPW):
         driver.find_element(By.XPATH, '//a[text()="전체 성적조회"]').click()
 
         rows = driver.find_elements(By.XPATH, '//div[@class="dataArea"]/table[3]/tbody/tr')
+        major = driver.find_element(By.XPATH, '//th[text()="소속"]/following-sibling::td[1]').text[:-3]
 
         lectures_data = []
 
@@ -40,19 +41,24 @@ def auto_test(studentId, studentPW):
             credit = row.find_element(By.XPATH, './td[5]').text  # 학점
             grade = row.find_element(By.XPATH, './td[6]').text  # 등급
 
+            if grade == 'N' or grade == 'F':
+                continue
+
             subject_data = {
                 '이수년도': year,
                 '학기': semester,
                 '이수구분': area,
-                '주제': topic,
+                '주제': topic if topic else ' ',
                 '교과목명': lecture_name,
                 '학점': credit,
-                '학번': grade
+                '학번': studentId
             }
 
             lectures_data.append(subject_data)
 
         driver.quit()
+
+        lectures_data.append(major)
         return lectures_data
 
     except UnexpectedAlertPresentException:
@@ -62,6 +68,7 @@ def auto_test(studentId, studentPW):
 
     except Exception as e:
         driver.quit()
-        print(f'재학생 인증 오류코드(디버깅): {e}')
+        print(f'원클릭 검사 크롤링 오류코드(디버깅): {e}')
         errorMessage = '회원 정보를 확인할 수 없습니다. 잠시 후 다시 시도해주세요.'
+        # 로그인 오류 or 크롤링 오류
         return errorMessage
