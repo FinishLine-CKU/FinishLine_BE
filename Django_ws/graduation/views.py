@@ -185,7 +185,7 @@ def upload_pdf(request):
 
                 uploaded_file.seek(0)
 
-                print("사용자:", user_id, "PDF 추출 로직 시작")
+                print("사용자:", user_id, "PDF 추출 시작")
 
                 #학번과 전공을 추출
                 extracted_major, student_year = extract_major_from_pdf_table(uploaded_file)
@@ -232,6 +232,8 @@ def general_check(request):
     #================================================================================
 
     #졸업요건 검사로직
+
+    print(f"사용자 {user_id} 졸업요건 검사 시작\n")
 
     #트리니티일 경우
     if (year > '2022'):
