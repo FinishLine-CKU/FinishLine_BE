@@ -352,7 +352,6 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
 
         #아니라면 이수영역 변경
         else:
-            print(f"사용자 전공: {major} 사용자 ID: {subject['학번']}")
 
             if "사제동행세미나" in subject['교과목명'] and major:
                 change_major_code = major[0] if isinstance(major, list) else major 
@@ -436,8 +435,9 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
                 )
                 subject_instance.save()
                 saved_subjects.append(subject_instance)
+                print(f"Successful Save to MyDoneLecture DB! ({subject['학번']}) : {subject['교과목명']}")
             else:
-                print(f"전체 데이터에서 누락된 과목: {subject['학번']} {subject['교과목명']} (전공: {major[0] if major else '미확인'})")
+                print(f"Fail Save to MyDoneLecture DB.. ({subject['학번']}) \nError : {subject['교과목명']}")
                 continue
 
     return saved_subjects

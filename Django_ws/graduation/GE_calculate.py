@@ -103,6 +103,8 @@ def get_user_GE_standard(year, user_college):
     else:
         filtered_data = GEStandard.objects.filter(연도=year).values()
 
+    print(f"사용자 입학연도: {year},{user_college} 교양요건 DB 추출: {list(filtered_data)}\n")
+
     # 23 ~ 25학번
     if(int(year) > 2022):
         
@@ -130,6 +132,9 @@ def get_user_GE_standard(year, user_college):
             {key: value for key, value in item.items() if key not in ['GEStandard_id', '연도'] and value != 0}
             for item in filtered_data
         ]
+        
+        print(f"교양영역 분리 이전 상태 확인: {cleaned_data}\n")
+
         humanism_GE_standard = [{key: value for key, value in item.items() if key in humanism_GE_data} for item in cleaned_data]
         basic_GE_standard = [{key: value for key, value in item.items() if key in basic_GE_data} for item in cleaned_data]
         fusion_GE_standard = [{key: value for key, value in item.items() if key in fusion_GE_data} for item in cleaned_data]
@@ -149,6 +154,8 @@ def get_user_GE_standard(year, user_college):
             for item in cleaned_data
         ]
 
+        print(f"교양인성 추출 확인: {humanism_GE_standard} \n교양기초 추출 확인: {basic_GE_standard} \n교양융합 추출 확인: {fusion_GE_standard}\n")
+
         for item in humanism_GE_standard:
             total_sum = sum(Decimal(value) for value in item.values())  
             item['총합'] = total_sum 
@@ -164,6 +171,8 @@ def get_user_GE_standard(year, user_college):
         data = {"humanism_GE_standard": humanism_GE_standard,
                 "basic_GE_standard": basic_GE_standard,
                 "fusion_GE_standard": fusion_GE_standard}
+        
+        print(f"교양요건 추출 완료 \n교양 인성: {humanism_GE_standard} \n교양기초: {basic_GE_standard} \n교양융합: {fusion_GE_standard}\n")
 
     # 18 ~ 22학번
     else:
@@ -178,6 +187,8 @@ def get_user_GE_standard(year, user_college):
             for item in filtered_data
         ]
 
+        print(f"교양영역 분리 이전 상태 확인: {cleaned_data}\n")
+
         essential_GE_standard = [{key: value for key, value in item.items() if key in essential_GE_data} for item in cleaned_data]
         chocie_GE_standard = [{key: value for key, value in item.items() if key in choice_GE_data} for item in cleaned_data]
         
@@ -191,6 +202,8 @@ def get_user_GE_standard(year, user_college):
             for item in cleaned_data
         ]
 
+        print(f"교양필수 추출 확인: {essential_GE_standard} \n교양선택 추출 확인: {chocie_GE_standard}\n")
+
         for item in essential_GE_standard:
             total_sum = sum(Decimal(value) for value in item.values())  
             item['총합'] = total_sum 
@@ -201,8 +214,9 @@ def get_user_GE_standard(year, user_college):
 
         data = {"essential_GE_standard":  essential_GE_standard,
                 "chocie_GE_standard": chocie_GE_standard}
+        
+        print(f"교양요건 추출 완료 \n교양필수: {essential_GE_standard} \n교양선택: {chocie_GE_standard}\n")
 
-    print("교양요건 추출", data)
     return data
 
 # 교양 부족 영역 계산
