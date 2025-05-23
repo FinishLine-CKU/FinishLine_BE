@@ -1285,7 +1285,7 @@ def rest_and_done_calculate(GE_total, lecture_dict_result, rest_total):
 
 #교양 부족학점, 부족 영역 계산
 def lack_GE_calculate(GE_humanism_standard, GE_fusion_standard, GE_basic_standard):
-    print(f"교양 인성 부족 영역: {GE_humanism_standard} \n교양 융합 부족 영역: {GE_fusion_standard} \n교양 기초 부족 영역: {GE_basic_standard}\n")
+    print(f"교양인성 부족 영역: {GE_humanism_standard} \n교양융합 부족 영역: {GE_fusion_standard} \n교양기초 부족 영역: {GE_basic_standard}\n")
     lack_GE_humanism_total = GE_humanism_standard[0]['총합']
     lack_GE_fusion_total = GE_fusion_standard[0]['총합']
     lack_GE_basic_total = GE_basic_standard[0]['총합']
@@ -1302,7 +1302,7 @@ def GE_trinity_calculate(user_id):
 
     #소속 단과대학 추출
     user_college = find_user_college(user_major)
-    print(f"사용자: {user_id} 소속 대학: {user_college}\n")
+    print(f"사용자: {user_id} 소속대학: {user_college}\n")
 
     #전체과목 데이터 추출
     lecture_dict, GE_total = get_user_GE(user_id)
@@ -1311,10 +1311,10 @@ def GE_trinity_calculate(user_id):
     user_GE_standard = get_user_GE_standard(year, user_college)
         
     lecture_dict_result, GE_humanism_standard, rest_total = GE_humanism_calculate(lecture_dict, user_GE_standard)
-    print(f'사용자: {user_id} \n교양 인성 계산 종료: {GE_humanism_standard}\n')
+    print(f'사용자: {user_id} \n교양인성 계산 종료: {GE_humanism_standard}\n')
 
     lecture_dict_result, GE_fusion_standard, rest_total, GE_humanism_standard = GE_fusion_calculate(lecture_dict_result, user_GE_standard, rest_total, GE_humanism_standard)
-    print(f'사용자: {user_id} \n교양 융합 계산 종료: {GE_fusion_standard}\n')
+    print(f'사용자: {user_id} \n교양융합 계산 종료: {GE_fusion_standard}\n')
 
 
     if (year == '2023'):
@@ -1323,7 +1323,7 @@ def GE_trinity_calculate(user_id):
     else:
         #23년도가 아닐떄에는 기존 교양기초 함수 사용
         lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search, stack_write = GE_basic_calculate_2025(lecture_dict_result, user_GE_standard, rest_total)
-    print(f'사용자: {user_id} \n교양 기초 계산 종료: {GE_basic_standard} \n')
+    print(f'사용자: {user_id} \n교양기초 계산 종료: {GE_basic_standard} \n')
 
     #일반선택 학점 및 교양 이수 학점 계산
     done_humanism_GE, done_basic_GE, done_fusion_GE, rest_total_topic = rest_and_done_calculate(GE_total, lecture_dict_result, rest_total)
