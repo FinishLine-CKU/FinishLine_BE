@@ -172,31 +172,29 @@ def upload_pdf(request):
     files = request.FILES.getlist('files')
     result_data = []
     duplicate_files = []
+    error_files = []
 
     #요청에 .pdf로 끝나는 file이 존재한다면
     for uploaded_file in files:
         if uploaded_file.name.endswith('.pdf'):
             try:
-                # pdf_bytes = io.BytesIO()
-
-                #메모리 효율을 위해 chunks로 나누어 분석
-                # for chunk in uploaded_file.chunks():
-                #     pdf_bytes.write(chunk)
 
                 uploaded_file.seek(0)
 
                 print("사용자:", user_id, "PDF 추출 시작")
 
                 #학번과 전공을 추출
-                extracted_major, student_year = extract_major_from_pdf_table(uploaded_file)
+                extracted_major, student_year, error_data = extract_major_from_pdf_table(uploaded_file)
+
+                if len(error_data) > 0:
+                    error_files.append(uploaded_file.name)
+                    continue
 
                 #pdf내부 과목목록을 추출
                 extracted_table = extract_from_pdf_table(user_id, uploaded_file)
 
                 #DB에 이수영역 변경 후 저장
-                saved_subjects = save_pdf_data_to_db(extracted_table, student_year, extracted_major)
-
-                # pdf_bytes.close()
+                duplicate_subjects, saved_subjects = save_pdf_data_to_db(extracted_table, student_year, extracted_major)
 
                 if saved_subjects: 
                     result_data.append({
@@ -204,7 +202,8 @@ def upload_pdf(request):
                         'status': 'saved',
                         'message': f"File '{uploaded_file.name}' uploaded successfully."
                     })
-                else:
+
+                if len(duplicate_subjects) > 0:
                     duplicate_files.append(uploaded_file.name)
 
             except MemoryError:
@@ -216,11 +215,14 @@ def upload_pdf(request):
                 return Response({'error': f'Error processing file {uploaded_file.name}: {str(e)}'}, status=500)
             
     logger.info("File processing completed.")
-    print(result_data)
+    print(f'정상 데이터 확인: {result_data}')
+    print(f'중복 데이터 확인: {duplicate_files}')
+    print(f'에러 데이터 확인: {error_files}')
     return Response({
         'message': 'Files processed successfully',
         'data': result_data,
         'duplicate_files': duplicate_files,
+        'error_files': error_files,
     })
 
 #졸업요건 검사 결과 전달
