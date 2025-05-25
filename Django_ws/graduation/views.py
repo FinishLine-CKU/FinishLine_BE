@@ -25,8 +25,6 @@ from .sub_major_calculate import calculate_sub_major
 from .micro_degree_calculate import calculate_lack_MD
 import io
 
-logger = logging.getLogger(__name__)
-
 #내 기이수 과목 데이터 학번으로 조회
 class MyDoneLectureModelViewSet(ModelViewSet):
     queryset = MyDoneLecture.objects.all()
@@ -193,6 +191,7 @@ def upload_pdf(request):
                 #pdf내부 과목목록을 추출
                 extracted_table = extract_from_pdf_table(user_id, uploaded_file)
 
+                print(f"사용자 전공: {extracted_major} 사용자 ID: {user_id}")
                 #DB에 이수영역 변경 후 저장
                 duplicate_subjects, saved_subjects = save_pdf_data_to_db(extracted_table, student_year, extracted_major)
 
@@ -207,17 +206,21 @@ def upload_pdf(request):
                     duplicate_files.append(uploaded_file.name)
 
             except MemoryError:
-                logger.error("메모리 부족 오류 발생 - 업로드 중단")
                 return Response({'error': '사용자가 많아 업로드할 수 없습니다. 잠시 후 다시 시도해 주세요.'}, status=500)
 
             except Exception as e:
-                logger.error(f"Error processing file {uploaded_file.name}: {str(e)}")
                 return Response({'error': f'Error processing file {uploaded_file.name}: {str(e)}'}, status=500)
             
-    logger.info("File processing completed.")
-    print(f'정상 데이터 확인: {result_data}')
-    print(f'중복 데이터 확인: {duplicate_files}')
-    print(f'에러 데이터 확인: {error_files}')
+    if len(result_data) > 0:
+        for file in result_data:
+            print(f"정상 파일 출력: {file['file']}")
+    if len(duplicate_files) > 0:
+        print(f"중복 파일 출력: {duplicate_files}") 
+    if len(error_files) > 0:
+        for file in error_data:
+            print(f"오류 파일 출력: {file['file']}")
+            print(f"오류 요인 분석: {file['message']}") 
+
     return Response({
         'message': 'Files processed successfully',
         'data': result_data,

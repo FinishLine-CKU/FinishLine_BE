@@ -271,6 +271,10 @@ def extract_major_from_pdf_table(uploaded_file):
         print(uploaded_file)
         for page in pdf.pages:
             table = page.extract_table()
+
+            for i in table:
+                print(i)
+
             if table:
                 for row in table:
                     if "학과/전공" in row:
@@ -294,7 +298,21 @@ def extract_major_from_pdf_table(uploaded_file):
                 break
 
         if (major_data is None or student_year is None):
-            error_data.append(uploaded_file)
+            for row in table:
+                if all(cell is None or cell == '' for cell in row):
+                    error_data.append({
+                        'file': uploaded_file.name,
+                        'status': 'error',
+                        'message': f"PDF form Error"
+                    })
+                    break
+                else:
+                    error_data.append({
+                        'file': uploaded_file.name,
+                        'status': 'error',
+                        'message': f"Major not found Error"
+                    })
+                    break
 
     major_code = get_major_code(major_data)
 
@@ -349,7 +367,6 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
     duplicate_subjects = []
 
     for subject in subjects_data:
-        print(f"사용자 전공: {major} 사용자 ID: {subject['학번']}")
         #중복된 데이터의 경우
         if MyDoneLecture.objects.filter(
             year=subject['이수년도'],
