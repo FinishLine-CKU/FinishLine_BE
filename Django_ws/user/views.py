@@ -182,19 +182,16 @@ def check_register(request):    # 로그인
                     'lackRestTotal' : lack_rest_total,
                     'lackTotal' : lack_total
                 }
-                print(f'Success LogIn! \n로그인 일시(KST): {user.last_login} \n이름: {user.name} \n전공코드: {user.major} \n학번: {student_id}')
             else:
                 error = '학번 또는 비밀번호가 올바르지 않습니다.'
                 data = {'error' : error}
-                print(f'Fail LogIn.. \nError: {error}')
         else:
             error = '학번 또는 비밀번호가 올바르지 않습니다.'
             data = {'error' : error}
-            print(f'Fail LogIn.. \nError: {error}')
     else:
         error = '서버가 원활하지 않습니다. 잠시 후 다시 시도해주세요.'
         data = {'error' : error}
-        print(f'Fail LogIn.. \nError: {error}')
+    print(data)
     return Response (data)
 
 @api_view(['POST'])
