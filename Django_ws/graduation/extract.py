@@ -263,12 +263,11 @@ def get_major_code(major_name):
 
 #학과, 전공, 학번 추출
 def extract_major_from_pdf_table(uploaded_file):
-    error_data = []
     uploaded_file.seek(0)  
     with pdfplumber.open(uploaded_file) as pdf:
         major_data = None  
         student_year = None
-        print(uploaded_file)
+        print(f"사용자 PDF명 {uploaded_file}\n")
         for page in pdf.pages:
             table = page.extract_table()
 
@@ -297,27 +296,10 @@ def extract_major_from_pdf_table(uploaded_file):
             if major_data and student_year:
                 break
 
-        if (major_data is None or student_year is None):
-            for row in table:
-                if all(cell is None or cell == '' for cell in row):
-                    error_data.append({
-                        'file': uploaded_file.name,
-                        'status': 'error',
-                        'message': f"PDF form Error"
-                    })
-                    break
-                else:
-                    error_data.append({
-                        'file': uploaded_file.name,
-                        'status': 'error',
-                        'message': f"Major not found Error"
-                    })
-                    break
-
     major_code = get_major_code(major_data)
 
     print(f"추출된 학과: {major_data} → 변환된 코드: {major_code}")
-    return major_code, student_year, error_data
+    return major_code, student_year
 
 #과목 목록 추출
 def extract_from_pdf_table(user_id, uploaded_file):
@@ -336,9 +318,7 @@ def extract_from_pdf_table(user_id, uploaded_file):
                 print(i)
                 
             if table:
-
                 for row in table:
-
                     if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "복전", "부전", "연계", "교필", "교선", "전공선택", "전공필수",
                                                                     "전공", "전심", "기초", "일선", "일반선택", "공통", "공통전공", "전공기본",
                                                                     "전공심화", "기초전공", "전기"]):
@@ -347,6 +327,7 @@ def extract_from_pdf_table(user_id, uploaded_file):
                         if grade in ["N", "F"]:
                             continue
                         
+                        #추출한 과목을 정해진 형식으로 저장
                         subject_data = {
                             '이수년도': year,
                             '학기': semester,
@@ -356,7 +337,6 @@ def extract_from_pdf_table(user_id, uploaded_file):
                             '학점': row[7],
                             '학번': user_id
                         }
-
                         table_data.append(subject_data)
         
     return table_data
@@ -364,7 +344,6 @@ def extract_from_pdf_table(user_id, uploaded_file):
 #전체 과목 데이터에서 과목코드를 가져와 내 기이수 과목에 저장
 def save_pdf_data_to_db(subjects_data, student_year, major=None):
     saved_subjects = []
-    duplicate_subjects = []
 
     for subject in subjects_data:
         #중복된 데이터의 경우
@@ -375,8 +354,6 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
             lecture_type=subject['이수구분'],
             user_id=subject['학번'],
         ).exists():
-            duplicate_subjects.append(subject)
-            print(f"check duplicated subject: {subject}\n")
             continue 
 
         #아니라면 이수영역 변경
@@ -464,10 +441,9 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
                 )
                 subject_instance.save()
                 saved_subjects.append(subject_instance)
-                
                 print(f"Successful Save to MyDoneLecture DB! ({subject['학번']}) : {subject['교과목명']}")
             else:
                 print(f"Fail Save to MyDoneLecture DB.. ({subject['학번']}) \nError : {subject['교과목명']}")
                 continue
 
-    return duplicate_subjects, saved_subjects
+    return saved_subjects
