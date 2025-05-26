@@ -186,6 +186,7 @@ def upload_pdf(request):
                 extracted_major, student_year, error_data = extract_major_from_pdf_table(uploaded_file)
 
                 if len(error_data) > 0:
+                    print(f"views.py에서 오류 확인")
                     for item in error_data:
                         error_message.append({
                             'file': item['file'],
