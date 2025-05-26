@@ -170,7 +170,6 @@ def upload_pdf(request):
     files = request.FILES.getlist('files')
     result_data = []
     duplicate_files = []
-    error_message = []
     error_files = []
 
     #요청에 .pdf로 끝나는 file이 존재한다면
@@ -186,12 +185,7 @@ def upload_pdf(request):
                 extracted_major, student_year, error_data = extract_major_from_pdf_table(uploaded_file)
 
                 if len(error_data) > 0:
-                    print(f"views.py에서 오류 확인")
-                    for item in error_data:
-                        error_message.append({
-                            'file': item['file'],
-                            'message': item['message']
-                        })
+                    error_files.append(uploaded_file.name)
                     continue
 
                 #pdf내부 과목목록을 추출
@@ -222,11 +216,10 @@ def upload_pdf(request):
             print(f"정상 파일 출력: {file['file']}")
     if len(duplicate_files) > 0:
         print(f"중복 파일 출력: {duplicate_files}") 
-    if len(error_message) > 0:
-        for file in error_message:
+    if len(error_files) > 0:
+        for file in error_data:
             print(f"오류 파일 출력: {file['file']}")
             print(f"오류 요인 분석: {file['message']}") 
-            error_files.append(file['file'])
 
     return Response({
         'message': 'Files processed successfully',

@@ -296,26 +296,22 @@ def extract_major_from_pdf_table(uploaded_file):
 
             if major_data and student_year:
                 break
-            elif (major_data is None or student_year is None):
-                for row in table:
-                    if all(cell is None or cell == '' for cell in row):
-                        print(f"PDF form Error")
-                        error_data.append({
-                            'file': uploaded_file.name,
-                            'status': 'error',
-                            'message': f"PDF form Error"
-                        })
-                        break
-                    else:
-                        print(f"Major not found Error")
-                        error_data.append({
-                            'file': uploaded_file.name,
-                            'status': 'error',
-                            'message': f"Major not found Error"
-                        })
-                        break
-                if len(error_data) > 0:
-                    print("오류 확인 로직 종료")
+
+        if (major_data is None or student_year is None):
+            for row in table:
+                if all(cell is None or cell == '' for cell in row):
+                    error_data.append({
+                        'file': uploaded_file.name,
+                        'status': 'error',
+                        'message': f"PDF form Error"
+                    })
+                    break
+                else:
+                    error_data.append({
+                        'file': uploaded_file.name,
+                        'status': 'error',
+                        'message': f"Major not found Error"
+                    })
                     break
 
     major_code = get_major_code(major_data)
