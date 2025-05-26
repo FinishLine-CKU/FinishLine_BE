@@ -25,6 +25,8 @@ from .sub_major_calculate import calculate_sub_major
 from .micro_degree_calculate import calculate_lack_MD
 import io
 
+logger = logging.getLogger(__name__)
+
 #내 기이수 과목 데이터 학번으로 조회
 class MyDoneLectureModelViewSet(ModelViewSet):
     queryset = MyDoneLecture.objects.all()
@@ -170,30 +172,31 @@ def upload_pdf(request):
     files = request.FILES.getlist('files')
     result_data = []
     duplicate_files = []
-    error_files = []
 
     #요청에 .pdf로 끝나는 file이 존재한다면
     for uploaded_file in files:
         if uploaded_file.name.endswith('.pdf'):
             try:
+                # pdf_bytes = io.BytesIO()
+
+                #메모리 효율을 위해 chunks로 나누어 분석
+                # for chunk in uploaded_file.chunks():
+                #     pdf_bytes.write(chunk)
 
                 uploaded_file.seek(0)
 
-                print("사용자:", user_id, "PDF 추출 시작")
+                print("사용자:", user_id, "PDF 추출 로직 시작")
 
                 #학번과 전공을 추출
-                extracted_major, student_year, error_data = extract_major_from_pdf_table(uploaded_file)
-
-                if len(error_data) > 0:
-                    error_files.append(uploaded_file.name)
-                    continue
+                extracted_major, student_year = extract_major_from_pdf_table(uploaded_file)
 
                 #pdf내부 과목목록을 추출
                 extracted_table = extract_from_pdf_table(user_id, uploaded_file)
 
-                print(f"사용자 전공: {extracted_major} 사용자 ID: {user_id}")
                 #DB에 이수영역 변경 후 저장
-                duplicate_subjects, saved_subjects = save_pdf_data_to_db(extracted_table, student_year, extracted_major)
+                saved_subjects = save_pdf_data_to_db(extracted_table, student_year, extracted_major)
+
+                # pdf_bytes.close()
 
                 if saved_subjects: 
                     result_data.append({
@@ -201,31 +204,23 @@ def upload_pdf(request):
                         'status': 'saved',
                         'message': f"File '{uploaded_file.name}' uploaded successfully."
                     })
-
-                if len(duplicate_subjects) > 0:
+                else:
                     duplicate_files.append(uploaded_file.name)
 
             except MemoryError:
+                logger.error("메모리 부족 오류 발생 - 업로드 중단")
                 return Response({'error': '사용자가 많아 업로드할 수 없습니다. 잠시 후 다시 시도해 주세요.'}, status=500)
 
             except Exception as e:
+                logger.error(f"Error processing file {uploaded_file.name}: {str(e)}")
                 return Response({'error': f'Error processing file {uploaded_file.name}: {str(e)}'}, status=500)
             
-    if len(result_data) > 0:
-        for file in result_data:
-            print(f"정상 파일 출력: {file['file']}")
-    if len(duplicate_files) > 0:
-        print(f"중복 파일 출력: {duplicate_files}") 
-    if len(error_files) > 0:
-        for file in error_data:
-            print(f"오류 파일 출력: {file['file']}")
-            print(f"오류 요인 분석: {file['message']}") 
-
+    logger.info("File processing completed.")
+    print(result_data)
     return Response({
         'message': 'Files processed successfully',
         'data': result_data,
         'duplicate_files': duplicate_files,
-        'error_files': error_files,
     })
 
 #졸업요건 검사 결과 전달
@@ -237,8 +232,6 @@ def general_check(request):
     #================================================================================
 
     #졸업요건 검사로직
-
-    print(f"사용자 {user_id} 졸업요건 검사 시작\n")
 
     #트리니티일 경우
     if (year > '2022'):
