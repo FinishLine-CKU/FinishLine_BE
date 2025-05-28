@@ -337,6 +337,6 @@ def oneclick_test(request):
     else:
         error = result
         data = {'error' : error}
-        print(f'Fail OneClick Test.. \nerror: {data}')
+        print(f'Fail OneClick Test.. \nerror: {error}')
 
     return Response(data)
