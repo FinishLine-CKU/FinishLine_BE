@@ -267,9 +267,13 @@ def extract_major_from_pdf_table(uploaded_file):
     with pdfplumber.open(uploaded_file) as pdf:
         major_data = None  
         student_year = None
-        print(uploaded_file)
+        print(f"사용자 PDF명 {uploaded_file}\n")
         for page in pdf.pages:
             table = page.extract_table()
+
+            for i in table:
+                print(i)
+
             if table:
                 for row in table:
                     if "학과/전공" in row:
@@ -307,6 +311,8 @@ def extract_from_pdf_table(user_id, uploaded_file):
         table_data = []
         for page in pdf.pages:
             table = page.extract_table()
+
+            print(f"사용자: {user_id} PDF 추출 내용\n")
 
             for i in table:
                 print(i)
@@ -435,9 +441,9 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
                 )
                 subject_instance.save()
                 saved_subjects.append(subject_instance)
-                print(f"Successful Save to MyDoneLecture DB! ({subject['학번']}) : {subject['교과목명']}")
+                print(f"사용자 학번: {subject['학번']} 전공: {major} 저장 성공:{subject['교과목명']}")
             else:
-                print(f"Fail Save to MyDoneLecture DB.. ({subject['학번']}) \nError : {subject['교과목명']}")
+                print(f"전체 데이터에서 누락된 과목: {subject['학번']} {subject['교과목명']} (전공: {major if major else '미확인'})")
                 continue
 
     return saved_subjects
