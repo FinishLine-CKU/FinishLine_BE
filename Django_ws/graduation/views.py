@@ -6,10 +6,12 @@ from rest_framework.decorators import action
 from rest_framework.response import Response
 from io import BytesIO
 from .extract import extract_from_pdf_table
+from .extract import get_major_code
 from .extract import save_pdf_data_to_db
 from .extract import extract_major_from_pdf_table
 from .GE_calculate import GE_all_calculate
 from .GE_calculate_trinity import GE_trinity_calculate
+from .auto_test import auto_test
 import logging
 from rest_framework.viewsets import ModelViewSet
 from rest_framework import status
@@ -315,3 +317,26 @@ def test_micro_degree(request):
 
     print(data)
     return Response (data)
+
+@api_view(['POST'])
+def oneclick_test(request):
+    data = request.data
+    studentId = data.get('studentId')
+    studentPW = data.get('studentPW')
+
+    result = auto_test(studentId, studentPW)
+
+    if isinstance(result, list):
+        # 기이수과목 DB처리
+        major = User.objects.filter(student_id=studentId).values_list('major', flat=True).first()
+        saved_subjects = save_pdf_data_to_db(result, studentId[:4], major)
+
+        data = {'success' : True}
+        print(f'Success OneClick Test!\n')
+
+    else:
+        error = result
+        data = {'error' : error}
+        print(f'Fail OneClick Test.. \nerror: {data}')
+
+    return Response(data)
