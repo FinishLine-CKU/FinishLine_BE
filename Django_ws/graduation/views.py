@@ -332,11 +332,11 @@ def oneclick_test(request):
         saved_subjects = save_pdf_data_to_db(result, studentId[:4], major)
 
         data = {'success' : True}
-        print(f'Success OneClick Test!\n')
+        print(f'Success OneClick Test!\n 사용자 학번: {studentId}')
 
     else:
         error = result
         data = {'error' : error}
-        print(f'Fail OneClick Test.. \nerror: {error}')
+        print(f'Fail OneClick Test.. \nError: {error} \n사용자 학번: {studentId}')
 
     return Response(data)

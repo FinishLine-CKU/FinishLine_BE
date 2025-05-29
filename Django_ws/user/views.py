@@ -25,18 +25,18 @@ def student_auth(request):    # 재학생인증
         if User.objects.filter(student_id = student_id, name = name).exists() and not isPasswordReset:
             error = '이미 가입된 회원입니다.'
             data = {'error' : error}
-            print(f'Fail Student Auth.. \nerror: {error}')
+            print(f'Fail Student Auth.. \nError: {error}')
         elif int(student_id[:4]) >= 2025 or int(student_id[:4]) <= 2017:
             error = '서비스 이용 대상이 아닙니다.'
             data = {'error' : error}
-            print(f'Fail Student Auth.. \nerror: {error}')
+            print(f'Fail Student Auth.. \nError: {error}')
         else:
             data = {'student_id': student_id, 'name' : name, 'major' : major}
             print(f'Success Student Auth! \n{major} {student_id} {name}')
     else:
         error = result
         data = {'error' : error}
-        print(f'Fail Student Auth.. \nerror: {error}')
+        print(f'Fail Student Auth.. \nError: {error} \n사용자 학번: {studentId}')
     return Response (data)
 
 @api_view(['POST'])
@@ -64,10 +64,10 @@ def register_info(request):    # 회원가입
             print(f'Success Sign Up! \n회원가입 일시(KST): {user.date_time_joined} \n이름: {user.name} \n전공코드: {user.major} \n학번: {user.student_id} \n비밀번호: {user.password} \n추가전공 종류: {user.sub_major_type} \n추가전공 코드: {user.sub_major} \n소단위전공: {user.MD}')
             return Response (True)
         except Exception as e:
-            print(f'DB 저장 오류: {repr(e)}')
+            print(f'Fail Sign Up.. \nDB 저장 오류: {repr(e)}')
             return Response (False)
     else:
-        print(f'Fail Sign Up')
+        print(f'Fail Sign Up.. \n{major} {student_id} {name}')
         return Response (False)
 
 @api_view(['POST'])
