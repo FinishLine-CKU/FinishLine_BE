@@ -89,7 +89,7 @@ def auto_test(studentId, studentPW):
 
     except UnexpectedAlertPresentException:
         driver.quit()
-        errorMessage = '아이디 또는 비밀번호를 확인해주세요.'
+        errorMessage = '아이디 또는 비밀번호를 확인해주세요. (가톨릭관동대 포털 정보 입력)'
         return errorMessage
 
     except Exception as e:
