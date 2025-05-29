@@ -62,12 +62,12 @@ def auto_test(studentId, studentPW):
                 area = '부전'
             elif area == '연계전공':
                 area = '연계'
-            elif area == '전공기초':
+            elif area == '전공기본':
                 area = '전기'
             elif area == '전공심화':
                 area = '전심'
-            elif area == '전공기초':
-                area = '전기'
+            elif area == '기초전공':
+                area = '기초'
             elif area == '공통전공':
                 area = '공통'
 

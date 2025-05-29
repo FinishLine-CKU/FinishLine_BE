@@ -119,7 +119,7 @@ class MyDoneLectureModelViewSet(ModelViewSet):
         subject = MyDoneLecture.objects.filter(user_id=user_id, lecture_code=lecture_code).first()
 
         if not subject:
-            print(f"delete요청 에러 사용자: {user_id}, {lecture_code}")
+            print(f"delete요청 에러: {user_id}, {lecture_code}")
             return Response({'detail': 'Subject not found'}, status=status.HTTP_404_NOT_FOUND)
         
         subject.delete()
@@ -179,11 +179,6 @@ def upload_pdf(request):
     for uploaded_file in files:
         if uploaded_file.name.endswith('.pdf'):
             try:
-                # pdf_bytes = io.BytesIO()
-
-                #메모리 효율을 위해 chunks로 나누어 분석
-                # for chunk in uploaded_file.chunks():
-                #     pdf_bytes.write(chunk)
 
                 uploaded_file.seek(0)
 
@@ -232,6 +227,8 @@ def general_check(request):
     year = user_id[:4]
 
     #================================================================================
+
+    print(f"{user_id} 교양 요건 계산 시작")
 
     #졸업요건 검사로직
 
