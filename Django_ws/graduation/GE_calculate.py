@@ -103,10 +103,8 @@ def get_user_GE_standard(year, user_college):
     else:
         filtered_data = GEStandard.objects.filter(연도=year).values()
 
-    if filtered_data:
-        print(f"{year} GEStandard_id: {filtered_data[0]['GEStandard_id']}\n")
-    else:
-        print(f"{year} GEStandard_id not found\n")
+    if not filtered_data:
+        print(f"GEStandard_id can not found")
 
     # 23 ~ 25학번
     if(int(year) > 2022):
@@ -221,6 +219,7 @@ def GE_all_calculate(user_id):
     done_choice_GE = liber_credit['done_choice_GE']
 
     # 교양 필수, 선택 영역 추출
+
     user_GE_standard = get_user_GE_standard(year, user_college)
     essential_GE_standard = user_GE_standard['essential_GE_standard']
     chocie_GE_standard = user_GE_standard['chocie_GE_standard']

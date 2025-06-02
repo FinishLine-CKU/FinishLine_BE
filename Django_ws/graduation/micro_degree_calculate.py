@@ -10,7 +10,7 @@ def pop_done_MD(student_id):
         ).values_list('credit', flat=True))
 
     done_MD = sum(user_MD_data)
-    print('소단위 전공 과목 총 이수학점: ', done_MD)
+    print('소단위전공 합계:', done_MD)
 
     return done_MD
     

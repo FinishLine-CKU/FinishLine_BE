@@ -12,6 +12,6 @@ def pop_done_rest(student_id):
 
     done_rest = sum(user_rest_data)
 
-    print('일선 분류 과목 총 이수학점: ', done_rest)
+    print('일반선택 과목합계:', done_rest)
 
     return done_rest

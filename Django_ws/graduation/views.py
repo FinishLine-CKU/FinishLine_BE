@@ -182,12 +182,14 @@ def upload_pdf(request):
 
                 uploaded_file.seek(0)
 
-                print("사용자:", user_id, "PDF 추출 로직 시작")
+                print(f"Start Extract PDF! \n사용자 학번: {user_id}")
 
                 #학번과 전공을 추출
                 extracted_major, student_year = extract_major_from_pdf_table(uploaded_file)
 
+                print(f"PDF 파일명: {uploaded_file}")
                 #pdf내부 과목목록을 추출
+                print(f"PDF 추출 내용: ")
                 extracted_table = extract_from_pdf_table(user_id, uploaded_file)
 
                 #DB에 이수영역 변경 후 저장
@@ -213,7 +215,6 @@ def upload_pdf(request):
                 return Response({'error': f'Error processing file {uploaded_file.name}: {str(e)}'}, status=500)
             
     logger.info("File processing completed.")
-    print(result_data)
     return Response({
         'message': 'Files processed successfully',
         'data': result_data,
@@ -228,7 +229,7 @@ def general_check(request):
 
     #================================================================================
 
-    print(f"{user_id} 교양 요건 계산 시작")
+    print(f"**Start Graduation Test** \n학번: {user_id}")
 
     #졸업요건 검사로직
 
@@ -288,7 +289,6 @@ def test_major(request):
         'lackMajor' : lack_major,  # 전공 부족 학점
         'lackSubMajor' : lack_sub_major  # 복수/부전공 부족 학점
     }
-    print(data)
     return Response (data)
 
 @api_view(['POST'])
@@ -311,8 +311,6 @@ def test_micro_degree(request):
         'restStandard' : rest_standard,
         'lackMD' : lack_MD
     }
-
-    print(data)
     return Response (data)
 
 @api_view(['POST'])
@@ -329,11 +327,11 @@ def oneclick_test(request):
         saved_subjects = save_pdf_data_to_db(result, studentId[:4], major)
 
         data = {'success' : True}
-        print(f'Success OneClick Test!\n 사용자 학번: {studentId}')
+        print(f'Success OneClick Test! \n학번: {studentId}\n전공코드: {major}')
 
     else:
         error = result
         data = {'error' : error}
-        print(f'Fail OneClick Test.. \nError: {error} \n사용자 학번: {studentId}')
+        print(f'Fail OneClick Test.. \nError: {error} \n학번: {studentId}')
 
     return Response(data)

@@ -1297,12 +1297,9 @@ def GE_trinity_calculate(user_id):
 
     user_major = User.objects.filter(student_id=user_id).values('major').first()
 
-    #18~25학년도까지 공통 함수 => 소속 단과대학, 전체 교양 과목, 사용자 교양요건 추출
-    print(f"트리니티 계산 로직 시작: {user_id} \n")
-
     #소속 단과대학 추출
     user_college = find_user_college(user_major)
-    print(f"{user_id} 소속대학: {user_college}\n")
+    print(f"소속대학: {user_college}")
 
     #전체과목 데이터 추출
     lecture_dict, GE_total = get_user_GE(user_id)
@@ -1310,9 +1307,9 @@ def GE_trinity_calculate(user_id):
     #사용자 교양요건 추출
     user_GE_standard = get_user_GE_standard(year, user_college)
 
-    print(f"{user_id} 교양 인성 기준: {user_GE_standard['humanism_GE_standard'][0]}")
-    print(f"{user_id} 교양 기초 기준: {user_GE_standard['basic_GE_standard'][0]}")
-    print(f"{user_id} 교양 융합 기준: {user_GE_standard['fusion_GE_standard'][0]}")
+    print(f"교양 인성 기준: {user_GE_standard['humanism_GE_standard'][0]}")
+    print(f"교양 기초 기준: {user_GE_standard['basic_GE_standard'][0]}")
+    print(f"교양 융합 기준: {user_GE_standard['fusion_GE_standard'][0]}")
         
     lecture_dict_result, GE_humanism_standard, rest_total = GE_humanism_calculate(lecture_dict, user_GE_standard)
 
@@ -1329,13 +1326,13 @@ def GE_trinity_calculate(user_id):
     #일반선택 학점 및 교양 이수 학점 계산
     done_humanism_GE, done_basic_GE, done_fusion_GE, rest_total_topic = rest_and_done_calculate(GE_total, lecture_dict_result, rest_total)
 
-    print(f"{user_id} 교양 인성 계산: {GE_humanism_standard[0]}")
-    print(f"{user_id} 교양 기초 계산: {GE_basic_standard[0]}")
-    print(f"{user_id} 교양 융합 계산: {GE_fusion_standard[0]}")
+    print(f"부족 영역(교양 인성): {GE_humanism_standard[0]}")
+    print(f"부족 영역(교양 기초): {GE_basic_standard[0]}")
+    print(f"부족 영역(교양 융합): {GE_fusion_standard[0]}")
 
     #최종 일반선택 학점 = 로직 후 일반선택 학점 + 남은 교양과목 총합
     rest_total = rest_total_topic
-    print(f'{user_id} 일선 학점 계산: {rest_total}\n')
+    print(f'교양 > 일선 학점: {rest_total}\n')
 
     #교양 부족 학점
     lack_GE_humanism_total, lack_GE_fusion_total, lack_GE_basic_total = lack_GE_calculate(GE_humanism_standard, GE_fusion_standard, GE_basic_standard)
