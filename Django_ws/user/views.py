@@ -61,7 +61,7 @@ def register_info(request):    # 회원가입
                 MD = micro_degree,
                 password = make_password(password)
             )
-            print(f'Success Sign Up! \n회원가입 일시(KST): {user.date_time_joined} \n이름: {user.name} \n전공코드: {user.major} \n학번: {user.student_id} \n비밀번호: {user.password} \n추가전공 종류: {user.sub_major_type} \n추가전공 코드: {user.sub_major} \n소단위전공: {user.MD}')
+            print(f'Success Sign Up! \n회원가입 일시(KST): {user.date_time_joined} \n이름: {user.name} \n전공코드: {user.major} \n학번: {user.student_id} \n비밀번호: {user.password} \n추가전공 종류: {user.sub_major_type if user.sub_major_type else False} \n추가전공 코드: {user.sub_major if user.sub_major else False} \n소단위전공: {user.MD if user.MD else False}')
             return Response (True)
         except Exception as e:
             print(f'Fail Sign Up.. \nDB 저장 오류: {repr(e)}')
@@ -182,16 +182,19 @@ def check_register(request):    # 로그인
                     'lackRestTotal' : lack_rest_total,
                     'lackTotal' : lack_total
                 }
+                print(f'Success Login! \n로그인 일시(KST): {user.last_login} \n이름: {user.name} \n전공코드: {user.major} \n학번: {user.student_id} \n기이수과목 등록 여부: {upload_pdf} \n졸업 검사 여부: {True if user.done_major else False} \n부족 학점(교양 필수): {result.get("lackEssentialGE", []) if result.get("lackEssentialGE", []) else False} \n부족 학점(교양 선택): {result.get("lackChoiceGE", []) if result.get("lackChoiceGE", []) else False} \n부족 학점(추가 전공): {user.lack_sub_major} \n부족 학점(소단위 전공): {lack_MD} \n부족 학점(일반 선택): {lack_rest_total} \n총 부족 학점: {lack_total}')
             else:
                 error = '학번 또는 비밀번호가 올바르지 않습니다.'
                 data = {'error' : error}
+                print(f'Fail Login.. \n비밀번호 복호화 오류: {error}')
         else:
             error = '학번 또는 비밀번호가 올바르지 않습니다.'
             data = {'error' : error}
+            print(f'Fail Login.. \n찾을 수 없는 회원 정보({student_id}): {error}')
     else:
         error = '서버가 원활하지 않습니다. 잠시 후 다시 시도해주세요.'
         data = {'error' : error}
-    print(data)
+        print(f'Fail Login.. \n서버 통신 오류: {error}')
     return Response (data)
 
 @api_view(['POST'])
