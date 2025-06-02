@@ -19,7 +19,7 @@ def pop_done_sub_major(student_id):
 
     done_sub_major = sum(user_sub_major_data)
 
-    print('추가 전공 과목 총 이수학점: ', done_sub_major)
+    print('추가전공 합계:', done_sub_major)
 
     return done_sub_major
 
