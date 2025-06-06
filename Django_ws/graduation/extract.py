@@ -201,65 +201,6 @@ MAJOR_MAP = {
     '자율전공학부': '033020',
     }
 
-# ' ' -> MSC교과군
-Science_Base = [
-    '4차산업혁명과융합기술의이해',
-    'Art&HomoLudens',
-    '경제학의이해',
-    '미술의이해와비평',
-    '언론학개론-인간과미디어',
-    '언론학개론-인간과소통',
-    '일반물리학',
-    '일반생물학',
-    '창의적디자인발상과표현',
-    '한국사회의이해',
-    '현대사회와법',
-    '경영학기초',
-    '기초체력의이해',
-    '문학의이해',
-    '문화관광콘텐츠스토리텔링의이해',
-    '물리학의이해',
-    '생활속의생명과학I',
-    '예비교사를위한데이터활용과보고서작성',
-    '정치학의이해',
-    '창의적컴퓨팅사고를위한파이썬',
-    '창의적사고와디자인',
-    '알기쉬운재활의이해',
-    '동양문화의이해',
-    '일반수학1',
-    '수리융합적사고와문제해결',
-    '웹프로그래밍기초',
-    '인문학적건강관리',
-    '문학적표현과언어학적원리Ⅰ',
-    '일반화학',
-    '생활속의화학',
-    '알기쉬운시장경제',
-    '예술과과학의융합',
-    '간호와생명과학',
-    '현대사회의심리이해',
-    '달콤한식음료이야기',
-    '생활속의생명과학II',
-    '서비스산업의이해',
-    '현대스포츠의세계',
-    '인공지능활용을위한데이터과학',
-    '서양문화의이해',
-    '삶과화법과교육',
-    'ICT와교육',
-    '컴퓨팅사고력',
-    '재미있는스포츠통계',
-    '국가경제의이해',
-    '생활속의물리',
-    '인간과환경',
-    '메타버스와일상생활',
-    'AcademicEnglish:Reading&Writing1',
-    '기초생명과학',
-    '동아시아문화의이해',
-    '인체생명과학Ⅰ',
-    '인체생명과학Ⅱ',
-    '전생애인간발달과건강증진',
-    '디지털시민교육'
-]
-
 def get_major_code(major_name):
     return MAJOR_MAP.get(major_name, None)
 
@@ -342,7 +283,7 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
     saved_subjects = []
 
     for subject in subjects_data:
-        #중복된 데이터의 경우
+        # 중복 데이터
         if MyDoneLecture.objects.filter(
             year=subject['이수년도'],
             semester=subject['학기'],
@@ -353,9 +294,9 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
             print(f"Check Duplicate Subject: {subject['학번']} {major if major else '-'} 교과목명: {subject['교과목명']}")
             continue 
 
-        #아니라면 이수영역 변경
+        # 학생 기이수과목 - 강의 DB 매칭 & 이수영역 전처리
         else:
-
+            # 기이수과목 - 강의 DB 매칭
             if "사제동행세미나" in subject['교과목명'] and major:
                 change_major_code = major[0] if isinstance(major, list) else major 
 
@@ -399,29 +340,34 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
                     credit=subject['학점'],
                 ).first()
 
-            if subject['이수구분'] in ['교양', '교선', '교필'] and subject['주제'] == ' ':
+            if subject['이수구분'] in ['교필', '교양'] and subject['주제'] == ' ':
                 lecture_name = subject['교과목명']
-                if '영어' in lecture_name or '중국어' in lecture_name or '일본어' in lecture_name:
-                        subject['주제'] = '외국어'
-                elif '인간' in lecture_name and ':' in lecture_name:
+                # if '영어' in lecture_name or '중국어' in lecture_name or '일본어' in lecture_name:
+                if lecture_name in AllLectureData.objects.filter(lecture_topic__icontains = '외국어').values_list('lecture_name', flat=True).distinct():
+                    subject['주제'] = '외국어'
+                # elif '인간' in lecture_name and ':' in lecture_name:
+                elif lecture_name in AllLectureData.objects.filter(lecture_topic__icontains = '인간학').values_list('lecture_name', flat=True).distinct():
                         subject['주제'] = '인간학'
-                elif 'VERUM' in lecture_name:
+                # elif 'VERUM' in lecture_name:
+                elif lecture_name in AllLectureData.objects.filter(lecture_topic__startswith = 'VERUM').values_list('lecture_name', flat=True).distinct():
                         subject['주제'] = 'VERUM캠프'
+                elif lecture_name in AllLectureData.objects.filter(lecture_topic__startswith = '봉사').values_list('lecture_name', flat=True).distinct():
+                        subject['주제'] = '봉사활동'
                 elif '논리적사고와글쓰기' in lecture_name:
                         subject['주제'] = '논리적사고와글쓰기'
-                elif '창의적사고와코딩' in lecture_name and student_year in ['2018', '2019']:
+                elif '창의적사고와코딩' in lecture_name:
+                    if student_year in ['2018', '2019']:
                         subject['주제'] = '창의적사고와코딩'
-                elif '창의적사고와코딩' in lecture_name and student_year in ['2020', '2021', '2022']:
+                    elif student_year in ['2020', '2021', '2022']:
                         subject['주제'] = 'MSC교과군'
-                elif '봉사와실천' in lecture_name:
-                        subject['주제'] = '봉사활동'
-                elif '사회봉사' in lecture_name:
-                        subject['주제'] = '균형1'
+                elif lecture_name in AllLectureData.objects.filter(lecture_topic = 'MSC교과군').values_list('lecture_name', flat=True).distinct():
+                    subject['주제'] = 'MSC교과군'
 
-                if (subject['이수구분'] in ['교필'] and subject['주제'] == ' '):
-                    lecture_name = subject['교과목명']
-                    if any(sub in lecture_name for sub in Science_Base):
-                        subject['주제'] = 'MSC교과군'
+            elif subject['이수구분'] in ['교선', '교양'] and subject['주제'] == ' ':
+                lecture_name = subject['교과목명']
+                if lecture_name in AllLectureData.objects.filter(lecture_topic = '계열기초').values_list('lecture_name', flat=True).distinct():
+                    subject['주제'] = '계열기초'
+                
 
             #내 기이수 과목에 저장
             if matching_alllecture:
