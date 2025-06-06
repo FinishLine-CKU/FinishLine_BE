@@ -342,13 +342,10 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
 
             if subject['이수구분'] in ['교필', '교양'] and subject['주제'] == ' ':
                 lecture_name = subject['교과목명']
-                # if '영어' in lecture_name or '중국어' in lecture_name or '일본어' in lecture_name:
                 if lecture_name in AllLectureData.objects.filter(lecture_topic__icontains = '외국어').values_list('lecture_name', flat=True).distinct():
-                    subject['주제'] = '외국어'
-                # elif '인간' in lecture_name and ':' in lecture_name:
+                    subject['주제'] = '외국어' 
                 elif lecture_name in AllLectureData.objects.filter(lecture_topic__icontains = '인간학').values_list('lecture_name', flat=True).distinct():
                         subject['주제'] = '인간학'
-                # elif 'VERUM' in lecture_name:
                 elif lecture_name in AllLectureData.objects.filter(lecture_topic__startswith = 'VERUM').values_list('lecture_name', flat=True).distinct():
                         subject['주제'] = 'VERUM캠프'
                 elif lecture_name in AllLectureData.objects.filter(lecture_topic__startswith = '봉사').values_list('lecture_name', flat=True).distinct():
@@ -362,12 +359,6 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
                         subject['주제'] = 'MSC교과군'
                 elif lecture_name in AllLectureData.objects.filter(lecture_topic = 'MSC교과군').values_list('lecture_name', flat=True).distinct():
                     subject['주제'] = 'MSC교과군'
-
-            elif subject['이수구분'] in ['교선', '교양'] and subject['주제'] == ' ':
-                lecture_name = subject['교과목명']
-                if lecture_name in AllLectureData.objects.filter(lecture_topic = '계열기초').values_list('lecture_name', flat=True).distinct():
-                    subject['주제'] = '계열기초'
-                
 
             #내 기이수 과목에 저장
             if matching_alllecture:
