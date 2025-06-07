@@ -415,7 +415,16 @@ def GE_all_calculate(user_id):
                 if "균형1" in choice_standard: 
                     choice_credit = choice_standard["균형1"]
 
-                    if lecture_credit == choice_credit:
+                    if lecture_credit > choice_credit:
+                        missing_credit = lecture_credit - choice_credit
+                        rest += missing_credit
+                        del choice_standard["균형1"]
+
+                        delete_items.append(needcheck)
+
+                        choice_standard["총합"] -= choice_credit
+
+                    elif lecture_credit == choice_credit:
                         del choice_standard["균형1"]
                         choice_standard["총합"] -= choice_credit
 
@@ -576,6 +585,15 @@ def GE_all_calculate(user_id):
             for choice_standard in chocie_GE_standard:
                 if "균형1" in choice_standard: 
                     choice_credit = choice_standard["균형1"]
+
+                    if lecture_credit > choice_credit:
+                        missing_credit = lecture_credit - choice_credit
+                        rest += missing_credit
+                        del choice_standard["균형1"]
+
+                        delete_items.append(needcheck)
+
+                        choice_standard["총합"] -= choice_credit
 
                     if lecture_credit == choice_credit:
                         del choice_standard["균형1"]
