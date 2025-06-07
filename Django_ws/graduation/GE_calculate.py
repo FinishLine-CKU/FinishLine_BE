@@ -496,82 +496,6 @@ def GE_all_calculate(user_id):
         if item in lectures_dict:
             lectures_dict.remove(item)
 
-    
-    ############################### 고전탐구 / 사유와지혜 / 가치와실천 / 상상력과표현 / 인문융합 ##############################
-
-    delete_items = []
-
-
-    for needcheck in lectures_dict[:]:
-        lecture_topic = needcheck['주제']
-        lecture_credit = Decimal(needcheck['학점'])
-
-        if lecture_topic in ["인간과문학", "역사와사회", "철학과예술"]:
-            for choice_standard in chocie_GE_standard:
-                if "고전탐구" in choice_standard and choice_standard["고전탐구"] == lecture_credit:
-                    del choice_standard["고전탐구"] 
-                    choice_standard["총합"] -= lecture_credit  
-                    if needcheck not in delete_items:
-                        delete_items.append(needcheck)
-                    break
-                
-                if "사유와지혜" in choice_standard and choice_standard["사유와지혜"] == lecture_credit:
-                    del choice_standard["사유와지혜"] 
-                    choice_standard["총합"] -= lecture_credit
-                    if needcheck not in delete_items:
-                        delete_items.append(needcheck)
-                    break
-
-                if "가치와실천" in choice_standard and choice_standard["가치와실천"] == lecture_credit:
-                    del choice_standard["가치와실천"] 
-                    choice_standard["총합"] -= lecture_credit
-                    if needcheck not in delete_items:
-                        delete_items.append(needcheck)
-                    break
-
-                if "상상력과표현" in choice_standard and choice_standard["상상력과표현"] == lecture_credit:
-                    del choice_standard["상상력과표현"]
-                    choice_standard["총합"] -= lecture_credit
-                    if needcheck not in delete_items:
-                        delete_items.append(needcheck)
-                    break
-
-    for item in delete_items:
-        if item in lectures_dict:
-            lectures_dict.remove(item)
-
-    
-    ############################################## 단과대학별 과목 (19학번) 반영 ##############################################
-    ################################################ 인문융합 과목 (20 ~) 반영 ################################################
-
-    delete_items = []
-
-
-    for needcheck in lectures_dict[:]:
-        lecture_topic = needcheck['주제']
-        lecture_credit = Decimal(needcheck['학점'])
-
-        if lecture_topic in ["인간과문학", "역사와사회", "철학과예술"]:
-            for choice_standard in chocie_GE_standard:
-                if "인문융합" in choice_standard and choice_standard["인문융합"] > lecture_credit:
-                    choice_credit = choice_standard["인문융합"]
-                    missing_credit = choice_credit - lecture_credit
-                    choice_standard["인문융합"] = missing_credit
-                    choice_standard["총합"] -= lecture_credit
-                    delete_items.append(needcheck)
-
-                elif "인문융합" in choice_standard and choice_standard["인문융합"] == lecture_credit: 
-                    del choice_standard["인문융합"]
-                    delete_items.append(needcheck)
-                    choice_standard["총합"] -= lecture_credit  
-                break
-
-
-    for item in delete_items:
-        if item in lectures_dict:
-            lectures_dict.remove(item)
-
-
     ######################################### 균형 1, 2, 3, 4 영역 대체과목 반영 (교집합) #########################################
 
     delete_items = []
@@ -668,6 +592,81 @@ def GE_all_calculate(user_id):
                         delete_items.append(needcheck) 
                     break
     
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+
+    
+    ############################### 고전탐구 / 사유와지혜 / 가치와실천 / 상상력과표현 / 인문융합 ##############################
+
+    delete_items = []
+
+
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        if lecture_topic in ["인간과문학", "역사와사회", "철학과예술"]:
+            for choice_standard in chocie_GE_standard:
+                if "고전탐구" in choice_standard and choice_standard["고전탐구"] == lecture_credit:
+                    del choice_standard["고전탐구"] 
+                    choice_standard["총합"] -= lecture_credit  
+                    if needcheck not in delete_items:
+                        delete_items.append(needcheck)
+                    break
+                
+                if "사유와지혜" in choice_standard and choice_standard["사유와지혜"] == lecture_credit:
+                    del choice_standard["사유와지혜"] 
+                    choice_standard["총합"] -= lecture_credit
+                    if needcheck not in delete_items:
+                        delete_items.append(needcheck)
+                    break
+
+                if "가치와실천" in choice_standard and choice_standard["가치와실천"] == lecture_credit:
+                    del choice_standard["가치와실천"] 
+                    choice_standard["총합"] -= lecture_credit
+                    if needcheck not in delete_items:
+                        delete_items.append(needcheck)
+                    break
+
+                if "상상력과표현" in choice_standard and choice_standard["상상력과표현"] == lecture_credit:
+                    del choice_standard["상상력과표현"]
+                    choice_standard["총합"] -= lecture_credit
+                    if needcheck not in delete_items:
+                        delete_items.append(needcheck)
+                    break
+
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+
+    
+    ############################################## 단과대학별 과목 (19학번) 반영 ##############################################
+    ################################################ 인문융합 과목 (20 ~) 반영 ################################################
+
+    delete_items = []
+
+
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        if lecture_topic in ["인간과문학", "역사와사회", "철학과예술"]:
+            for choice_standard in chocie_GE_standard:
+                if "인문융합" in choice_standard and choice_standard["인문융합"] > lecture_credit:
+                    choice_credit = choice_standard["인문융합"]
+                    missing_credit = choice_credit - lecture_credit
+                    choice_standard["인문융합"] = missing_credit
+                    choice_standard["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                elif "인문융합" in choice_standard and choice_standard["인문융합"] == lecture_credit: 
+                    del choice_standard["인문융합"]
+                    delete_items.append(needcheck)
+                    choice_standard["총합"] -= lecture_credit  
+                break
+
+
     for item in delete_items:
         if item in lectures_dict:
             lectures_dict.remove(item)
