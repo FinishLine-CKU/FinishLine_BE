@@ -415,7 +415,16 @@ def GE_all_calculate(user_id):
                 if "균형1" in choice_standard: 
                     choice_credit = choice_standard["균형1"]
 
-                    if lecture_credit == choice_credit:
+                    if lecture_credit > choice_credit:
+                        missing_credit = lecture_credit - choice_credit
+                        rest += missing_credit
+                        del choice_standard["균형1"]
+
+                        delete_items.append(needcheck)
+
+                        choice_standard["총합"] -= choice_credit
+
+                    elif lecture_credit == choice_credit:
                         del choice_standard["균형1"]
                         choice_standard["총합"] -= choice_credit
 
@@ -483,6 +492,106 @@ def GE_all_calculate(user_id):
     # print('수강 인정 교선 과목 (삭제) : ')
     # pprint.pprint(delete_items, width=80, sort_dicts=False)
 
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+
+    ######################################### 균형 1, 2, 3, 4 영역 대체과목 반영 (교집합) #########################################
+
+    delete_items = []
+
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        if lecture_topic == "인간과문학":
+
+            for choice_standard in chocie_GE_standard:
+                if "균형1" in choice_standard: 
+                    choice_credit = choice_standard["균형1"]
+
+                    if lecture_credit > choice_credit:
+                        missing_credit = lecture_credit - choice_credit
+                        rest += missing_credit
+                        del choice_standard["균형1"]
+
+                        delete_items.append(needcheck)
+
+                        choice_standard["총합"] -= choice_credit
+
+                    if lecture_credit == choice_credit:
+                        del choice_standard["균형1"]
+                        choice_standard["총합"] -= lecture_credit
+
+                        delete_items.append(needcheck) 
+                    break
+        
+        if lecture_topic == "역사와사회":
+
+            for choice_standard in chocie_GE_standard:
+                if "균형2" in choice_standard: 
+                    choice_credit = choice_standard["균형2"]
+
+                    if lecture_credit == choice_credit:
+                        del choice_standard["균형2"]
+                        choice_standard["총합"] -= lecture_credit
+
+                        delete_items.append(needcheck) 
+                    break
+
+        if lecture_topic == "자연과환경":
+
+            for choice_standard in chocie_GE_standard:
+                if "균형3" in choice_standard: 
+                    choice_credit = choice_standard["균형3"]
+
+                    if lecture_credit == choice_credit:
+                        del choice_standard["균형3"]
+                        choice_standard["총합"] -= lecture_credit
+
+                        delete_items.append(needcheck) 
+                    elif lecture_credit > choice_credit:
+                        missing_credit = lecture_credit - choice_credit
+                        rest += missing_credit
+                        del choice_standard["균형3"]
+
+                        choice_standard["총합"] -= choice_credit
+                    break
+
+
+        if lecture_topic == "수리와과학":
+
+            for choice_standard in chocie_GE_standard:
+                if "균형3" in choice_standard: 
+                    choice_credit = choice_standard["균형3"]
+
+                    if lecture_credit == choice_credit:
+                        del choice_standard["균형3"]
+                        choice_standard["총합"] -= lecture_credit
+
+                        delete_items.append(needcheck) 
+                    elif lecture_credit > choice_credit:
+                        missing_credit = lecture_credit - choice_credit
+                        rest += missing_credit
+                        del choice_standard["균형3"]
+
+                        choice_standard["총합"] -= choice_credit
+                    break
+
+
+        if lecture_topic == "철학과예술":
+
+            for choice_standard in chocie_GE_standard:
+                if "균형4" in choice_standard: 
+                    choice_credit = choice_standard["균형4"]
+
+                    if lecture_credit == choice_credit:
+                        del choice_standard["균형4"]
+                        choice_standard["총합"] -= lecture_credit
+
+                        delete_items.append(needcheck) 
+                    break
+    
     for item in delete_items:
         if item in lectures_dict:
             lectures_dict.remove(item)
@@ -558,98 +667,6 @@ def GE_all_calculate(user_id):
                 break
 
 
-    for item in delete_items:
-        if item in lectures_dict:
-            lectures_dict.remove(item)
-
-
-    ######################################### 균형 1, 2, 3, 4 영역 대체과목 반영 (교집합) #########################################
-
-    delete_items = []
-
-    for needcheck in lectures_dict[:]:
-        lecture_topic = needcheck['주제']
-        lecture_credit = Decimal(needcheck['학점'])
-
-        if lecture_topic == "인간과문학":
-
-            for choice_standard in chocie_GE_standard:
-                if "균형1" in choice_standard: 
-                    choice_credit = choice_standard["균형1"]
-
-                    if lecture_credit == choice_credit:
-                        del choice_standard["균형1"]
-                        choice_standard["총합"] -= lecture_credit
-
-                        delete_items.append(needcheck) 
-                    break
-        
-        if lecture_topic == "역사와사회":
-
-            for choice_standard in chocie_GE_standard:
-                if "균형2" in choice_standard: 
-                    choice_credit = choice_standard["균형2"]
-
-                    if lecture_credit == choice_credit:
-                        del choice_standard["균형2"]
-                        choice_standard["총합"] -= lecture_credit
-
-                        delete_items.append(needcheck) 
-                    break
-
-        if lecture_topic == "자연과환경":
-
-            for choice_standard in chocie_GE_standard:
-                if "균형3" in choice_standard: 
-                    choice_credit = choice_standard["균형3"]
-
-                    if lecture_credit == choice_credit:
-                        del choice_standard["균형3"]
-                        choice_standard["총합"] -= lecture_credit
-
-                        delete_items.append(needcheck) 
-                    elif lecture_credit > choice_credit:
-                        missing_credit = lecture_credit - choice_credit
-                        rest += missing_credit
-                        del choice_standard["균형3"]
-
-                        choice_standard["총합"] -= choice_credit
-                    break
-
-
-        if lecture_topic == "수리와과학":
-
-            for choice_standard in chocie_GE_standard:
-                if "균형3" in choice_standard: 
-                    choice_credit = choice_standard["균형3"]
-
-                    if lecture_credit == choice_credit:
-                        del choice_standard["균형3"]
-                        choice_standard["총합"] -= lecture_credit
-
-                        delete_items.append(needcheck) 
-                    elif lecture_credit > choice_credit:
-                        missing_credit = lecture_credit - choice_credit
-                        rest += missing_credit
-                        del choice_standard["균형3"]
-
-                        choice_standard["총합"] -= choice_credit
-                    break
-
-
-        if lecture_topic == "철학과예술":
-
-            for choice_standard in chocie_GE_standard:
-                if "균형4" in choice_standard: 
-                    choice_credit = choice_standard["균형4"]
-
-                    if lecture_credit == choice_credit:
-                        del choice_standard["균형4"]
-                        choice_standard["총합"] -= lecture_credit
-
-                        delete_items.append(needcheck) 
-                    break
-    
     for item in delete_items:
         if item in lectures_dict:
             lectures_dict.remove(item)
