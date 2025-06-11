@@ -25,6 +25,7 @@ from .serializers import NowLectureDataSerializer
 from .major_calculate import calculate_major
 from .sub_major_calculate import calculate_sub_major
 from .micro_degree_calculate import calculate_lack_MD
+from .education_calculate import calculate_lack_education
 import io
 
 logger = logging.getLogger(__name__)
@@ -311,6 +312,20 @@ def test_micro_degree(request):
         'restStandard' : rest_standard,
         'lackMD' : lack_MD
     }
+    return Response (data)
+
+@api_view(['POST'])
+def test_education(request):
+    data = request.data
+    student_id = data.get('student_id')
+    education_standard, done_education, lack_education = calculate_lack_education(student_id)
+
+    data = {
+        'doneEducation' : done_education,
+        'EducationStandard' : education_standard,
+        'lackEducation' : lack_education
+    }
+
     return Response (data)
 
 @api_view(['POST'])
