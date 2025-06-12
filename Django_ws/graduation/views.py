@@ -318,12 +318,10 @@ def test_micro_degree(request):
 def test_education(request):
     data = request.data
     student_id = data.get('student_id')
-    done_education, done_education_rest, education_standard, lack_education = calculate_lack_education(student_id)
+    done_education_rest, lack_education = calculate_lack_education(student_id)
 
     data = {
-        'doneEducation' : done_education,
         'doneEducationRest': done_education_rest,
-        'EducationStandard' : education_standard,
         'lackEducation' : lack_education,
     }
 
