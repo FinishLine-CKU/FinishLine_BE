@@ -349,7 +349,7 @@ def GE_all_calculate(user_id):
                     del essential_stanadard["MSC교과군"]
                     delete_items.append(needcheck)
                     
-                    essential_stanadard["총합"] -= choice_credit    # 학점 기준 초과 시 반영
+                    essential_stanadard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                 else:
                     break
 
@@ -389,7 +389,7 @@ def GE_all_calculate(user_id):
                     del essential_stanadard["창의적사고와코딩"]
                     delete_items.append(needcheck)
                     
-                    essential_stanadard["총합"] -= choice_credit    # 학점 기준 초과 시 반영
+                    essential_stanadard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                 else:
                     break
 
