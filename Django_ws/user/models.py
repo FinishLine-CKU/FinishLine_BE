@@ -25,7 +25,6 @@ class User(models.Model):
     done_sub_major = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_sub_major_rest = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_MD = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
-    done_education = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_education_rest = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     done_MD_rest = models.DecimalField(max_digits=5, decimal_places=1, blank=True, null=True)
     
