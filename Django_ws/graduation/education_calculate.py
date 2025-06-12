@@ -65,33 +65,39 @@ def select_user_standard(student_id):
         major = '일반학과'
 
     sub_major_type = user_info['sub_major_type']
+
+    # 교직 복전/부전공 이수 시 졸업요건에서 소단위 전공 제외 (추후)
+    if sub_major_type == '':
+        sub_major_type = None
+
     education_standard = Standard.objects.filter(year = year, college = major, sub_major_type = sub_major_type).values_list('education_standard', flat=True).first()
 
-    return education_standard, major
+    return education_standard
 
 def calculate_lack_education(student_id):
     done_education = pop_user_education(student_id)
-    education_standard, major = select_user_standard(student_id)
+    education_standard = select_user_standard(student_id)
 
-    if major == '사범대학':
+    # 비 사범대학
+    if education_standard == None:
+        education_standard = 0
+        lack_education = 0
+        done_education_rest = done_education
+        User.objects.filter(student_id = student_id).update(done_education_rest = done_education_rest)
 
+    # 사범대학
+    else:
         lack_education = education_standard - done_education
+        done_education_rest = 0
 
         if lack_education < 0:
+            done_education_rest = abs(lack_education)
             lack_education = 0
 
         User.objects.filter(student_id = student_id).update(
-        done_education = done_education,
-        lack_education = lack_education)
+            done_education = done_education,
+            done_education_rest = done_education_rest,
+            lack_education = lack_education
+        )
 
-        done_education_rest = None
-    
-    else: #일반대학
-        done_education_rest = done_education
-        User.objects.filter(student_id = student_id).update(
-        done_education_rest = done_education)
-
-        # education_standard = None
-        lack_education = None
-
-    return education_standard, done_education, lack_education, done_education_rest
+    return done_education, done_education_rest, education_standard, lack_education
