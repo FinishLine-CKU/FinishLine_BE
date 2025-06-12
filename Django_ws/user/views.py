@@ -98,16 +98,10 @@ def check_register(request):    # 로그인
             user = User.objects.filter(student_id = student_id).first()
             upload_pdf = MyDoneLecture.objects.filter(user_id = student_id).exists()    # 기이수과목 DB 확인
             if user.done_major == None:
-                if year > '2022':
-                    result = {
-                        "lackEssentialGE": None,
-                        "lackChoiceGE": None
-                    }
-                else:
-                    result = {
-                        "lackEssentialGE": None,
-                        "lackChoiceGE": None
-                    }
+                result = {
+                    "lackEssentialGE": None,
+                    "lackChoiceGE": None
+                }
                 lack_MD = None
                 lack_rest_total = None
                 lack_total = None

@@ -96,7 +96,6 @@ class Standard(models.Model):
     choice_GE_standard = models.DecimalField(max_digits=4, decimal_places=1, blank=True, null=True)
     rest_standard = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
     MD_standard = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
-    education_standard = models.DecimalField(max_digits=3, decimal_places=1, blank=True, null=True)
     
     def __str__(self):
         return self.college
