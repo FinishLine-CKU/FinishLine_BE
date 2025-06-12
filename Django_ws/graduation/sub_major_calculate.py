@@ -47,6 +47,10 @@ def select_user_standard(student_id):
     elif user_info['major'] == '03300117':
         major = '건축학'
 
+    elif user_info['major'] in education_college:
+        major = '사범대학'
+        # 2023 ~ 2025 : 교직과, 국어교육과, 수학교육과, 역사교육과, 영어교육과, 지리교육과, 체육교육과, 컴퓨터교육과
+
     # 입학년도 별 분류
     elif (int(year) <= 2021) and (user_info['major'] == '03300118'):
         major = '건축공학'
@@ -69,9 +73,6 @@ def select_user_standard(student_id):
             # 2023 : 산림치유, 언어재활, 중독재활상담, 치매전문재활, 통합치유
             # 2024 ~ 2025 : (복지상담), (스마트통합치유), 산림치유, 언어재활, 치매전문재활, (해양치유레저)
         
-        elif user_info['major'] in education_college:
-            major = '사범대학'
-            # 2023 ~ 2025 : 교직과, 국어교육과, 수학교육과, 역사교육과, 영어교육과, 지리교육과, 체육교육과, 컴퓨터교육과
         else:
             major = '일반학과'
     else :
