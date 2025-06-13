@@ -137,9 +137,13 @@ def check_register(request):    # 로그인
 
                 if user.done_education_rest == None:
                     done_education_rest = 0
+                else:
+                    done_education_rest = user.done_education_rest
 
                 if user.done_rest == None:
                     done_rest = 0
+                else:
+                    done_rest = user.done_rest
 
                 if standard_id.rest_standard == None:
                     rest_standard = 0
