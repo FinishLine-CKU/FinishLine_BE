@@ -158,7 +158,18 @@ def check_register(request):    # 로그인
                 else:
                     lack_MD = user.lack_MD
 
-                lack_total = user.lack_major + lack_sub_major + user.lack_GE + lack_MD + lack_rest_total  # 부족한 학점 총계
+                # 졸업요건 검사 오류 케이스 로그인 오류 예외처리
+                if user.lack_major == None:
+                    lack_major = 0
+                else:
+                    lack_major = user.lack_major
+                
+                if user.lack_GE == None:
+                    lack_GE = 0
+                else:
+                    lack_GE = user.lack_GE
+
+                lack_total = lack_major + lack_sub_major + lack_GE + lack_MD + lack_rest_total  # 부족한 학점 총계
 
 
             if check_password(password, user.password):
