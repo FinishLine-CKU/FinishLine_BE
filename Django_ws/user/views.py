@@ -135,17 +135,23 @@ def check_register(request):    # 로그인
                 else:
                     done_MD_rest = user.done_MD_rest
 
+                if user.done_education_rest == None:
+                    done_education_rest = 0
+
+                if user.done_rest == None:
+                    done_rest = 0
+
                 if standard_id.rest_standard == None:
                     rest_standard = 0
                 else:
                     rest_standard = standard_id.rest_standard
 
-                lack_rest_total = rest_standard - (done_major_rest + done_sub_major_rest + done_GE_rest + done_MD_rest)
+                lack_rest_total = rest_standard - (done_major_rest + done_sub_major_rest + done_GE_rest + done_MD_rest + done_education_rest + done_rest)
 
                 if lack_rest_total < 0:
                     lack_rest_total = 0
                 
-                user.lack_rest = lack_rest_total  # 부족한 일선 총 학점 저장
+                user.lack_rest = lack_rest_total  # 부족한 일선 총 학점 저장 (재방문 확인 가능)
                 user.save()
 
                 if user.lack_sub_major == None:
