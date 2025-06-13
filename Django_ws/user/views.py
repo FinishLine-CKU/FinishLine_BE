@@ -98,16 +98,10 @@ def check_register(request):    # 로그인
             user = User.objects.filter(student_id = student_id).first()
             upload_pdf = MyDoneLecture.objects.filter(user_id = student_id).exists()    # 기이수과목 DB 확인
             if user.done_major == None:
-                if year > '2022':
-                    result = {
-                        "교양 인성, 기초 부족 학점": None,
-                        "교양 융합 부족 학점": None
-                    }
-                else:
-                    result = {
-                        "교양필수 부족 학점": None,
-                        "교양선택 부족 학점": None
-                    }
+                result = {
+                    "lackEssentialGE": None,
+                    "lackChoiceGE": None
+                }
                 lack_MD = None
                 lack_rest_total = None
                 lack_total = None
@@ -141,17 +135,23 @@ def check_register(request):    # 로그인
                 else:
                     done_MD_rest = user.done_MD_rest
 
+                if user.done_education_rest == None:
+                    done_education_rest = 0
+
+                if user.done_rest == None:
+                    done_rest = 0
+
                 if standard_id.rest_standard == None:
                     rest_standard = 0
                 else:
                     rest_standard = standard_id.rest_standard
 
-                lack_rest_total = rest_standard - (done_major_rest + done_sub_major_rest + done_GE_rest + done_MD_rest)
+                lack_rest_total = rest_standard - (done_major_rest + done_sub_major_rest + done_GE_rest + done_MD_rest + done_education_rest + done_rest)
 
                 if lack_rest_total < 0:
                     lack_rest_total = 0
                 
-                user.lack_rest = lack_rest_total  # 부족한 일선 총 학점 저장
+                user.lack_rest = lack_rest_total  # 부족한 일선 총 학점 저장 (재방문 확인 가능)
                 user.save()
 
                 if user.lack_sub_major == None:
@@ -164,7 +164,18 @@ def check_register(request):    # 로그인
                 else:
                     lack_MD = user.lack_MD
 
-                lack_total = + user.lack_major + lack_sub_major + user.lack_GE + lack_MD + lack_rest_total  # 부족한 학점 총계
+                # 졸업요건 검사 오류 케이스 로그인 오류 예외처리
+                if user.lack_major == None:
+                    lack_major = 0
+                else:
+                    lack_major = user.lack_major
+                
+                if user.lack_GE == None:
+                    lack_GE = 0
+                else:
+                    lack_GE = user.lack_GE
+
+                lack_total = lack_major + lack_sub_major + lack_GE + lack_MD + lack_rest_total  # 부족한 학점 총계
 
 
             if check_password(password, user.password):

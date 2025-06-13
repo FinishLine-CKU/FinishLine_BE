@@ -18,5 +18,6 @@ urlpatterns = [
     path('api/mydonelecture/<int:pk>/', MyDoneLectureModelViewSet.as_view({'delete': 'destroy'}), name='delete_my_done_lecture'),
     path('test_major/', views.test_major, name='test_major'),
     path('test_micro_degree/', views.test_micro_degree, name='test_micro_degree'),
+    path('test_education/', views.test_education, name='test_education'),
     path('oneclick_test/', views.oneclick_test, name='oneclick_test'),
 ]
