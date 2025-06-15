@@ -27,6 +27,7 @@ from .sub_major_calculate import calculate_sub_major
 from .micro_degree_calculate import calculate_lack_MD
 from .education_calculate import calculate_lack_education
 import io
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -175,51 +176,61 @@ def upload_pdf(request):
     files = request.FILES.getlist('files')
     result_data = []
     duplicate_files = []
+    error_files = []
+    image_files = []
 
     #요청에 .pdf로 끝나는 file이 존재한다면
     for uploaded_file in files:
-        if uploaded_file.name.endswith('.pdf'):
-            try:
+        try:
+            if uploaded_file.name.endswith('.pdf'):
 
-                uploaded_file.seek(0)
+                    uploaded_file.seek(0)
 
-                print(f"Start Extract PDF! \n사용자 학번: {user_id}")
+                    print(f"Start Extract PDF! \n사용자 학번: {user_id}")
 
-                #학번과 전공을 추출
-                extracted_major, student_year = extract_major_from_pdf_table(uploaded_file)
+                    #학번과 전공을 추출
+                    extracted_major, student_year = extract_major_from_pdf_table(uploaded_file)
 
-                print(f"PDF 파일명: {uploaded_file}")
-                #pdf내부 과목목록을 추출
-                print(f"PDF 추출 내용: ")
-                extracted_table = extract_from_pdf_table(user_id, uploaded_file)
+                    print(f"PDF 파일명: {uploaded_file}")
+                    #pdf내부 과목목록을 추출
+                    print(f"PDF 추출 내용: ")
+                    extracted_table = extract_from_pdf_table(user_id, uploaded_file)
 
-                #DB에 이수영역 변경 후 저장
-                saved_subjects = save_pdf_data_to_db(extracted_table, student_year, extracted_major)
+                    #DB에 이수영역 변경 후 저장
+                    saved_subjects, duplicate_subjects = save_pdf_data_to_db(extracted_table, student_year, extracted_major)
 
-                # pdf_bytes.close()
 
-                if saved_subjects: 
-                    result_data.append({
-                        'file': uploaded_file.name,
-                        'status': 'saved',
-                        'message': f"File '{uploaded_file.name}' uploaded successfully."
-                    })
-                else:
-                    duplicate_files.append(uploaded_file.name)
-
-            except MemoryError:
-                logger.error("메모리 부족 오류 발생 - 업로드 중단")
-                return Response({'error': '사용자가 많아 업로드할 수 없습니다. 잠시 후 다시 시도해 주세요.'}, status=500)
-
-            except Exception as e:
-                logger.error(f"Error processing file {uploaded_file.name}: {str(e)}")
-                return Response({'error': f'Error processing file {uploaded_file.name}: {str(e)}'}, status=500)
+                    if duplicate_subjects: 
+                        duplicate_files.append(uploaded_file.name)
+                    elif saved_subjects: 
+                        result_data.append(uploaded_file.name)
+                    else: 
+                        raise ValueError("PDF DB 저장 실패")
+        
+            else:
+                raise ValueError("PDF 형식 오류: 이미지 기반 PDF")
             
-    logger.info("File processing completed.")
+        except MemoryError:
+            return Response({'error': '사용자가 많아 업로드할 수 없습니다. 잠시 후 다시 시도해 주세요.'}, status=500)
+        
+        except ValueError as e:
+            error_msg = str(e)
+            if error_msg == "PDF 형식 오류: 이미지 기반 PDF":
+                image_files.append(uploaded_file.name)
+                print(f'error: {user_id} {str(e)}')
+            else:
+                error_files.append(uploaded_file.name)
+                print(f'error: {user_id} {str(e)}')
+
+        except Exception as e:
+            return Response({'error': f'Error processing file {uploaded_file.name}: {str(e)}'}, status=500)
+            
     return Response({
         'message': 'Files processed successfully',
         'data': result_data,
         'duplicate_files': duplicate_files,
+        'error_files': error_files,
+        'image_files': image_files,
     })
 
 #졸업요건 검사 결과 전달
