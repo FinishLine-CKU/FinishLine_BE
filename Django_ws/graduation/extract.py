@@ -213,27 +213,26 @@ def extract_major_from_pdf_table(uploaded_file):
         for page in pdf.pages:
             table = page.extract_table()
 
+            if table is None:
+                raise ValueError("PDF 형식 오류: 이미지 기반 PDF")
+
+            for i in table:
+                print(i)
+
             if table:
                 for row in table:
-                    if "학과/전공" in row:
-                        for cell in row:
-                            if cell and "학과/전공" not in cell:
-                                major_data = cell.strip()
-                                break
-                    if major_data:
+                    if "학과/전공" in row and row[3]:
+                        major_data = row[3].strip()
                         break
 
                 for row in table:
-                    if '학 번' in row:
-                        for cell in row:
-                            if cell and "학 번" not in cell:
-                                student_year = cell.strip()[:4]
-                                break
-                    if student_year:
+                    if "학 번" in row and row[3]:
+                        student_year = row[3][:4].strip()
                         break
 
-            if major_data and student_year:
-                break
+            if major_data is None or student_year is None:
+                raise ValueError("PDF 형식 오류: pdf Nonetype")
+                
 
     major_code = get_major_code(major_data)
 
@@ -250,15 +249,12 @@ def extract_from_pdf_table(user_id, uploaded_file):
         table_data = []
         for page in pdf.pages:
             table = page.extract_table()
-
-            for i in table:
-                print(i)
                 
             if table:
                 for row in table:
-                    if any(subject_type in row for subject_type in ["교양", "전필", "전선", "소전", "복전", "부전", "연계", "교필", "교선", "전공선택", "전공필수",
+                    if row[0] and row[0] in ["교양", "전필", "전선", "소전", "복전", "부전", "연계", "교필", "교선", "전공선택", "전공필수",
                                                                     "전공", "전심", "기초", "일선", "일반선택", "공통", "공통전공", "전공기본",
-                                                                    "전공심화", "기초전공", "전기", "교직"]):
+                                                                    "전공심화", "기초전공", "전기", "교직"]:
                         grade = row[9].strip() if row[9] else "" 
 
                         if grade in ["N", "F"]:
@@ -275,12 +271,19 @@ def extract_from_pdf_table(user_id, uploaded_file):
                             '학번': user_id
                         }
                         table_data.append(subject_data)
-            continue
+            
+            else:
+                raise ValueError("PDF 형식 오류: 이미지 기반 PDF")
+            
+        if len(table_data) == 0:
+            raise ValueError("PDF 형식 오류: 과목 추출 불가")
+
     return table_data
 
 #전체 과목 데이터에서 과목코드를 가져와 내 기이수 과목에 저장
 def save_pdf_data_to_db(subjects_data, student_year, major=None):
     saved_subjects = []
+    duplicate_subjects = []
 
     for subject in subjects_data:
         # 중복 데이터
@@ -292,6 +295,7 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
             user_id=subject['학번'],
         ).exists():
             print(f"Check Duplicate Subject: {subject['학번']} {major if major else '-'} 교과목명: {subject['교과목명']}")
+            duplicate_subjects.append(subject)
             continue 
 
         # 학생 기이수과목 - 강의 DB 매칭 & 이수영역 전처리
@@ -377,7 +381,7 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
                 saved_subjects.append(subject_instance)
                 print(f"Saved to DB: {subject['학번']} {major if major else '-'} 교과목명: {subject['교과목명']}")
             else:
-                print(f"Fail save to DB: {subject['학번']} {major if major else '-'} 이수구분: {subject['이수구분']} 교과목명: {subject['교과목명']}")
+                print(f"Fail save to DB: {subject['학번']} 이수년도: {subject['이수년도']} 학기: {subject['학기']} 이수구분: {subject['이수구분']} 교과목명: {subject['교과목명']}")
                 continue
 
-    return saved_subjects
+    return saved_subjects, duplicate_subjects
