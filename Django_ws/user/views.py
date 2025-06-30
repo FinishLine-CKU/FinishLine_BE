@@ -283,7 +283,7 @@ def change_info(request):    # 회원정보 수정
 
     # 사범대학 교직 복수전공 선택
     if sub_major_type == 'double' and sub_major in education_college:
-                sub_major_type = 'double(education)'
+        sub_major_type = 'double(education)'
 
     if student_id:
         user = User.objects.filter(student_id = student_id).first()
