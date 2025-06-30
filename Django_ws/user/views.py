@@ -12,6 +12,7 @@ from rest_framework.response import Response
 from django.http import HttpResponse
 from datetime import timedelta, datetime, timezone
 
+education_college = ['030701*', '030704*', '030710*', '030709*', '030702*', '030705*', '030707*']
 
 @api_view(['POST'])
 def student_auth(request):    # 재학생인증
@@ -51,6 +52,10 @@ def register_info(request):    # 회원가입
     password = data.get('password')
     if name and major and student_id and password:
         try:
+            # 사범대학 교직 복수전공 선택
+            if sub_major_type == 'double' and sub_major in education_college:
+                sub_major_type = 'double(education)'
+
             user = User.objects.create(
                 date_time_joined = (datetime.now(timezone.utc) + timedelta(hours=9)),
                 name = name,
@@ -223,7 +228,13 @@ def my_info(request):    # 마이페이지
             'student_id' : user.student_id,
         }
         if user.sub_major_type and user.sub_major:
-            data['sub_major_type'] = user.sub_major_type
+            # 사범대학 교직 복수전공 선택
+            if user.sub_major_type == 'double(education)':
+                sub_major_type = 'double'
+                data['sub_major_type'] = sub_major_type
+            else:
+                data['sub_major_type'] = user.sub_major_type
+
             data['sub_major'] = user.sub_major
         if user.MD:
             data['micro_degree'] = user.MD
@@ -269,6 +280,11 @@ def change_info(request):    # 회원정보 수정
     sub_major_type = data.get('sub_major_type')
     sub_major = data.get('sub_major')
     micro_degree = data.get('micro_degree')
+
+    # 사범대학 교직 복수전공 선택
+    if sub_major_type == 'double' and sub_major in education_college:
+        sub_major_type = 'double(education)'
+
     if student_id:
         user = User.objects.filter(student_id = student_id).first()
         user.sub_major_type = sub_major_type

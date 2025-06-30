@@ -71,7 +71,7 @@ class MyDoneLectureModelViewSet(ModelViewSet):
                 elif(user_sub_major_type['sub_major_type']):
                     user_sub_major_type_data = user_sub_major_type['sub_major_type']
 
-                    if(user_sub_major_type_data == 'double'):
+                    if(user_sub_major_type_data == 'double' or user_sub_major_type_data == 'double(education)'):
                         if(user_sub_major['sub_major'] == subject_major_code['major_code']):
                             subject['lecture_type'] = '복전'
                             print('과목찾기 : ', user_id, "복전으로 변경 : ",  lecture_code, subject_major_code)
@@ -272,7 +272,7 @@ def general_check(request):
 def test_major(request):
     data = request.data
     student_id = data.get('student_id')
-    sub_major_type = User.objects.filter(student_id = student_id).values_list('sub_major_type', flat=True)
+    sub_major_type = User.objects.filter(student_id = student_id).values_list('sub_major_type', flat=True).first()
 
     lack_major, done_major, standard_id = calculate_major(student_id)
     lack_sub_major, done_sub_major, standard_id,  = calculate_sub_major(student_id)
@@ -285,9 +285,13 @@ def test_major(request):
         done_sub_major = 0
         sub_major_standard = 0
 
+    # 사범대학 교직 복수전공 선택
+    if sub_major_type == 'double(education)':
+        sub_major_type = 'double'
+
     data = {
         'major' : major,  # 전공명
-        'subMajorType' : standard.sub_major_type,
+        'subMajorType' : sub_major_type,
         'doneMajor' : done_major,  # 전공 이수 학점
         'doneSubMajor' : done_sub_major,
         'doneMajorRest' : done_major_rest,  # 전공 > 일선 학점
