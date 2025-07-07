@@ -27,7 +27,7 @@ def student_auth(request):    # 재학생인증
             error = '이미 가입된 회원입니다.'
             data = {'error' : error}
             print(f'Fail Student Auth.. \nError: {error}')
-        elif int(student_id[:4]) >= 2025 or int(student_id[:4]) <= 2017:
+        elif int(student_id[:4]) <= 2017:
             error = '서비스 이용 대상이 아닙니다.'
             data = {'error' : error}
             print(f'Fail Student Auth.. \nError: {error}')
