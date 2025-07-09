@@ -26,7 +26,7 @@ def scraping(studentId, studentPW):
         driver.implicitly_wait(2)
 
         driver.find_element(By.XPATH, '//a[@class="snbmenu1"]').click()
-        driver.find_element(By.XPATH, '//a[text()="이수구분별 학점조회"]').click()
+        driver.find_element(By.XPATH, '//a[text()="전체 성적조회"]').click()
 
         student_id = driver.find_element(By.XPATH, '//th[text()="학번"]/following-sibling::td[1]').text
         name = driver.find_element(By.XPATH, '//th[text()="성명"]/following-sibling::td[1]').text
