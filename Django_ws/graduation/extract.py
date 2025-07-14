@@ -348,12 +348,11 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
                 lecture_name = subject['교과목명']
                 if lecture_name in AllLectureData.objects.filter(lecture_topic__icontains = '외국어').values_list('lecture_name', flat=True).distinct():
                     subject['주제'] = '외국어' 
-                elif '인간학' in lecture_name:
-                    if student_year == '2018':
-                        if '철학적인간학' in lecture_name:
-                            subject['주제'] = '철학적인간학'
-                        elif '신학적인간학' in lecture_name:
-                            subject['주제'] = '신학적인간학'
+                elif lecture_name in AllLectureData.objects.filter(lecture_topic__icontains = '인간학').values_list('lecture_name', flat=True).distinct():
+                    if '철학적인간학' in lecture_name:
+                        subject['주제'] = '철학적인간학'
+                    elif '신학적인간학' in lecture_name:
+                        subject['주제'] = '신학적인간학'
                     else:
                         subject['주제'] = '인간학'
                 elif lecture_name in AllLectureData.objects.filter(lecture_topic__startswith = 'VERUM').values_list('lecture_name', flat=True).distinct():
