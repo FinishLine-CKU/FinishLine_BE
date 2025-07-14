@@ -348,14 +348,20 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
                 lecture_name = subject['교과목명']
                 if lecture_name in AllLectureData.objects.filter(lecture_topic__icontains = '외국어').values_list('lecture_name', flat=True).distinct():
                     subject['주제'] = '외국어' 
-                elif lecture_name in AllLectureData.objects.filter(lecture_topic__icontains = '인간학').values_list('lecture_name', flat=True).distinct():
+                elif '인간학' in lecture_name:
+                    if student_year == '2018':
+                        if '철학적인간학' in lecture_name:
+                            subject['주제'] = '철학적인간학'
+                        elif '신학적인간학' in lecture_name:
+                            subject['주제'] = '신학적인간학'
+                    else:
                         subject['주제'] = '인간학'
                 elif lecture_name in AllLectureData.objects.filter(lecture_topic__startswith = 'VERUM').values_list('lecture_name', flat=True).distinct():
-                        subject['주제'] = 'VERUM캠프'
+                    subject['주제'] = 'VERUM캠프'
                 elif lecture_name in AllLectureData.objects.filter(lecture_topic__startswith = '봉사').values_list('lecture_name', flat=True).distinct():
-                        subject['주제'] = '봉사활동'
+                    subject['주제'] = '봉사활동'
                 elif '논리적사고와글쓰기' in lecture_name:
-                        subject['주제'] = '논리적사고와글쓰기'
+                    subject['주제'] = '논리적사고와글쓰기'
                 elif '창의적사고와코딩' in lecture_name:
                     if student_year in ['2018', '2019']:
                         subject['주제'] = '창의적사고와코딩'
