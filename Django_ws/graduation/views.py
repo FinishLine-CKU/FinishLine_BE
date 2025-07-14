@@ -139,13 +139,18 @@ class AllLectureDataModelViewSet(ModelViewSet):
     @action(detail=False, methods=['get'], url_path='filter')
     def filter_by_code(self, request): 
         lectureCode = request.query_params.get('code')
+        searchType = request.query_params.get('searchType')
 
-        if len(lectureCode) > 9:
-            lectureCode
-        else:
-            lectureCode = lectureCode[:6] + "-" + lectureCode[6:9]
+        if searchType == 'searchCode':
+            if len(lectureCode) > 9:
+                lectureCode
+            else:
+                lectureCode = lectureCode[:6] + "-" + lectureCode[6:9]
+            
+            queryset = AllLectureData.objects.filter(lecture_code=lectureCode)
 
-        queryset = AllLectureData.objects.filter(lecture_code=lectureCode)
+        elif searchType == 'searchName':
+            queryset = AllLectureData.objects.filter(lecture_name__icontains=lectureCode)
         
         serializer = self.get_serializer(queryset, many=True)
         return Response(serializer.data)
@@ -168,12 +173,15 @@ class NowLectureModelViewSet(ModelViewSet):
             else:
                 lectureCode = lectureCode[:6] + "-" + lectureCode[6:9]
                 
-            queryset = NowLectureData.objects.filter(lecture_code=lectureCode)
+            filteredCode = NowLectureData.objects.filter(lecture_code=lectureCode)
+        
+        elif searchType == 'searchName':
+            filteredCode = NowLectureData.objects.filter(lecture_name__icontains=lectureCode)
     
         if year and semester:
-            queryset = queryset.filter(year=year, semester=semester)
+            filteredCode = filteredCode.filter(year=year, semester=semester)
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(filteredCode, many=True)
         return Response(serializer.data)
 
 #pdf에서 정보 추출
