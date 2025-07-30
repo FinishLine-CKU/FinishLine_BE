@@ -26,8 +26,8 @@ from .major_calculate import calculate_major
 from .sub_major_calculate import calculate_sub_major
 from .micro_degree_calculate import calculate_lack_MD
 from .education_calculate import calculate_lack_education
-import io
-import time
+from django.db.models import Q
+
 
 logger = logging.getLogger(__name__)
 
@@ -176,7 +176,13 @@ class NowLectureModelViewSet(ModelViewSet):
             filteredCode = NowLectureData.objects.filter(lecture_code=lectureCode)
         
         elif searchType == 'searchName':
-            filteredCode = NowLectureData.objects.filter(lecture_name__icontains=lectureCode)
+            q = Q()
+            lecturelist = list(lectureCode)
+
+            for i in range(len(lecturelist)):
+               q &= Q(lecture_name__icontains = lecturelist[i])
+
+            filteredCode = NowLectureData.objects.filter(q)
     
         if year and semester:
             filteredCode = filteredCode.filter(year=year, semester=semester)
