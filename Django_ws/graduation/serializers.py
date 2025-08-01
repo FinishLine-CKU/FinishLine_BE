@@ -16,4 +16,4 @@ class AllLectureDataSerializer(serializers.ModelSerializer):
 class NowLectureDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = NowLectureData
-        fields = ['year', 'semester', 'lecture_code', 'lecture_name', 'lecture_type', 'lecture_topic', 'credit']
+        fields = ['year', 'semester', 'lecture_code', 'lecture_name', 'lecture_type', 'lecture_topic', 'credit', 'major_code']
