@@ -147,12 +147,18 @@ class AllLectureDataModelViewSet(ModelViewSet):
             else:
                 lectureCode = lectureCode[:6] + "-" + lectureCode[6:9]
             
-            queryset = AllLectureData.objects.filter(lecture_code=lectureCode)
+            filteredCode = AllLectureData.objects.filter(lecture_code=lectureCode)
 
         elif searchType == 'searchName':
-            queryset = AllLectureData.objects.filter(lecture_name__icontains=lectureCode)
+            q = Q()
+            lecturelist = list(lectureCode)
+
+            for i in range(len(lecturelist)):
+               q &= Q(lecture_name__icontains = lecturelist[i])
+
+            filteredCode = AllLectureData.objects.filter(q)
         
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(filteredCode, many=True)
         return Response(serializer.data)
     
 #과목코드로 조회
