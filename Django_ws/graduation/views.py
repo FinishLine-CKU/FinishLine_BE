@@ -60,7 +60,7 @@ class MyDoneLectureModelViewSet(ModelViewSet):
                 user_sub_major = User.objects.filter(student_id=user_id).values('sub_major').first()
                 subject_major_code = NowLectureData.objects.filter(lecture_code=lecture_code).values('major_code').first()
                 print('과목찾기 : ', user_id, user_major_code, user_sub_major_type, user_sub_major['sub_major'])
-                if(subject_major_code['major_code'] == " "):
+                if(subject_major_code['major_code'] is None or subject_major_code['major_code'].strip() == ""):
                     print(user_id, "교양 추가 : ", lecture_code)
                     break
 
