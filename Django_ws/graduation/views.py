@@ -26,8 +26,8 @@ from .major_calculate import calculate_major
 from .sub_major_calculate import calculate_sub_major
 from .micro_degree_calculate import calculate_lack_MD
 from .education_calculate import calculate_lack_education
-import io
-import time
+from django.db.models import Q
+
 
 logger = logging.getLogger(__name__)
 
@@ -139,15 +139,26 @@ class AllLectureDataModelViewSet(ModelViewSet):
     @action(detail=False, methods=['get'], url_path='filter')
     def filter_by_code(self, request): 
         lectureCode = request.query_params.get('code')
+        searchType = request.query_params.get('searchType')
 
-        if len(lectureCode) > 9:
-            lectureCode
-        else:
-            lectureCode = lectureCode[:6] + "-" + lectureCode[6:9]
+        if searchType == 'searchCode':
+            if len(lectureCode) > 9:
+                lectureCode
+            else:
+                lectureCode = lectureCode[:6] + "-" + lectureCode[6:9]
+            
+            filteredCode = AllLectureData.objects.filter(lecture_code=lectureCode)
 
-        queryset = AllLectureData.objects.filter(lecture_code=lectureCode)
+        elif searchType == 'searchName':
+            q = Q()
+            lecturelist = list(lectureCode)
+
+            for i in range(len(lecturelist)):
+               q &= Q(lecture_name__icontains = lecturelist[i])
+
+            filteredCode = AllLectureData.objects.filter(q)
         
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(filteredCode, many=True)
         return Response(serializer.data)
     
 #과목코드로 조회
@@ -168,12 +179,21 @@ class NowLectureModelViewSet(ModelViewSet):
             else:
                 lectureCode = lectureCode[:6] + "-" + lectureCode[6:9]
                 
-            queryset = NowLectureData.objects.filter(lecture_code=lectureCode)
+            filteredCode = NowLectureData.objects.filter(lecture_code=lectureCode)
+        
+        elif searchType == 'searchName':
+            q = Q()
+            lecturelist = list(lectureCode)
+
+            for i in range(len(lecturelist)):
+               q &= Q(lecture_name__icontains = lecturelist[i])
+
+            filteredCode = NowLectureData.objects.filter(q)
     
         if year and semester:
-            queryset = queryset.filter(year=year, semester=semester)
+            filteredCode = filteredCode.filter(year=year, semester=semester)
 
-        serializer = self.get_serializer(queryset, many=True)
+        serializer = self.get_serializer(filteredCode, many=True)
         return Response(serializer.data)
 
 #pdf에서 정보 추출
