@@ -208,7 +208,9 @@ def get_user_GE_standard(year, user_college):
 def GE_all_calculate(user_id):
     student_id = user_id
     year = student_id[:4]   # 학번 전처리 (년도 추출)  ex) 2020xxxx > 2020
-    user_college = ''
+    user_major = User.objects.filter(student_id=user_id).values('major').first()
+    #소속 단과대학 추출
+    user_college = find_user_college(user_major)
 
     # 교양 이수학점 계산 및 교양 과목 추출
     lecture_dict, liber_credit = get_user_GE(user_id)
@@ -670,6 +672,45 @@ def GE_all_calculate(user_id):
     for item in delete_items:
         if item in lectures_dict:
             lectures_dict.remove(item)
+
+    ######################################################## 교선 계열기초 대체과목 영역 계산(20 ~ 22) ########################################################
+
+    delete_items = []
+
+    if year in ["2020", "2021", "2022"] and user_college == 'trinity':
+
+        for needcheck in lectures_dict[:]:
+            lecture_topic = needcheck['주제']
+            lecture_credit = Decimal(needcheck['학점'])
+
+            if lecture_topic in ["창업", "창의성"]:
+                for choice_standard in chocie_GE_standard:
+                    if "계열기초" in choice_standard and choice_standard["계열기초"] > lecture_credit:
+                        choice_credit = choice_standard["계열기초"]
+                        missing_credit = choice_credit - lecture_credit
+                        choice_standard["계열기초"] = missing_credit
+                        choice_standard["총합"] -= lecture_credit
+                        delete_items.append(needcheck)
+
+                    elif "계열기초" in choice_standard and choice_standard["계열기초"] == lecture_credit: 
+                        del choice_standard["계열기초"]
+                        delete_items.append(needcheck)
+                        choice_standard["총합"] -= lecture_credit
+
+                    elif "계열기초" in choice_standard and choice_standard["계열기초"] < lecture_credit: 
+                        choice_credit = choice_standard["계열기초"]
+                        missing_credit = choice_credit - lecture_credit
+                        rest += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                        del choice_standard["계열기초"]
+                        delete_items.append(needcheck)
+                        
+                        choice_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+                    else:
+                        break
+
+        for item in delete_items:
+            if item in lectures_dict:
+                lectures_dict.remove(item)
 
 
     ################################################### 검사 알고리즘 종료 ####################################################
