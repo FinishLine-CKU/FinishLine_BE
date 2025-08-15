@@ -208,7 +208,9 @@ def get_user_GE_standard(year, user_college):
 def GE_all_calculate(user_id):
     student_id = user_id
     year = student_id[:4]   # 학번 전처리 (년도 추출)  ex) 2020xxxx > 2020
-    user_college = ''
+    user_major = User.objects.filter(student_id=user_id).values('major').first()
+    #소속 단과대학 추출
+    user_college = find_user_college(user_major)
 
     # 교양 이수학점 계산 및 교양 과목 추출
     lecture_dict, liber_credit = get_user_GE(user_id)
@@ -675,7 +677,7 @@ def GE_all_calculate(user_id):
 
     delete_items = []
 
-    if year in ["2020", "2021", "2022"]:
+    if year in ["2020", "2021", "2022"] and user_college == 'trinity':
 
         for needcheck in lectures_dict[:]:
             lecture_topic = needcheck['주제']
