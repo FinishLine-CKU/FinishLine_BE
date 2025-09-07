@@ -95,7 +95,7 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total, GE_humanism_
                     del GE_standard["정보활용"]
                     delete_items.append(needcheck)
                     
-                    GE_standard["총합"] -= lecture_credit 
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))
                 else:
                     continue
 
@@ -121,7 +121,7 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total, GE_humanism_
                     del GE_standard["정보활용"]
                     delete_items.append(needcheck)
                     
-                    GE_standard["총합"] -= lecture_credit    
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))   
                 else:
                     continue
 
@@ -147,7 +147,7 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total, GE_humanism_
                     del GE_standard["정보활용"]
                     delete_items.append(needcheck)
                     
-                    GE_standard["총합"] -= lecture_credit    
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))   
                 else:
                     continue
 
@@ -183,7 +183,7 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total, GE_humanism_
                     del GE_standard["창의융합"]
                     delete_items.append(needcheck)
                     
-                    GE_standard["총합"] -= lecture_credit   
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))   
                 else:
                     continue
 
@@ -209,7 +209,7 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total, GE_humanism_
                     del GE_standard["창의융합"]
                     delete_items.append(needcheck)
                     
-                    GE_standard["총합"] -= lecture_credit  
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))  
                 else:
                     continue
 
@@ -235,7 +235,7 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total, GE_humanism_
                     del GE_standard["창의융합"]
                     delete_items.append(needcheck)
                     
-                    GE_standard["총합"] -= lecture_credit  
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit)) 
                 else:
                     continue
 
@@ -271,7 +271,7 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total, GE_humanism_
                     del GE_standard["문제해결"]
                     delete_items.append(needcheck)
                     
-                    GE_standard["총합"] -= lecture_credit
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))
                 else:
                     continue
 
@@ -297,7 +297,7 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total, GE_humanism_
                     del GE_standard["문제해결"]
                     delete_items.append(needcheck)
                     
-                    GE_standard["총합"] -= lecture_credit   
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))   
                 else:
                     continue
 
@@ -323,7 +323,7 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total, GE_humanism_
                     del GE_standard["문제해결"]
                     delete_items.append(needcheck)
                     
-                    GE_standard["총합"] -= lecture_credit    # 학점 기준 초과 시 반영
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                 else:
                     continue
 
@@ -371,7 +371,7 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total, GE_humanism_
                             del GE_standard["융합비고"]
                             delete_items.append(needcheck)
                             
-                            GE_standard["총합"] -= lecture_credit    # 학점 기준 초과 시 반영
+                            GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                         else:
                             continue
 
@@ -402,7 +402,7 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total, GE_humanism_
                             del GE_standard["융합비고"]
                             delete_items.append(needcheck)
                             
-                            GE_standard["총합"] -= lecture_credit    # 학점 기준 초과 시 반영
+                            GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                         else:
                             continue
 
@@ -433,7 +433,7 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total, GE_humanism_
                             del GE_standard["융합비고"]
                             delete_items.append(needcheck)
                             
-                            GE_standard["총합"] -= lecture_credit    # 학점 기준 초과 시 반영
+                            GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                         else:
                             continue          
 
@@ -479,7 +479,7 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total, GE_humanism_
                             del GE_standard["트리니티아카데미"]
                             delete_items.append(needcheck)
                             
-                            GE_standard["총합"] -= lecture_credit    # 학점 기준 초과 시 반영
+                            GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                         else:
                             break
         else:
@@ -584,7 +584,7 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_t
                         del GE_standard["자기관리"]
                         delete_items.append(needcheck)
                         
-                        GE_standard["총합"] -= GE_credit    # 학점 기준 초과 시 반영
+                        GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                     else:
                         break
 
@@ -625,7 +625,7 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_t
                         del GE_standard["자기관리"]
                         delete_items.append(needcheck)
                         
-                        GE_standard["총합"] -= GE_credit    # 학점 기준 초과 시 반영
+                        GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                     else:
                         break
 
@@ -682,7 +682,7 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_t
                         del GE_standard["자기관리"]
                         delete_items.append(needcheck)
                         
-                        GE_standard["총합"] -= GE_credit    # 학점 기준 초과 시 반영
+                        GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                     else:
                         break
 
@@ -767,7 +767,7 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_t
                         del GE_standard["자기관리"]
                         delete_items.append(needcheck)
                         
-                        GE_standard["총합"] -= GE_credit    # 학점 기준 초과 시 반영
+                        GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                     else:
                         break
 
@@ -808,7 +808,7 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_t
                         del GE_standard["자기관리"]
                         delete_items.append(needcheck)
                         
-                        GE_standard["총합"] -= GE_credit    # 학점 기준 초과 시 반영
+                        GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                     else:
                         break
                     
@@ -849,7 +849,7 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_t
                         del GE_standard["자기관리"]
                         delete_items.append(needcheck)
                         
-                        GE_standard["총합"] -= GE_credit    # 학점 기준 초과 시 반영
+                        GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                     else:
                         break
                     
@@ -890,7 +890,7 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_t
                         del GE_standard["자기관리"]
                         delete_items.append(needcheck)
                         
-                        GE_standard["총합"] -= GE_credit    # 학점 기준 초과 시 반영
+                        GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                     else:
                         break
                     
@@ -993,7 +993,7 @@ def GE_basic_calculate_2025(lecture_dict, user_GE_standard, rest_total):
                     del GE_standard["소통"]
                     delete_items.append(needcheck)
                     
-                    GE_standard["총합"] -= GE_credit    # 학점 기준 초과 시 반영
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                 else:
                     break
                 
@@ -1029,7 +1029,7 @@ def GE_basic_calculate_2025(lecture_dict, user_GE_standard, rest_total):
                     del GE_standard["소통"]
                     delete_items.append(needcheck)
                     
-                    GE_standard["총합"] -= GE_credit    # 학점 기준 초과 시 반영
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                 else:
                     break
                 
@@ -1074,7 +1074,7 @@ def GE_basic_calculate_2025(lecture_dict, user_GE_standard, rest_total):
                     del GE_standard["자기관리"]
                     delete_items.append(needcheck)
                     
-                    GE_standard["총합"] -= GE_credit    # 학점 기준 초과 시 반영
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                 else:
                     break
                 
@@ -1115,7 +1115,7 @@ def GE_basic_calculate_2025(lecture_dict, user_GE_standard, rest_total):
                     del GE_standard["자기관리"]
                     delete_items.append(needcheck)
                     
-                    GE_standard["총합"] -= GE_credit    # 학점 기준 초과 시 반영
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                 else:
                     break
                 
@@ -1156,7 +1156,7 @@ def GE_basic_calculate_2025(lecture_dict, user_GE_standard, rest_total):
                     del GE_standard["자기관리"]
                     delete_items.append(needcheck)
                     
-                    GE_standard["총합"] -= GE_credit    # 학점 기준 초과 시 반영
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                 else:
                     break
                 
@@ -1199,7 +1199,7 @@ def GE_basic_calculate_2025(lecture_dict, user_GE_standard, rest_total):
                     del GE_standard["자기관리"]
                     delete_items.append(needcheck)
                     
-                    GE_standard["총합"] -= GE_credit    # 학점 기준 초과 시 반영
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
                 else:
                     break
                 
