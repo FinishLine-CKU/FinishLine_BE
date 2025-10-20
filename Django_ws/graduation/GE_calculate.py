@@ -857,7 +857,7 @@ def GE_all_calculate(user_id):
 
 
     for i in lecture_check:
-        print("분류확인", i)
+        print("분류 확인", i)
 
 
     rest_info = {"일반선택": [], "총합": Decimal(0.0)}
@@ -947,7 +947,7 @@ def GE_all_calculate(user_id):
 
     lack_total_GE = lack_essential_GE + lack_choice_GE # 교양 종합 부족학점
 
-    calculate_and_save_standard(done_GE, lack_total_GE, rest_total, student_id)
+    calculate_and_save_standard(done_GE, lack_total_GE, rest_total, student_id, lecture_check)
 
     result = {
         "lackEssentialGE": lack_essential_GE, #필수 부족학점
@@ -964,7 +964,7 @@ def GE_all_calculate(user_id):
     return result
 
 #사용자 교양 계산 학점 DB 저장
-def calculate_and_save_standard(done_GE, lack_total_GE, rest_total, student_id):
+def calculate_and_save_standard(done_GE, lack_total_GE, rest_total, student_id, lecture_check):
     try:
         user = User.objects.get(student_id=student_id)
         
@@ -975,8 +975,17 @@ def calculate_and_save_standard(done_GE, lack_total_GE, rest_total, student_id):
         user.lack_GE = lack_total_GE #부족한 교양 학점
         user.done_GE_rest = rest_total #교양 이수 일선 넘어가는 학점
 
-        
         user.save()
+
+        for item in lecture_check:
+            check_name = item['교과목명']
+            check_matched = item['분류']
+
+            lecture_object = MyDoneLecture.objects.filter(lecture_name=check_name, user_id=student_id).first()
+
+            if lecture_object:
+                lecture_object.matched_topic = check_matched
+                lecture_object.save()
 
     except User.DoesNotExist:
         print(f"사용자를 찾을 수 없습니다: {student_id}")
