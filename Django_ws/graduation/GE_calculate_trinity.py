@@ -1645,23 +1645,18 @@ def GE_trinity_calculate(user_id):
         
     lecture_dict_result, GE_humanism_standard, rest_total, GE_humanism_lecture_check = GE_humanism_calculate(lecture_dict, user_GE_standard)
 
-    print("***교양 인성 분류 확인", GE_humanism_lecture_check)
 
     lecture_dict_result, GE_fusion_standard, rest_total, GE_humanism_standard, GE_fusion_lecture_check = GE_fusion_calculate(lecture_dict_result, user_GE_standard, rest_total, GE_humanism_standard)
-
-    print("***교양 융합 분류 확인", GE_fusion_lecture_check)
 
 
     if (year == '2023'):
         #23년도 교양기초일때에만 다른 연도와 분리된 함수 사용
         lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search, GE_basic_lecture_check = GE_basic_calculate_2023(lecture_dict_result, user_GE_standard, user_college, rest_total)
 
-        print("***교양 기초 분류 확인", GE_basic_lecture_check)
     else:
         #23년도가 아닐떄에는 기존 교양기초 함수 사용
         lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search, stack_write, GE_basic_lecture_check = GE_basic_calculate_2025(lecture_dict_result, user_GE_standard, rest_total)
 
-        print("***교양 기초 분류 확인", GE_basic_lecture_check)
 
     #일반선택 학점 및 교양 이수 학점 계산
     done_humanism_GE, done_basic_GE, done_fusion_GE, rest_total_topic = rest_and_done_calculate(GE_total, lecture_dict_result, rest_total)
@@ -1790,10 +1785,8 @@ def GE_trinity_calculate(user_id):
     #DB에 저장할 교양 세부 검사 과정
     GE_lecture_check = GE_basic_lecture_check + GE_fusion_lecture_check + GE_humanism_lecture_check
 
-    print("통합 계산 확인", GE_lecture_check)
-
     #DB에 저장
-    calculate_and_save_standard(done_GE, lack_total_GE, rest_total, user_id)
+    calculate_and_save_standard(done_GE, lack_total_GE, rest_total, user_id, GE_lecture_check)
 
     data = {
             'lackEssentialGE': lack_total_GE,

@@ -200,7 +200,7 @@ def get_user_GE_standard(year, user_college):
             item['총합'] = total_sum 
 
         data = {"essential_GE_standard":  essential_GE_standard,
-                "chocie_GE_standard": chocie_GE_standard}
+                "chocie_GE_standard": chocie_GE_standard}  
 
     return data
 
@@ -856,8 +856,8 @@ def GE_all_calculate(user_id):
     ################################################## 일반선택 및 학점계산 ###################################################
 
 
-    for i in lecture_check:
-        print("분류 확인", i)
+    # for i in lecture_check:
+    #     print("분류 확인", i)
 
 
     rest_info = {"일반선택": [], "총합": Decimal(0.0)}
