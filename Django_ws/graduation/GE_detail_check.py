@@ -59,7 +59,7 @@ def GE_detail_check(user_id):
 
         #####일반선택#####
         for item in my_list:
-            if item['matched_topic'] == '' and item['lecture_type'] in ['교양', '교선', '교필']:
+            if item['matched_topic'] == '' and item['lecture_type'] in ['교양', '교필', '교선']:
                 count += item['credit']
                 rest_list.append(item)
 
@@ -133,9 +133,4 @@ def GE_detail_check(user_id):
             "list" : rest_list
         }
 
-    return {
-        "essential_GE_standard" : table1,
-        "choice_GE_standard" : table2,
-        "fusion_GE_standard" : table3,
-        "rest_GE_list" : table4,
-    }
+    return table1, table2, table3, table4

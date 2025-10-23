@@ -404,8 +404,15 @@ def oneclick_test(request):
 
 @api_view(['POST'])
 def ge_detail_view(request):
-    user_id = request.data.get('user_id')
+    user_id = request.data.get('student_id')
 
-    data = GE_detail_check(user_id)
+    table1, table2, table3, table4 = GE_detail_check(user_id)
+
+    data = {
+        "essentialTable" : table1,
+        "choiceTable" : table2,
+        "fusionTable" : table3,
+        "restTable" : table4,
+    }
 
     return Response(data)
