@@ -30,7 +30,7 @@ def GE_detail_check(user_id):
         item['year'] = item['year'][2:]
 
     #트리니티 이전
-    if (int(student_year) < 2022):
+    if (int(student_year) < 2023):
 
         #####교필#####
         for item in data['essential_GE_standard']:
@@ -100,7 +100,7 @@ def GE_detail_check(user_id):
     
     #트리니티 이후
     else:
-        
+
         #####인성#####
         for item in data['humanism_GE_standard']:
                 for key, value in item.items():
