@@ -987,6 +987,13 @@ def calculate_and_save_standard(done_GE, lack_total_GE, rest_total, student_id, 
                 lecture_object.matched_topic = check_matched
                 lecture_object.save()
 
+        lecture_dict = MyDoneLecture.objects.filter(user_id=student_id)
+
+        for item in lecture_dict:
+            if not item.matched_topic and item.lecture_type in ['교양', '교필', '교선']:
+                item.matched_topic = '일반선택'
+                item.save()
+
     except User.DoesNotExist:
         print(f"사용자를 찾을 수 없습니다: {student_id}")
     except ValueError as ve:

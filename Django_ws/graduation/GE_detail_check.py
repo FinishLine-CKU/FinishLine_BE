@@ -2,6 +2,7 @@ from user.models import User
 from .GE_calculate import find_user_college
 from .GE_calculate import get_user_GE_standard
 from .models import MyDoneLecture
+from .micro_degree_calculate import select_user_standard
 def GE_detail_check(user_id):
     
     student_year = user_id[:4]
@@ -26,6 +27,15 @@ def GE_detail_check(user_id):
         .values('year', 'semester', 'lecture_name', 'lecture_type', 'credit', 'lecture_topic', 'matched_topic')
     )
 
+    MD_standard, rest_standard = select_user_standard(user_id)
+
+    if student_year in ['2018', '2019']:
+        standard_order = ['철학적인간학', '신학적인간학', '인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', '창의적사고와코딩', '외국어', '고전탐구', '사유와지혜', '가치와실천', '상상력과표현', '인문융합', '균형1', '균형2', '균형3', '균형4']
+    elif student_year in ['2020', '2021', '2022']:
+        standard_order = ['인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', 'MSC교과군', '외국어', '계열기초', '사유와지혜', '가치와실천', '상상력과표현', '인문융합', '균형1', '균형2', '균형3', '균형4']
+    elif student_year in ['2023', '2024', '2025']: 
+        standard_order = ['VERUM캠프', '봉사활동', '트리니티아카데미', '인간학', '소통', '디지털소통', '자기관리', '정보활용', '창의융합', '문제해결']
+
     for item in my_list:
         item['year'] = item['year'][2:]
 
@@ -33,14 +43,14 @@ def GE_detail_check(user_id):
     if (int(student_year) < 2023):
 
         #####교필#####
-        for item in data['essential_GE_standard']:
-                for key, value in item.items():
-                    if key != '총합':
-                        table1.append({
-                            "topic" : key,
-                            "standard" : value,
-                            "subject" : []
-                        })
+        for ordered in standard_order:
+            for item in data['essential_GE_standard']:
+                if ordered in item:
+                    table1.append({
+                        "topic": ordered,
+                        "standard": item[ordered],
+                        "subject": []
+                    })
 
         for item in my_list:
             if item['matched_topic'] in ['인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', '창의적사고와코딩', '외국어', 'MSC교과군', '철학적인간학', '신학적인간학']:
@@ -60,14 +70,14 @@ def GE_detail_check(user_id):
 
 
         #####교선#####
-        for item in data['chocie_GE_standard']:
-                for key, value in item.items():
-                    if key != '총합':
-                        table2.append({
-                            "topic" : key,
-                            "standard" : value,
-                            "subject" : []
-                        })
+        for ordered in standard_order:
+            for item in data['chocie_GE_standard']:
+                if ordered in item:
+                    table2.append({
+                        "topic": ordered,
+                        "standard": item[ordered],
+                        "subject": []
+                    })
 
         for item in my_list:
             if item['matched_topic'] in ['계열기초', '고전탐구', '사유와지혜', '가치와실천', '상상력과표현', '인문융합', '균형1', '균형2', '균형3', '균형4']:
@@ -87,13 +97,12 @@ def GE_detail_check(user_id):
 
         #####일반선택#####
         for item in my_list:
-            if item['matched_topic'] == '' and item['lecture_type'] in ['교양', '교필', '교선']:
-                rest_count += item['credit']
+            if item['matched_topic'] == '일반선택':
                 rest_list.append(item)
 
         table4 = {
-            "topic" : "일선",
-            "standard" : rest_count,
+            "topic" : "일반선택",
+            "standard" : rest_standard,
             "subject" : rest_list
         }
                     
@@ -102,14 +111,14 @@ def GE_detail_check(user_id):
     else:
 
         #####인성#####
-        for item in data['humanism_GE_standard']:
-                for key, value in item.items():
-                    if key != '총합':
-                        table1.append({
-                            "topic" : key,
-                            "standard" : value,
-                            "subject" : []
-                        })
+        for ordered in standard_order:
+            for item in data['humanism_GE_standard']:
+                if ordered in item:
+                    table1.append({
+                        "topic": ordered,
+                        "standard": item[ordered],
+                        "subject": []
+                    })
 
         for item in my_list:
             if item['matched_topic'] in ['인간학', '봉사활동', 'VERUM캠프', '트리니티아카데미']:
@@ -128,14 +137,14 @@ def GE_detail_check(user_id):
             })
 
         #####기초#####
-        for item in data['basic_GE_standard']:
-                for key, value in item.items():
-                    if key != '총합':
-                        table2.append({
-                            "topic" : key,
-                            "standard" : value,
-                            "subject" : []
-                        })
+        for ordered in standard_order:
+            for item in data['basic_GE_standard']:
+                if ordered in item:
+                    table2.append({
+                        "topic": ordered,
+                        "standard": item[ordered],
+                        "subject": []
+                    })
 
         for item in my_list:
             if item['matched_topic'] in ['소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통']:
@@ -154,14 +163,14 @@ def GE_detail_check(user_id):
             })
 
         #####융합#####
-        for item in data['fusion_GE_standard']:
-                for key, value in item.items():
-                    if key != '총합':
-                        table3.append({
-                            "topic" : key,
-                            "standard" : value,
-                            "subject" : []
-                        })
+        for ordered in standard_order:
+            for item in data['fusion_GE_standard']:
+                if ordered in item:
+                    table3.append({
+                        "topic": ordered,
+                        "standard": item[ordered],
+                        "subject": []
+                    })
 
         for item in my_list:
             if item['matched_topic'] in ['정보활용', '창의융합', '문제해결', '융합비고']:
@@ -182,13 +191,12 @@ def GE_detail_check(user_id):
 
         #####일반선택#####
         for item in my_list:
-            if item['matched_topic'] == '' and item['lecture_type'] in ['교양', '교필', '교선']:
-                rest_count += item['credit']
+            if item['matched_topic'] == '일반선택':
                 rest_list.append(item)
 
         table4 = {
-            "topic" : "일선",
-            "standard" : rest_count,
+            "topic" : "일반선택",
+            "standard" : rest_standard,
             "subject" : rest_list
         }
 
