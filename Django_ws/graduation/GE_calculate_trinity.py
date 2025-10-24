@@ -892,7 +892,7 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_t
                         GE_standard["총합"] -= lecture_credit
                         delete_items.append(needcheck)
 
-                        lecture_update['분류'] = '자기관리'
+                        lecture_update['분류'] = '진로탐색'
                         lecture_check.append(lecture_update)  
 
                     elif "자기관리" in GE_standard and GE_standard["자기관리"] == lecture_credit: 
@@ -901,7 +901,7 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_t
                         delete_items.append(needcheck)
                         GE_standard["총합"] -= lecture_credit
 
-                        lecture_update['분류'] = '자기관리'
+                        lecture_update['분류'] = '진로탐색'
                         lecture_check.append(lecture_update)  
 
                     elif "자기관리" in GE_standard and GE_standard["자기관리"] < lecture_credit: 
@@ -914,7 +914,7 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_t
                         
                         GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
 
-                        lecture_update['분류'] = '자기관리'
+                        lecture_update['분류'] = '진로탐색'
                         lecture_check.append(lecture_update)  
 
                     else:

@@ -17,7 +17,6 @@ def GE_detail_check(user_id):
     table4 = []
     my_list = []
     rest_list = []
-    rest_count = 0
     success_count_1 = 0
     success_count_2 = 0
     success_count_3 = 0
@@ -34,7 +33,7 @@ def GE_detail_check(user_id):
     elif student_year in ['2020', '2021', '2022']:
         standard_order = ['인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', 'MSC교과군', '외국어', '계열기초', '사유와지혜', '가치와실천', '상상력과표현', '인문융합', '균형1', '균형2', '균형3', '균형4']
     elif student_year in ['2023', '2024', '2025']: 
-        standard_order = ['VERUM캠프', '봉사활동', '트리니티아카데미', '인간학', '소통', '디지털소통', '자기관리', '정보활용', '창의융합', '문제해결']
+        standard_order = ['VERUM캠프', '봉사활동', '트리니티아카데미', '인간학', '소통', '논리적사고와글쓰기', '외국어', '디지털소통', '자기관리', '정보활용', '창의융합', '문제해결']
 
     for item in my_list:
         item['year'] = item['year'][2:]
@@ -61,11 +60,11 @@ def GE_detail_check(user_id):
 
         if success_count_1 >= data['essential_GE_standard'][0]['총합']:
             table1.append({
-                "success" : 'true',
+                "success" : True,
             })
         else:
             table1.append({
-                "success" : 'false',
+                "success" : False,
             })
 
 
@@ -88,11 +87,11 @@ def GE_detail_check(user_id):
 
         if success_count_2 >= data['chocie_GE_standard'][0]['총합']:
             table2.append({
-                "success" : 'true',
+                "success" : True,
             })
         else:
             table2.append({
-                "success" : 'false',
+                "success" : False,
             })
 
         #####일반선택#####
@@ -129,22 +128,55 @@ def GE_detail_check(user_id):
 
         if success_count_1 >= data['humanism_GE_standard'][0]['총합']:
             table1.append({
-                "success" : 'true',
+                "success" : True,
             })
         else:
             table1.append({
-                "success" : 'false',
+                "success" : False,
             })
 
         #####기초#####
         for ordered in standard_order:
             for item in data['basic_GE_standard']:
                 if ordered in item:
-                    table2.append({
-                        "topic": ordered,
-                        "standard": item[ordered],
-                        "subject": []
-                    })
+                    if ordered == '소통':
+                        table2.append({
+                            "topic": '논리적사고와글쓰기',
+                            "standard": item[ordered],
+                            "subject": []
+                        })
+                        table2.append({
+                            "topic": '외국어',
+                            "standard": item[ordered],
+                            "subject": []
+                        })
+                    if ordered == '자기관리':
+                        table2.append({
+                            "topic": '진로탐색',
+                            "standard": item[ordered],
+                            "subject": []
+                        })
+                        table2.append({
+                            "topic": '창의성',
+                            "standard": item[ordered],
+                            "subject": []
+                        })
+                        table2.append({
+                            "topic": '창업',
+                            "standard": item[ordered],
+                            "subject": []
+                        })
+                        table2.append({
+                            "topic": '계열기초',
+                            "standard": item[ordered],
+                            "subject": []
+                        })
+                    else:
+                        table2.append({
+                            "topic": ordered,
+                            "standard": item[ordered],
+                            "subject": []
+                        })
 
         for item in my_list:
             if item['matched_topic'] in ['소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통']:
@@ -155,11 +187,11 @@ def GE_detail_check(user_id):
 
         if success_count_2 >= data['basic_GE_standard'][0]['총합']:
             table2.append({
-                "success" : 'true',
+                "success" : True,
             })
         else:
             table2.append({
-                "success" : 'false',
+                "success" : False,
             })
 
         #####융합#####
@@ -181,11 +213,11 @@ def GE_detail_check(user_id):
 
         if success_count_3 >= data['fusion_GE_standard'][0]['총합']:
             table3.append({
-                "success" : 'true',
+                "success" : True,
             })
         else:
             table3.append({
-                "success" : 'false',
+                "success" : False,
             })
 
 
@@ -199,5 +231,10 @@ def GE_detail_check(user_id):
             "standard" : rest_standard,
             "subject" : rest_list
         }
+
+    print("1", table1)
+    print("2", table2)
+    print("3", table3)
+    print("4", table4)
 
     return table1, table2, table3, table4
