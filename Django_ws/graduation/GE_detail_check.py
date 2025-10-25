@@ -56,36 +56,20 @@ def GE_detail_check(user_id):
                         "standard": item[ordered],
                         "subject": []
                     })
-                if ordered == '논리적사고와글쓰기':
-                    table1.append({
-                        "topic": '논사글',
-                        "standard": item[ordered],
-                        "subject": []
-                    })
-                if ordered == '창의적사고와코딩':
-                    table1.append({
-                        "topic": '창사코',
-                        "standard": item[ordered],
-                        "subject": []
-                    })
 
 
         for item in my_list:
             if item['matched_topic'] in ['인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', '창의적사고와코딩', '외국어', 'MSC교과군', '철학적인간학', '신학적인간학']:
                 for i in table1:
                     if i['topic'] == item['matched_topic']:
+
+                        if item['matched_topic'] == '논리적사고와글쓰기':
+                            item['lecture_topic'] = '논사글'
+                        if item['matched_topic'] == '창의적사고와코딩':
+                            item['lecture_topic'] = '창사코'
+
                         i['subject'].append(item)
                         success_count_1 += item['credit']
-                    
-                    elif i['topic'] == '논사글':
-                        if item['matched_topic'] == '논리적사고와글쓰기':
-                            i['subject'].append(item)
-                            success_count_2 += item['credit']
-
-                    elif i['topic'] == '창사코':
-                        if item['matched_topic'] == '창의적사고와코딩':
-                            i['subject'].append(item)
-                            success_count_2 += item['credit']
 
         if success_count_1 >= data['essential_GE_standard'][0]['총합']:
             table1.append({
@@ -172,7 +156,7 @@ def GE_detail_check(user_id):
                 if ordered in item:
                     if ordered == '소통':
                         table2.append({
-                            "topic": '논사글, 외국어',
+                            "topic": '논리적사고와글쓰기, 외국어',
                             "standard": item[ordered],
                             "subject": []
                         })
@@ -210,7 +194,7 @@ def GE_detail_check(user_id):
 
                     elif ordered == '논리적사고와글쓰기':
                         table2.append({
-                            "topic": '논사글',
+                            "topic": '논리적사고와글쓰기',
                             "standard": item[ordered],
                             "subject": []
                         })
@@ -226,25 +210,29 @@ def GE_detail_check(user_id):
             if item['matched_topic'] in ['소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통']:
                 for i in table2:
                     if i['topic'] == item['matched_topic']:
+
+                        if item['matched_topic'] == '논리적사고와글쓰기':
+                            item['lecture_topic'] = '논사글'
+
                         i['subject'].append(item)
                         success_count_2 += item['credit']
 
-                    elif i['topic'] == '논사글, 외국어':
+                    if i['topic'] == '논리적사고와글쓰기, 외국어':
                         if item['matched_topic'] in ['논리적사고와글쓰기', '외국어']:
+
+                            if item['matched_topic'] == '논리적사고와글쓰기':
+                                item['lecture_topic'] = '논사글'
+
                             i['subject'].append(item)
                             success_count_2 += item['credit']
 
-                    elif i['topic'] == '논사글':
-                        if item['matched_topic'] == '논리적사고와글쓰기':
-                            i['subject'].append(item)
-                            success_count_2 += item['credit']
 
-                    elif i['topic'] == '진로탐색, 창의성, 창업':
+                    if i['topic'] == '진로탐색, 창의성, 창업':
                         if item['matched_topic'] in ['진로탐색' , '창의성', '창업']:
                             i['subject'].append(item)
                             success_count_2 += item['credit']
 
-                    elif i['topic'] == '진로탐색, 창의성, 창업, 계열기초':
+                    if i['topic'] == '진로탐색, 창의성, 창업, 계열기초':
                         if item['matched_topic'] in ['진로탐색' , '창의성', '창업', '계열기초']:
                             i['subject'].append(item)
                             success_count_2 += item['credit']
@@ -264,15 +252,30 @@ def GE_detail_check(user_id):
         for ordered in standard_order:
             for item in data['fusion_GE_standard']:
                 if ordered in item:
-                    if ordered == '융합비고':
+                    if ordered == '정보활용':
                         table3.append({
-                            "topic": '정보활용, 창의융합, 문제해결',
+                            "topic": '정치와경제, 심리와건강, 정보와기술',
                             "standard": item[ordered],
                             "subject": []
                         })
-                    else:
+
+                    elif ordered == '창의융합':
                         table3.append({
-                            "topic": ordered,
+                            "topic": '인간과문학, 역사와사회, 철학과예술',
+                            "standard": item[ordered],
+                            "subject": []
+                        })
+
+                    elif ordered == '문제해결':
+                        table3.append({
+                            "topic": '자연과환경, 수리와과학, 언어와문화',
+                            "standard": item[ordered],
+                            "subject": []
+                        })
+
+                    elif ordered == '융합비고':
+                        table3.append({
+                            "topic": '정보활용, 창의융합, 문제해결',
                             "standard": item[ordered],
                             "subject": []
                         })
@@ -283,6 +286,21 @@ def GE_detail_check(user_id):
                     if i['topic'] == item['matched_topic']:
                         i['subject'].append(item)
                         success_count_3 += item['credit']
+
+                    if i['topic'] == '정치와경제, 심리와건강, 정보와기술':
+                        if item['matched_topic'] == '정보활용':
+                            i['subject'].append(item)
+                            success_count_3 += item['credit']
+
+                    if i['topic'] == '인간과문학, 역사와사회, 철학과예술':
+                        if item['matched_topic'] == '창의융합':
+                            i['subject'].append(item)
+                            success_count_3 += item['credit']
+
+                    if i['topic'] == '자연과환경, 수리와과학, 언어와문화':
+                        if item['matched_topic'] == '문제해결':
+                            i['subject'].append(item)
+                            success_count_3 += item['credit']
 
                     if i['topic'] == '정보활용, 창의융합, 문제해결':
                         if item['matched_topic'] == '융합비고':
