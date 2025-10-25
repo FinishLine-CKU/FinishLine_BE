@@ -21,6 +21,12 @@ def GE_detail_check(user_id):
     success_count_2 = 0
     success_count_3 = 0
 
+
+    if user_college == 'trinity':
+        trinity_free = True
+    else:
+        trinity_free = False
+
     my_list = list(
         MyDoneLecture.objects.filter(user_id=user_id)
         .values('year', 'semester', 'lecture_name', 'lecture_type', 'credit', 'lecture_topic', 'matched_topic')
@@ -33,7 +39,7 @@ def GE_detail_check(user_id):
     elif student_year in ['2020', '2021', '2022']:
         standard_order = ['인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', 'MSC교과군', '외국어', '계열기초', '사유와지혜', '가치와실천', '상상력과표현', '인문융합', '균형1', '균형2', '균형3', '균형4']
     elif student_year in ['2023', '2024', '2025']: 
-        standard_order = ['VERUM캠프', '봉사활동', '트리니티아카데미', '인간학', '소통', '논리적사고와글쓰기', '외국어', '디지털소통', '자기관리', '정보활용', '창의융합', '문제해결']
+        standard_order = ['VERUM캠프', '봉사활동', '트리니티아카데미', '인간학', '소통', '논리적사고와글쓰기', '외국어', '디지털소통', '자기관리', '정보활용', '창의융합', '문제해결', '융합비고']
 
     for item in my_list:
         item['year'] = item['year'][2:]
@@ -50,6 +56,19 @@ def GE_detail_check(user_id):
                         "standard": item[ordered],
                         "subject": []
                     })
+                if ordered == '논리적사고와글쓰기':
+                    table1.append({
+                        "topic": '논사글',
+                        "standard": item[ordered],
+                        "subject": []
+                    })
+                if ordered == '창의적사고와코딩':
+                    table1.append({
+                        "topic": '창사코',
+                        "standard": item[ordered],
+                        "subject": []
+                    })
+
 
         for item in my_list:
             if item['matched_topic'] in ['인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', '창의적사고와코딩', '외국어', 'MSC교과군', '철학적인간학', '신학적인간학']:
@@ -57,6 +76,16 @@ def GE_detail_check(user_id):
                     if i['topic'] == item['matched_topic']:
                         i['subject'].append(item)
                         success_count_1 += item['credit']
+                    
+                    elif i['topic'] == '논사글':
+                        if item['matched_topic'] == '논리적사고와글쓰기':
+                            i['subject'].append(item)
+                            success_count_2 += item['credit']
+
+                    elif i['topic'] == '창사코':
+                        if item['matched_topic'] == '창의적사고와코딩':
+                            i['subject'].append(item)
+                            success_count_2 += item['credit']
 
         if success_count_1 >= data['essential_GE_standard'][0]['총합']:
             table1.append({
@@ -129,10 +158,12 @@ def GE_detail_check(user_id):
         if success_count_1 >= data['humanism_GE_standard'][0]['총합']:
             table1.append({
                 "success" : True,
+                "trinity" : trinity_free,
             })
         else:
             table1.append({
                 "success" : False,
+                "trinity" : trinity_free,
             })
 
         #####기초#####
@@ -141,16 +172,12 @@ def GE_detail_check(user_id):
                 if ordered in item:
                     if ordered == '소통':
                         table2.append({
-                            "topic": '논리적사고와글쓰기',
+                            "topic": '논사글, 외국어',
                             "standard": item[ordered],
                             "subject": []
                         })
-                        table2.append({
-                            "topic": '외국어',
-                            "standard": item[ordered],
-                            "subject": []
-                        })
-                    if ordered == '자기관리':
+
+                    elif ordered == '자기관리' and int(student_year) == 2023 and user_college == 'trinity':
                         table2.append({
                             "topic": '진로탐색',
                             "standard": item[ordered],
@@ -166,11 +193,28 @@ def GE_detail_check(user_id):
                             "standard": item[ordered],
                             "subject": []
                         })
+
+                    elif ordered == '자기관리' and int(student_year) == 2023 and user_college in ['human_service', 'regular']:
                         table2.append({
-                            "topic": '계열기초',
+                            "topic": '진로탐색, 창의성, 창업',
                             "standard": item[ordered],
                             "subject": []
                         })
+
+                    elif ordered == '자기관리' and int(student_year) > 2023:
+                        table2.append({
+                            "topic": '진로탐색, 창의성, 창업, 계열기초',
+                            "standard": item[ordered],
+                            "subject": []
+                        })
+
+                    elif ordered == '논리적사고와글쓰기':
+                        table2.append({
+                            "topic": '논사글',
+                            "standard": item[ordered],
+                            "subject": []
+                        })
+
                     else:
                         table2.append({
                             "topic": ordered,
@@ -185,24 +229,53 @@ def GE_detail_check(user_id):
                         i['subject'].append(item)
                         success_count_2 += item['credit']
 
+                    elif i['topic'] == '논사글, 외국어':
+                        if item['matched_topic'] in ['논리적사고와글쓰기', '외국어']:
+                            i['subject'].append(item)
+                            success_count_2 += item['credit']
+
+                    elif i['topic'] == '논사글':
+                        if item['matched_topic'] == '논리적사고와글쓰기':
+                            i['subject'].append(item)
+                            success_count_2 += item['credit']
+
+                    elif i['topic'] == '진로탐색, 창의성, 창업':
+                        if item['matched_topic'] in ['진로탐색' , '창의성', '창업']:
+                            i['subject'].append(item)
+                            success_count_2 += item['credit']
+
+                    elif i['topic'] == '진로탐색, 창의성, 창업, 계열기초':
+                        if item['matched_topic'] in ['진로탐색' , '창의성', '창업', '계열기초']:
+                            i['subject'].append(item)
+                            success_count_2 += item['credit']
+
         if success_count_2 >= data['basic_GE_standard'][0]['총합']:
             table2.append({
                 "success" : True,
+                "trinity" : trinity_free,
             })
         else:
             table2.append({
                 "success" : False,
+                "trinity" : trinity_free,
             })
 
         #####융합#####
         for ordered in standard_order:
             for item in data['fusion_GE_standard']:
                 if ordered in item:
-                    table3.append({
-                        "topic": ordered,
-                        "standard": item[ordered],
-                        "subject": []
-                    })
+                    if ordered == '융합비고':
+                        table3.append({
+                            "topic": '정보활용, 창의융합, 문제해결',
+                            "standard": item[ordered],
+                            "subject": []
+                        })
+                    else:
+                        table3.append({
+                            "topic": ordered,
+                            "standard": item[ordered],
+                            "subject": []
+                        })
 
         for item in my_list:
             if item['matched_topic'] in ['정보활용', '창의융합', '문제해결', '융합비고']:
@@ -211,13 +284,20 @@ def GE_detail_check(user_id):
                         i['subject'].append(item)
                         success_count_3 += item['credit']
 
+                    if i['topic'] == '정보활용, 창의융합, 문제해결':
+                        if item['matched_topic'] == '융합비고':
+                            i['subject'].append(item)
+                            success_count_3 += item['credit']
+
         if success_count_3 >= data['fusion_GE_standard'][0]['총합']:
             table3.append({
                 "success" : True,
+                "trinity" : trinity_free,
             })
         else:
             table3.append({
                 "success" : False,
+                "trinity" : trinity_free,
             })
 
 
@@ -231,10 +311,5 @@ def GE_detail_check(user_id):
             "standard" : rest_standard,
             "subject" : rest_list
         }
-
-    print("1", table1)
-    print("2", table2)
-    print("3", table3)
-    print("4", table4)
 
     return table1, table2, table3, table4
