@@ -43,6 +43,7 @@ class MyDoneLecture(models.Model):
     credit = models.DecimalField(max_digits=3, decimal_places=1)
     user_id = models.CharField(max_length=30, null=True)
     can_delete = models.BooleanField(default=False)
+    matched_topic = models.CharField(max_length=200, blank=True, null=True, default='')
 
     alllecture = models.ForeignKey(AllLectureData, on_delete=models.CASCADE, null=True)
 
