@@ -200,7 +200,7 @@ def get_user_GE_standard(year, user_college):
             item['총합'] = total_sum 
 
         data = {"essential_GE_standard":  essential_GE_standard,
-                "chocie_GE_standard": chocie_GE_standard}
+                "chocie_GE_standard": chocie_GE_standard}  
 
     return data
 
@@ -220,6 +220,8 @@ def GE_all_calculate(user_id):
     done_essential_GE = liber_credit['done_essential_GE']
     done_choice_GE = liber_credit['done_choice_GE']
 
+    lecture_check = []
+
     # 교양 필수, 선택 영역 추출
 
     user_GE_standard = get_user_GE_standard(year, user_college)
@@ -235,6 +237,7 @@ def GE_all_calculate(user_id):
 
         for essential_stanadard in essential_GE_standard:
             if lecture_topic in essential_stanadard:
+                lecture_update = needcheck
                 essential_credit = essential_stanadard[lecture_topic]
 
                 if lecture_credit < essential_credit:
@@ -245,6 +248,9 @@ def GE_all_calculate(user_id):
 
                     essential_stanadard['총합'] -= lecture_credit
 
+                    lecture_update['분류'] = lecture_topic
+                    lecture_check.append(lecture_update)
+
                 elif lecture_credit > essential_credit:
                     del essential_stanadard[lecture_topic]
                     missing_credit = essential_credit - lecture_credit
@@ -254,11 +260,17 @@ def GE_all_calculate(user_id):
 
                     essential_stanadard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
 
+                    lecture_update['분류'] = lecture_topic
+                    lecture_check.append(lecture_update)
+
                 elif lecture_credit == essential_credit:
                     del essential_stanadard[lecture_topic]
                     essential_stanadard['총합'] -= essential_credit
 
                     delete_items.append(needcheck)
+
+                    lecture_update['분류'] = lecture_topic
+                    lecture_check.append(lecture_update)
 
             else:
                 break
@@ -286,6 +298,7 @@ def GE_all_calculate(user_id):
 
         for choice_standard in chocie_GE_standard:
             if lecture_topic in choice_standard:
+                lecture_update = needcheck
                 choice_credit = choice_standard[lecture_topic]
 
                 if lecture_credit < choice_credit:
@@ -297,6 +310,9 @@ def GE_all_calculate(user_id):
 
                     choice_standard['총합'] -= lecture_credit
 
+                    lecture_update['분류'] = lecture_topic
+                    lecture_check.append(lecture_update)
+
                 elif lecture_credit > choice_credit:
                     del choice_standard[lecture_topic]
                     missing_credit = lecture_credit - choice_credit
@@ -305,11 +321,17 @@ def GE_all_calculate(user_id):
                     delete_items.append(needcheck)
                     choice_standard['총합'] -= choice_credit   # 학점 기준 초과 시 반영
 
+                    lecture_update['분류'] = lecture_topic
+                    lecture_check.append(lecture_update)
+
                 elif lecture_credit == choice_credit:
                     del choice_standard[lecture_topic]
                     choice_standard['총합'] -= choice_credit
 
                     delete_items.append(needcheck)
+
+                    lecture_update['분류'] = lecture_topic
+                    lecture_check.append(lecture_update)
 
             else:
                 break
@@ -333,18 +355,27 @@ def GE_all_calculate(user_id):
         if lecture_topic in ["정보와기술", "자연과환경", "수리와과학"]:
             for essential_stanadard in essential_GE_standard:
                 if "MSC교과군" in essential_stanadard and essential_stanadard["MSC교과군"] > lecture_credit:
+                    lecture_update = needcheck
                     essential_credit = essential_stanadard["MSC교과군"]
                     missing_credit = essential_credit - lecture_credit
                     essential_stanadard["MSC교과군"] = missing_credit
                     essential_stanadard["총합"] -= lecture_credit
                     delete_items.append(needcheck)
 
+                    lecture_update['분류'] = 'MSC교과군'
+                    lecture_check.append(lecture_update)
+
                 elif "MSC교과군" in essential_stanadard and essential_stanadard["MSC교과군"] == lecture_credit: 
+                    lecture_update = needcheck
                     del essential_stanadard["MSC교과군"]
                     delete_items.append(needcheck)
                     essential_stanadard["총합"] -= lecture_credit
 
+                    lecture_update['분류'] = 'MSC교과군'
+                    lecture_check.append(lecture_update)
+
                 elif "MSC교과군" in essential_stanadard and essential_stanadard["MSC교과군"] < lecture_credit: 
+                    lecture_update = needcheck
                     essential_credit = essential_stanadard["MSC교과군"]
                     missing_credit = essential_credit - lecture_credit
                     rest += abs(missing_credit) # 초과 학점 일반선택 학점 추가
@@ -352,6 +383,10 @@ def GE_all_calculate(user_id):
                     delete_items.append(needcheck)
                     
                     essential_stanadard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                    lecture_update['분류'] = 'MSC교과군'
+                    lecture_check.append(lecture_update)
+
                 else:
                     break
 
@@ -373,18 +408,27 @@ def GE_all_calculate(user_id):
         if lecture_topic in ["정보와기술"]:
             for essential_stanadard in essential_GE_standard:
                 if "창의적사고와코딩" in essential_stanadard and essential_stanadard["창의적사고와코딩"] > lecture_credit:
+                    lecture_update = needcheck
                     essential_credit = essential_stanadard["창의적사고와코딩"]
                     missing_credit = essential_credit - lecture_credit
                     essential_stanadard["창의적사고와코딩"] = missing_credit
                     essential_stanadard["총합"] -= lecture_credit
                     delete_items.append(needcheck)
 
+                    lecture_update['분류'] = '창의적사고와코딩'
+                    lecture_check.append(lecture_update)
+
                 elif "창의적사고와코딩" in essential_stanadard and essential_stanadard["창의적사고와코딩"] == lecture_credit: 
+                    lecture_update = needcheck
                     del essential_stanadard["창의적사고와코딩"]
                     delete_items.append(needcheck)
                     essential_stanadard["총합"] -= lecture_credit
 
+                    lecture_update['분류'] = '창의적사고와코딩'
+                    lecture_check.append(lecture_update)
+
                 elif "창의적사고와코딩" in essential_stanadard and essential_stanadard["창의적사고와코딩"] < lecture_credit: 
+                    lecture_update = needcheck
                     essential_credit = essential_stanadard["창의적사고와코딩"]
                     missing_credit = essential_credit - lecture_credit
                     rest += abs(missing_credit) # 초과 학점 일반선택 학점 추가
@@ -392,6 +436,9 @@ def GE_all_calculate(user_id):
                     delete_items.append(needcheck)
                     
                     essential_stanadard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                    lecture_update['분류'] = '창의적사고와코딩'
+                    lecture_check.append(lecture_update)
                 else:
                     break
 
@@ -416,6 +463,7 @@ def GE_all_calculate(user_id):
             for choice_standard in chocie_GE_standard:
                 if "균형1" in choice_standard: 
                     choice_credit = choice_standard["균형1"]
+                    lecture_update = needcheck
 
                     if lecture_credit > choice_credit:
                         missing_credit = lecture_credit - choice_credit
@@ -431,6 +479,10 @@ def GE_all_calculate(user_id):
                         choice_standard["총합"] -= choice_credit
 
                         delete_items.append(needcheck) 
+
+                    lecture_update['분류'] = '균형1'
+                    lecture_check.append(lecture_update)
+                        
                     break
         
         if lecture_topic == "정치와경제":
@@ -438,6 +490,7 @@ def GE_all_calculate(user_id):
             for choice_standard in chocie_GE_standard:
                 if "균형2" in choice_standard: 
                     choice_credit = choice_standard["균형2"]
+                    lecture_update = needcheck
 
                     if lecture_credit == choice_credit:
                         del choice_standard["균형2"]
@@ -453,6 +506,10 @@ def GE_all_calculate(user_id):
                         delete_items.append(needcheck)
 
                         choice_standard["총합"] -= choice_credit
+
+                    lecture_update['분류'] = '균형2'
+                    lecture_check.append(lecture_update)
+
                     break
 
         if lecture_topic == "정보와기술":
@@ -460,6 +517,7 @@ def GE_all_calculate(user_id):
             for choice_standard in chocie_GE_standard:
                 if "균형3" in choice_standard: 
                     choice_credit = choice_standard["균형3"]
+                    lecture_update = needcheck
 
                     if lecture_credit == choice_credit:
                         del choice_standard["균형3"]
@@ -476,6 +534,10 @@ def GE_all_calculate(user_id):
                         delete_items.append(needcheck)
 
                         choice_standard["총합"] -= choice_credit
+
+                    lecture_update['분류'] = '균형3'
+                    lecture_check.append(lecture_update)
+
                     break
 
         if lecture_topic == "심리와건강":
@@ -483,12 +545,17 @@ def GE_all_calculate(user_id):
             for choice_standard in chocie_GE_standard:
                 if "균형4" in choice_standard: 
                     choice_credit = choice_standard["균형4"]
+                    lecture_update = needcheck
 
                     if lecture_credit == choice_credit:
                         del choice_standard["균형4"]
                         choice_standard["총합"] -= choice_credit
 
                         delete_items.append(needcheck) 
+
+                    lecture_update['분류'] = '균형4'
+                    lecture_check.append(lecture_update)
+
                     break
 
     # print('수강 인정 교선 과목 (삭제) : ')
@@ -511,6 +578,7 @@ def GE_all_calculate(user_id):
             for choice_standard in chocie_GE_standard:
                 if "균형1" in choice_standard: 
                     choice_credit = choice_standard["균형1"]
+                    lecture_update = needcheck
 
                     if lecture_credit > choice_credit:
                         missing_credit = lecture_credit - choice_credit
@@ -526,6 +594,10 @@ def GE_all_calculate(user_id):
                         choice_standard["총합"] -= lecture_credit
 
                         delete_items.append(needcheck) 
+
+                    lecture_update['분류'] = '균형1'
+                    lecture_check.append(lecture_update)
+
                     break
         
         if lecture_topic == "역사와사회":
@@ -533,12 +605,17 @@ def GE_all_calculate(user_id):
             for choice_standard in chocie_GE_standard:
                 if "균형2" in choice_standard: 
                     choice_credit = choice_standard["균형2"]
+                    lecture_update = needcheck
 
                     if lecture_credit == choice_credit:
                         del choice_standard["균형2"]
                         choice_standard["총합"] -= lecture_credit
 
                         delete_items.append(needcheck) 
+
+                    lecture_update['분류'] = '균형2'
+                    lecture_check.append(lecture_update)
+
                     break
 
         if lecture_topic == "자연과환경":
@@ -546,6 +623,7 @@ def GE_all_calculate(user_id):
             for choice_standard in chocie_GE_standard:
                 if "균형3" in choice_standard: 
                     choice_credit = choice_standard["균형3"]
+                    lecture_update = needcheck
 
                     if lecture_credit == choice_credit:
                         del choice_standard["균형3"]
@@ -558,6 +636,10 @@ def GE_all_calculate(user_id):
                         del choice_standard["균형3"]
 
                         choice_standard["총합"] -= choice_credit
+
+                    lecture_update['분류'] = '균형3'
+                    lecture_check.append(lecture_update)
+
                     break
 
 
@@ -566,6 +648,7 @@ def GE_all_calculate(user_id):
             for choice_standard in chocie_GE_standard:
                 if "균형3" in choice_standard: 
                     choice_credit = choice_standard["균형3"]
+                    lecture_update = needcheck
 
                     if lecture_credit == choice_credit:
                         del choice_standard["균형3"]
@@ -578,6 +661,10 @@ def GE_all_calculate(user_id):
                         del choice_standard["균형3"]
 
                         choice_standard["총합"] -= choice_credit
+
+                    lecture_update['분류'] = '균형4'
+                    lecture_check.append(lecture_update)
+
                     break
 
 
@@ -586,12 +673,17 @@ def GE_all_calculate(user_id):
             for choice_standard in chocie_GE_standard:
                 if "균형4" in choice_standard: 
                     choice_credit = choice_standard["균형4"]
+                    lecture_update = needcheck
 
                     if lecture_credit == choice_credit:
                         del choice_standard["균형4"]
                         choice_standard["총합"] -= lecture_credit
 
                         delete_items.append(needcheck) 
+
+                    lecture_update['분류'] = '균형4'
+                    lecture_check.append(lecture_update)
+
                     break
     
     for item in delete_items:
@@ -611,31 +703,51 @@ def GE_all_calculate(user_id):
         if lecture_topic in ["인간과문학", "역사와사회", "철학과예술"]:
             for choice_standard in chocie_GE_standard:
                 if "고전탐구" in choice_standard and choice_standard["고전탐구"] == lecture_credit:
+                    lecture_update = needcheck
                     del choice_standard["고전탐구"] 
                     choice_standard["총합"] -= lecture_credit  
                     if needcheck not in delete_items:
                         delete_items.append(needcheck)
+
+                    lecture_update['분류'] = '고전탐구'
+                    lecture_check.append(lecture_update)
+
                     break
                 
                 if "사유와지혜" in choice_standard and choice_standard["사유와지혜"] == lecture_credit:
+                    lecture_update = needcheck
                     del choice_standard["사유와지혜"] 
                     choice_standard["총합"] -= lecture_credit
                     if needcheck not in delete_items:
                         delete_items.append(needcheck)
+
+                    lecture_update['분류'] = "사유와지혜"
+                    lecture_check.append(lecture_update)
+
                     break
 
                 if "가치와실천" in choice_standard and choice_standard["가치와실천"] == lecture_credit:
+                    lecture_update = needcheck
                     del choice_standard["가치와실천"] 
                     choice_standard["총합"] -= lecture_credit
                     if needcheck not in delete_items:
                         delete_items.append(needcheck)
+
+                    lecture_update['분류'] = "가치와실천"
+                    lecture_check.append(lecture_update)
+
                     break
 
                 if "상상력과표현" in choice_standard and choice_standard["상상력과표현"] == lecture_credit:
+                    lecture_update = needcheck
                     del choice_standard["상상력과표현"]
                     choice_standard["총합"] -= lecture_credit
                     if needcheck not in delete_items:
                         delete_items.append(needcheck)
+
+                    lecture_update['분류'] = "상상력과표현"
+                    lecture_check.append(lecture_update)
+
                     break
 
     for item in delete_items:
@@ -656,16 +768,25 @@ def GE_all_calculate(user_id):
         if lecture_topic in ["인간과문학", "역사와사회", "철학과예술"]:
             for choice_standard in chocie_GE_standard:
                 if "인문융합" in choice_standard and choice_standard["인문융합"] > lecture_credit:
+                    lecture_update = needcheck
                     choice_credit = choice_standard["인문융합"]
                     missing_credit = choice_credit - lecture_credit
                     choice_standard["인문융합"] = missing_credit
                     choice_standard["총합"] -= lecture_credit
                     delete_items.append(needcheck)
 
+                    lecture_update['분류'] = "인문융합"
+                    lecture_check.append(lecture_update)
+
                 elif "인문융합" in choice_standard and choice_standard["인문융합"] == lecture_credit: 
+                    lecture_update = needcheck
                     del choice_standard["인문융합"]
                     delete_items.append(needcheck)
                     choice_standard["총합"] -= lecture_credit  
+
+                    lecture_update['분류'] = "인문융합"
+                    lecture_check.append(lecture_update)
+
                 break
 
 
@@ -686,18 +807,27 @@ def GE_all_calculate(user_id):
             if lecture_topic in ["창업", "창의성"]:
                 for choice_standard in chocie_GE_standard:
                     if "계열기초" in choice_standard and choice_standard["계열기초"] > lecture_credit:
+                        lecture_update = needcheck
                         choice_credit = choice_standard["계열기초"]
                         missing_credit = choice_credit - lecture_credit
                         choice_standard["계열기초"] = missing_credit
                         choice_standard["총합"] -= lecture_credit
                         delete_items.append(needcheck)
 
+                        lecture_update['분류'] = "계열기초"
+                        lecture_check.append(lecture_update)
+
                     elif "계열기초" in choice_standard and choice_standard["계열기초"] == lecture_credit: 
+                        lecture_update = needcheck
                         del choice_standard["계열기초"]
                         delete_items.append(needcheck)
                         choice_standard["총합"] -= lecture_credit
 
-                    elif "계열기초" in choice_standard and choice_standard["계열기초"] < lecture_credit: 
+                        lecture_update['분류'] = "계열기초"
+                        lecture_check.append(lecture_update)
+
+                    elif "계열기초" in choice_standard and choice_standard["계열기초"] < lecture_credit:
+                        lecture_update = needcheck
                         choice_credit = choice_standard["계열기초"]
                         missing_credit = choice_credit - lecture_credit
                         rest += abs(missing_credit) # 초과 학점 일반선택 학점 추가
@@ -705,6 +835,10 @@ def GE_all_calculate(user_id):
                         delete_items.append(needcheck)
                         
                         choice_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                        lecture_update['분류'] = "계열기초"
+                        lecture_check.append(lecture_update)
+
                     else:
                         break
 
@@ -720,6 +854,10 @@ def GE_all_calculate(user_id):
 
     ###########################################################################################################################
     ################################################## 일반선택 및 학점계산 ###################################################
+
+
+    # for i in lecture_check:
+    #     print("분류 확인", i)
 
 
     rest_info = {"일반선택": [], "총합": Decimal(0.0)}
@@ -809,7 +947,7 @@ def GE_all_calculate(user_id):
 
     lack_total_GE = lack_essential_GE + lack_choice_GE # 교양 종합 부족학점
 
-    calculate_and_save_standard(done_GE, lack_total_GE, rest_total, student_id)
+    calculate_and_save_standard(done_GE, lack_total_GE, rest_total, student_id, lecture_check)
 
     result = {
         "lackEssentialGE": lack_essential_GE, #필수 부족학점
@@ -826,7 +964,7 @@ def GE_all_calculate(user_id):
     return result
 
 #사용자 교양 계산 학점 DB 저장
-def calculate_and_save_standard(done_GE, lack_total_GE, rest_total, student_id):
+def calculate_and_save_standard(done_GE, lack_total_GE, rest_total, student_id, lecture_check):
     try:
         user = User.objects.get(student_id=student_id)
         
@@ -837,8 +975,31 @@ def calculate_and_save_standard(done_GE, lack_total_GE, rest_total, student_id):
         user.lack_GE = lack_total_GE #부족한 교양 학점
         user.done_GE_rest = rest_total #교양 이수 일선 넘어가는 학점
 
-        
         user.save()
+
+        for item in lecture_check:
+            check_name = item['교과목명']
+            check_matched = item['분류']
+
+            lecture_object = MyDoneLecture.objects.filter(lecture_name=check_name, user_id=student_id).first()
+
+            if lecture_object:
+                try:
+                    lecture_object.matched_topic = check_matched
+                    lecture_object.save()
+
+                except IntegrityError as ie:
+                    print("matched_topic 저장중 DB오류",lecture_object)
+
+        lecture_dict = MyDoneLecture.objects.filter(user_id=student_id)
+
+        for item in lecture_dict:
+            if not item.matched_topic and item.lecture_type in ['교양', '교필', '교선']:
+                try:
+                    item.matched_topic = '일반선택'
+                    item.save()
+                except IntegrityError as ie:
+                    print("matched_topic 일반선택 저장중 오류",lecture_object)
 
     except User.DoesNotExist:
         print(f"사용자를 찾을 수 없습니다: {student_id}")

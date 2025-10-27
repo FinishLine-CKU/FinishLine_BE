@@ -20,4 +20,5 @@ urlpatterns = [
     path('test_micro_degree/', views.test_micro_degree, name='test_micro_degree'),
     path('test_education/', views.test_education, name='test_education'),
     path('oneclick_test/', views.oneclick_test, name='oneclick_test'),
+    path('ge_detail_view/', views.ge_detail_view, name='ge_detail_view'),
 ]

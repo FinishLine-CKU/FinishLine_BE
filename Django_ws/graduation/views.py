@@ -10,6 +10,8 @@ from .extract import get_major_code
 from .extract import save_pdf_data_to_db
 from .extract import extract_major_from_pdf_table
 from .GE_calculate import GE_all_calculate
+from .GE_calculate import get_user_GE_standard
+from .GE_calculate import find_user_college
 from .GE_calculate_trinity import GE_trinity_calculate
 from .auto_test import auto_test
 import logging
@@ -19,6 +21,7 @@ from .models import MyDoneLecture
 from .models import Standard
 from .models import AllLectureData
 from .models import NowLectureData
+from .models import GEStandard
 from .serializers import MyDoneLectureSerializer
 from .serializers import AllLectureDataSerializer
 from .serializers import NowLectureDataSerializer
@@ -26,6 +29,7 @@ from .major_calculate import calculate_major
 from .sub_major_calculate import calculate_sub_major
 from .micro_degree_calculate import calculate_lack_MD
 from .education_calculate import calculate_lack_education
+from .GE_detail_check import GE_detail_check
 from django.db.models import Q
 
 
@@ -395,5 +399,20 @@ def oneclick_test(request):
         error = result
         data = {'error' : error}
         print(f'Fail OneClick Test.. \nError: {error} \n학번: {studentId}')
+
+    return Response(data)
+
+@api_view(['POST'])
+def ge_detail_view(request):
+    user_id = request.data.get('student_id')
+
+    essentialTable, choiceTable, fusionTable, restTable = GE_detail_check(user_id)
+
+    data = {
+        "essentialTable" : essentialTable,
+        "choiceTable" : choiceTable,
+        "fusionTable" : fusionTable,
+        "restTable" : restTable,
+    }
 
     return Response(data)
