@@ -406,13 +406,13 @@ def oneclick_test(request):
 def ge_detail_view(request):
     user_id = request.data.get('student_id')
 
-    table1, table2, table3, table4 = GE_detail_check(user_id)
+    essentialTable, choiceTable, fusionTable, restTable = GE_detail_check(user_id)
 
     data = {
-        "essentialTable" : table1,
-        "choiceTable" : table2,
-        "fusionTable" : table3,
-        "restTable" : table4,
+        "essentialTable" : essentialTable,
+        "choiceTable" : choiceTable,
+        "fusionTable" : fusionTable,
+        "restTable" : restTable,
     }
 
     return Response(data)
