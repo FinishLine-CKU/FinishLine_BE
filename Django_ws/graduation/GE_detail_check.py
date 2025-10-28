@@ -321,4 +321,6 @@ def GE_detail_check(user_id):
             "subject" : rest_list
         }
 
+    print(f"Checked GE Detail Info! \n학번: {user_id} \n전공: {user_major} \n소속 단과대학: {user_college}")
+
     return essentialTable, choiceTable, fusionTable, restTable
