@@ -384,10 +384,10 @@ def oneclick_test(request):
 
     result = auto_test(studentId, studentPW)
 
-    for original_subject in result:
-        print(original_subject)
-
     if isinstance(result, list):
+
+        for original_subject in result:
+            print(original_subject)
         # 기이수과목 DB처리
         major = User.objects.filter(student_id=studentId).values_list('major', flat=True).first()
         saved_subjects = save_pdf_data_to_db(result, studentId[:4], major)
