@@ -2,7 +2,9 @@ from django.contrib.auth.hashers import make_password, check_password
 from rest_framework.decorators import api_view
 from .scraping import scraping
 from .models import User
+from .mapping_major import mapping_major
 from user.models import VisitorCount
+from user.models import MajorMap
 from graduation.models import Standard
 from graduation.models import MyDoneLecture
 from graduation.GE_calculate import GE_all_calculate
@@ -32,8 +34,15 @@ def student_auth(request):    # 재학생인증
             data = {'error' : error}
             print(f'Fail Student Auth.. \nError: {error}')
         else:
-            data = {'student_id': student_id, 'name' : name, 'major' : major}
-            print(f'Success Student Auth! \n{major} {student_id} {name}')
+            mapping_result = mapping_major(major)
+            if len(mapping_result) > 1:
+                major, college = mapping_result
+                data = {'student_id': student_id, 'name' : name, 'major' : major, 'college' : college}
+                print(f'Success Student Auth! \n{college} {major} {student_id} {name}')
+            else:
+                error = mapping_result
+                data = {'error' : error}
+                print(f'Fail Major Mapping.. \nError: {error} \n사용자 학번: {studentId} \n소속 정보: {major}')
     else:
         error = result
         data = {'error' : error}
@@ -74,6 +83,17 @@ def register_info(request):    # 회원가입
     else:
         print(f'Fail Sign Up.. \n{major} {student_id} {name}')
         return Response (False)
+
+@api_view(['GET'])
+def major_mapping(request):
+    majors = MajorMap.objects.exclude(college = '').values('college', 'major_label', 'major_code')
+    MDs = MajorMap.objects.filter(major_type = 'MD').values('major_label', 'major_code')
+
+    data = {
+        'majors' : majors,
+        'MDs' : MDs
+    }
+    return Response (data)
 
 @api_view(['POST'])
 def reset_check_register(request):  # 비밀번호 재설정 (회원 정보 확인)

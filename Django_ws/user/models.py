@@ -38,3 +38,19 @@ class VisitorCount(models.Model):
 
     def __str__(self):
         return self.today_visitor
+
+class MajorMap(models.Model):
+    college = models.CharField(max_length=100, blank=True, null=True)
+    major_label = models.CharField(max_length=100, unique=True)
+    major_code = models.CharField(max_length=100, unique=True, primary_key=True)
+    major_type = models.CharField(max_length=30, blank=True, null=True)
+
+    def __str__(self):
+        return self.major_label
+
+class MajorAlias(models.Model):
+    major_code = models.CharField(max_length=100)
+    alias = models.CharField(max_length=100, unique=True, primary_key=True)
+
+    def __str__(self):
+        return self.alias

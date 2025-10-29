@@ -41,5 +41,5 @@ def scraping(studentId, studentPW):
     except Exception as e:
         driver.quit()
         print(f'재학생 인증 오류코드(디버깅): {e}')
-        errorMessage = '회원 정보를 확인할 수 없습니다. 잠시 후 다시 시도해주세요.'
+        errorMessage = '회원정보 형식이 일치하지 않습니다. 관리자에게 문의하세요.'
         return errorMessage
