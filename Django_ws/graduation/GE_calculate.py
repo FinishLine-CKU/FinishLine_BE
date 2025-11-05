@@ -662,7 +662,7 @@ def GE_all_calculate(user_id):
 
                         choice_standard["총합"] -= choice_credit
 
-                    lecture_update['분류'] = '균형4'
+                    lecture_update['분류'] = '균형3'
                     lecture_check.append(lecture_update)
 
                     break
