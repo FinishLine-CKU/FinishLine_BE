@@ -291,7 +291,6 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
             year=subject['이수년도'],
             semester=subject['학기'],
             lecture_name=subject['교과목명'],
-            lecture_type=subject['이수구분'],
             user_id=subject['학번'],
         ).exists():
             print(f"Check Duplicate Subject: {subject['학번']} {major if major else '-'} 교과목명: {subject['교과목명']}")
