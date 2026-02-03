@@ -35,7 +35,7 @@ def student_auth(request):    # 재학생인증
             print(f'Fail Student Auth.. \nError: {error}')
         else:
             mapping_result = mapping_major(major)
-            if len(mapping_result) > 1:
+            if isinstance(mapping_result, tuple):
                 major, college = mapping_result
                 data = {'student_id': student_id, 'name' : name, 'major' : major, 'college' : college}
                 print(f'Success Student Auth! \n{college} {major} {student_id} {name}')
@@ -367,7 +367,7 @@ def set_visitor_cookie(request):    # 방문자 수 계산
             # 오후 3시 이후이면 내일 오후 3시로 만료 시간 설정
             expire_time = (afternoon_3 + timedelta(days=1))
 
-        response.set_cookie('last_visit', last_visit, expires=expire_time, httponly=True, secure=True, samesite="None")
+        response.set_cookie('last_visit', last_visit, expires=expire_time, httponly=True, secure=True, samesite="Lax")
 
         visitor_entry = VisitorCount.objects.filter(id=1).first()
 
