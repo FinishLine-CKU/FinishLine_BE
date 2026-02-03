@@ -35,7 +35,7 @@ def student_auth(request):    # 재학생인증
             print(f'Fail Student Auth.. \nError: {error}')
         else:
             mapping_result = mapping_major(major)
-            if len(mapping_result) > 1:
+            if isinstance(mapping_result, tuple):
                 major, college = mapping_result
                 data = {'student_id': student_id, 'name' : name, 'major' : major, 'college' : college}
                 print(f'Success Student Auth! \n{college} {major} {student_id} {name}')
