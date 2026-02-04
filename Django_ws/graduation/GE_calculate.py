@@ -49,6 +49,9 @@ def get_user_GE(user_id):
     for changed_verum in lectures_dict:
         if changed_verum['주제'] == 'VERUM인성':
             changed_verum['주제'] = 'VERUM캠프'
+
+        elif changed_verum['주제'] == 'VERUM인간':
+            changed_verum['주제'] = '인간학'
     
     # 23 ~ 25학번
     if (year > 2022):
