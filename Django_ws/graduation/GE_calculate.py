@@ -52,6 +52,9 @@ def get_user_GE(user_id):
 
         elif changed_verum['주제'] == 'VERUM인간':
             changed_verum['주제'] = '인간학'
+
+        elif changed_verum['주제'] == '디지털시대의사고와표현':
+            changed_verum['주제'] = '논리적사고와글쓰기'
     
     # 23 ~ 25학번
     if (year > 2022):
