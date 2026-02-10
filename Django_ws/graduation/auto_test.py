@@ -26,23 +26,20 @@ def auto_test(studentId, studentPW):
         driver.implicitly_wait(2)
 
         driver.find_element(By.XPATH, '//a[@class="snbmenu1"]').click()
-        driver.find_element(By.XPATH, '//a[text()="전체 성적조회"]').click()
+        driver.find_element(By.XPATH, '//a[text()="이수구분별 학점조회"]').click()
 
         rows = driver.find_elements(By.XPATH, '//div[@class="dataArea"]/table[3]/tbody/tr')
 
         lectures_data = []
 
         for row in rows:
-            year, semester = row.find_element(By.XPATH, './td[1]').text.split('/')  # 이수학기
-            area = row.find_element(By.XPATH, './td[2]').text  # 이수구분
-            topic = row.find_element(By.XPATH, './td[3]').text  # 이수영역/주제
-            lecture_name = row.find_element(By.XPATH, './td[4]').text  # 교과목명
-            credit = row.find_element(By.XPATH, './td[5]').text  # 학점
-            grade = row.find_element(By.XPATH, './td[6]').text  # 등급
-
-            if grade == 'N' or grade == 'F':
-                continue
-            
+            area = row.find_element(By.XPATH, './td[1]').text  # 이수구분
+            topic = row.find_element(By.XPATH, './td[2]').text  # 이수영역/주제
+            year, semester = row.find_element(By.XPATH, './td[3]').text.split('/')  # 이수학기
+            lecture_code = row.find_element(By.XPATH, './td[4]').text  # 과목코드-분반
+            lecture_name = row.find_element(By.XPATH, './td[5]').text  # 교과목명
+            credit = row.find_element(By.XPATH, './td[6]').text  # 학점
+            etc = row.find_element(By.XPATH, './td[7]').text  # 비고
 
             if area == '전공필수':
                 area = '전필'
@@ -76,9 +73,11 @@ def auto_test(studentId, studentPW):
                 '학기': semester,
                 '이수구분': area,
                 '주제': topic if topic else ' ',
+                '과목코드': lecture_code,
                 '교과목명': lecture_name,
                 '학점': credit,
-                '학번': studentId
+                '학번': studentId,
+                '비고': etc
             }
 
             lectures_data.append(subject_data)
