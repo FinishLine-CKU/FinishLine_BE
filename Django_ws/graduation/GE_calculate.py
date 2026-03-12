@@ -219,12 +219,12 @@ def GE_all_calculate(user_id):
     user_college = find_user_college(user_major)
 
     # 교양 이수학점 계산 및 교양 과목 추출
-    lecture_dict, liber_credit = get_user_GE(user_id)
+    lecture_dict, GE_credit = get_user_GE(user_id)
     lectures_dict = []
     lectures_dict = lecture_dict
-    done_GE = liber_credit['done_GE']
-    done_essential_GE = liber_credit['done_essential_GE']
-    done_choice_GE = liber_credit['done_choice_GE']
+    done_GE = GE_credit['done_GE']
+    done_essential_GE = GE_credit['done_essential_GE']
+    done_choice_GE = GE_credit['done_choice_GE']
 
     lecture_check = []
 
