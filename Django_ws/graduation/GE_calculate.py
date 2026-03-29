@@ -46,22 +46,26 @@ def get_user_GE(user_id):
             }
         lectures_dict.append(lecture_data)
 
-    for changed_verum in lectures_dict:
-        if changed_verum['주제'] == 'VERUM인성':
-            changed_verum['주제'] = 'VERUM캠프'
+    # (2026학년도 기준) 교양 교육과정 대체 교과목 전처리 (주제 매핑)
+    for lecture in lectures_dict:
+        if lecture['주제'] == 'VERUM인간':
+            lecture['주제'] = '인간학'
 
-        elif changed_verum['주제'] == 'VERUM인간':
-            changed_verum['주제'] = '인간학'
+        elif lecture['주제'] == 'VERUM인성':
+            lecture['주제'] = 'VERUM캠프'
 
-        elif changed_verum['주제'] == '디지털시대의사고와표현':
-            changed_verum['주제'] = '논리적사고와글쓰기'
+        elif lecture['주제'] == '디지털시대의사고와표현':
+            lecture['주제'] = '논리적사고와글쓰기'
+
+        # 공통 적용 X - 대체 로직
+        # elif lecture['주제'] == '디지털소통':
+        #     lecture['주제'] = 'MSC교과군'
     
     # 23 ~ 25학번
     if (year > 2022):
         for data in lectures_dict[:]:
             done_GE += data['학점']  # 교양과목 총 이수 학점
 
-        for data in lectures_dict[:]:
             if data['주제'] in {'VERUM캠프', '봉사활동', '인간학'}:
                 done_humanism_GE += data['학점']  # 교양인성 총 이수 학점
 
@@ -83,7 +87,6 @@ def get_user_GE(user_id):
         for data in lectures_dict[:]:
             done_GE += data['학점']  # 교양과목 총 이수 학점
 
-        for data in lectures_dict[:]:
             if data['주제'] in {'인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', '창의적사고와코딩', '외국어', 'MSC교과군', '철학적인간학', '신학적인간학'}:
                 done_essential_GE += data['학점']  # 교양필수 총 이수 학점
                 
@@ -358,7 +361,7 @@ def GE_all_calculate(user_id):
         lecture_topic = needcheck['주제']
         lecture_credit = Decimal(needcheck['학점'])
 
-        if lecture_topic in ["정보와기술", "자연과환경", "수리와과학"]:
+        if lecture_topic in ["정보와기술", "자연과환경", "수리와과학", "디지털소통"]:
             for essential_stanadard in essential_GE_standard:
                 if "MSC교과군" in essential_stanadard and essential_stanadard["MSC교과군"] > lecture_credit:
                     lecture_update = needcheck
@@ -396,6 +399,84 @@ def GE_all_calculate(user_id):
                 else:
                     break
 
+            
+        if lecture_topic == "디지털시대의사고와표현":
+            for essential_stanadard in essential_GE_standard:
+                if "논리적사고와글쓰기" in essential_stanadard and essential_stanadard["논리적사고와글쓰기"] > lecture_credit:
+                    lecture_update = needcheck
+                    essential_credit = essential_stanadard["논리적사고와글쓰기"]
+                    missing_credit = essential_credit - lecture_credit
+                    essential_stanadard["논리적사고와글쓰기"] = missing_credit
+                    essential_stanadard["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                    lecture_update['분류'] = '논리적사고와글쓰기'
+                    lecture_check.append(lecture_update)
+
+                elif "논리적사고와글쓰기" in essential_stanadard and essential_stanadard["논리적사고와글쓰기"] == lecture_credit: 
+                    lecture_update = needcheck
+                    del essential_stanadard["논리적사고와글쓰기"]
+                    delete_items.append(needcheck)
+                    essential_stanadard["총합"] -= lecture_credit
+
+                    lecture_update['분류'] = '논리적사고와글쓰기'
+                    lecture_check.append(lecture_update)
+
+                elif "논리적사고와글쓰기" in essential_stanadard and essential_stanadard["논리적사고와글쓰기"] < lecture_credit: 
+                    lecture_update = needcheck
+                    essential_credit = essential_stanadard["논리적사고와글쓰기"]
+                    missing_credit = essential_credit - lecture_credit
+                    rest += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del essential_stanadard["논리적사고와글쓰기"]
+                    delete_items.append(needcheck)
+                    
+                    essential_stanadard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                    lecture_update['분류'] = '논리적사고와글쓰기'
+                    lecture_check.append(lecture_update)
+
+                else:
+                    break
+        
+
+        if lecture_topic == "언어와문화":
+            for essential_stanadard in essential_GE_standard:
+                if "외국어" in essential_stanadard and essential_stanadard["외국어"] > lecture_credit:
+                    lecture_update = needcheck
+                    essential_credit = essential_stanadard["외국어"]
+                    missing_credit = essential_credit - lecture_credit
+                    essential_stanadard["외국어"] = missing_credit
+                    essential_stanadard["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                    lecture_update['분류'] = '외국어'
+                    lecture_check.append(lecture_update)
+
+                elif "외국어" in essential_stanadard and essential_stanadard["외국어"] == lecture_credit: 
+                    lecture_update = needcheck
+                    del essential_stanadard["외국어"]
+                    delete_items.append(needcheck)
+                    essential_stanadard["총합"] -= lecture_credit
+
+                    lecture_update['분류'] = '외국어'
+                    lecture_check.append(lecture_update)
+
+                elif "외국어" in essential_stanadard and essential_stanadard["외국어"] < lecture_credit: 
+                    lecture_update = needcheck
+                    essential_credit = essential_stanadard["외국어"]
+                    missing_credit = essential_credit - lecture_credit
+                    rest += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del essential_stanadard["외국어"]
+                    delete_items.append(needcheck)
+                    
+                    essential_stanadard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                    lecture_update['분류'] = '외국어'
+                    lecture_check.append(lecture_update)
+
+                else:
+                    break
+
     # print('수강 인정 교선 과목 (삭제) : ')
     # pprint.pprint(delete_items, width=80, sort_dicts=False)
 
@@ -411,7 +492,78 @@ def GE_all_calculate(user_id):
         lecture_topic = needcheck['주제']
         lecture_credit = Decimal(needcheck['학점'])
 
-        if lecture_topic in ["정보와기술"]:
+        if lecture_topic in ["인간학"]:
+            for essential_stanadard in essential_GE_standard:
+                if "철학적인간학" in essential_stanadard and essential_stanadard["철학적인간학"] > lecture_credit:
+                    lecture_update = needcheck
+                    essential_credit = essential_stanadard["철학적인간학"]
+                    missing_credit = essential_credit - lecture_credit
+                    essential_stanadard["철학적인간학"] = missing_credit
+                    essential_stanadard["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                    lecture_update['분류'] = '철학적인간학'
+                    lecture_check.append(lecture_update)
+
+                elif "철학적인간학" in essential_stanadard and essential_stanadard["철학적인간학"] == lecture_credit: 
+                    lecture_update = needcheck
+                    del essential_stanadard["철학적인간학"]
+                    delete_items.append(needcheck)
+                    essential_stanadard["총합"] -= lecture_credit
+
+                    lecture_update['분류'] = '철학적인간학'
+                    lecture_check.append(lecture_update)
+
+                elif "철학적인간학" in essential_stanadard and essential_stanadard["철학적인간학"] < lecture_credit: 
+                    lecture_update = needcheck
+                    essential_credit = essential_stanadard["철학적인간학"]
+                    missing_credit = essential_credit - lecture_credit
+                    rest += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del essential_stanadard["철학적인간학"]
+                    delete_items.append(needcheck)
+                    
+                    essential_stanadard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                    lecture_update['분류'] = '철학적인간학'
+                    lecture_check.append(lecture_update)
+
+                elif "신학적인간학" in essential_stanadard and essential_stanadard["신학적인간학"] > lecture_credit:
+                    lecture_update = needcheck
+                    essential_credit = essential_stanadard["신학적인간학"]
+                    missing_credit = essential_credit - lecture_credit
+                    essential_stanadard["신학적인간학"] = missing_credit
+                    essential_stanadard["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                    lecture_update['분류'] = '신학적인간학'
+                    lecture_check.append(lecture_update)
+
+                elif "신학적인간학" in essential_stanadard and essential_stanadard["신학적인간학"] == lecture_credit: 
+                    lecture_update = needcheck
+                    del essential_stanadard["신학적인간학"]
+                    delete_items.append(needcheck)
+                    essential_stanadard["총합"] -= lecture_credit
+
+                    lecture_update['분류'] = '신학적인간학'
+                    lecture_check.append(lecture_update)
+
+                elif "신학적인간학" in essential_stanadard and essential_stanadard["신학적인간학"] < lecture_credit: 
+                    lecture_update = needcheck
+                    essential_credit = essential_stanadard["신학적인간학"]
+                    missing_credit = essential_credit - lecture_credit
+                    rest += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del essential_stanadard["신학적인간학"]
+                    delete_items.append(needcheck)
+                    
+                    essential_stanadard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                    lecture_update['분류'] = '신학적인간학'
+                    lecture_check.append(lecture_update)
+                else:
+                    break
+
+
+        if lecture_topic in ["정보와기술", "디지털소통"]:
             for essential_stanadard in essential_GE_standard:
                 if "창의적사고와코딩" in essential_stanadard and essential_stanadard["창의적사고와코딩"] > lecture_credit:
                     lecture_update = needcheck
