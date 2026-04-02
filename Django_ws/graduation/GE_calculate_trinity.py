@@ -1623,6 +1623,61 @@ def lack_GE_calculate(GE_humanism_standard, GE_fusion_standard, GE_basic_standar
 
     return lack_GE_humanism_total, lack_GE_fusion_total, lack_GE_basic_total
 
+#26년도 교양 기초 대체과목 변경안 계산
+def ge_renew_2026(lecture_dict_result, user_GE_standard, rest_total):
+    human_ge_standard = user_GE_standard['humanism_GE_standard'][0]
+    basic_ge_standard = user_GE_standard['basic_GE_standard'][0]
+    fusion_ge_standard = user_GE_standard['fusion_GE_standard'][0]
+
+    print("human 잔여 요건", human_ge_standard)
+    print("basic 잔여 요건", basic_ge_standard)
+    print("fusion 잔여 요건", fusion_ge_standard)
+
+    basic_topic_map = {
+        '언어와문화' : '소통',
+    }
+
+    lecture_check = []
+    delete_items = []
+    rest = rest_total
+
+    for needcheck in lecture_dict_result:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+        lecture_update = needcheck
+
+        mapped_topic = basic_topic_map.get(lecture_topic)
+
+        if mapped_topic in basic_ge_standard:
+            check_topic_credit = basic_ge_standard[mapped_topic]
+            del basic_ge_standard[mapped_topic]
+
+            if lecture_credit == check_topic_credit:
+                    basic_ge_standard['총합'] -= lecture_credit
+            
+            elif lecture_credit > check_topic_credit:
+                    missing_credit = check_topic_credit - lecture_credit
+                    rest += abs(missing_credit) 
+
+                    basic_ge_standard['총합'] -= (lecture_credit - abs(missing_credit))
+
+            elif lecture_credit < check_topic_credit:
+                    missing_credit = check_topic_credit - lecture_credit
+                    basic_ge_standard[mapped_topic] = missing_credit
+
+                    basic_ge_standard['총합'] -= lecture_credit
+
+            delete_items.append(needcheck)
+            lecture_update['분류'] = mapped_topic
+            lecture_check.append(lecture_update)
+    
+    for item in delete_items:
+        if item in lecture_dict_result:
+            lecture_dict_result.remove(item)
+
+
+    return lecture_dict_result, rest, lecture_check
+
 #트리티니 교양 계산 컨트롤타워
 def GE_trinity_calculate(user_id):
     year = user_id[:4]
@@ -1657,6 +1712,9 @@ def GE_trinity_calculate(user_id):
         #23년도가 아닐떄에는 기존 교양기초 함수 사용
         lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search, stack_write, GE_basic_lecture_check = GE_basic_calculate_2025(lecture_dict_result, user_GE_standard, rest_total)
 
+
+    #26년도 교양 기초 대체과목 변경안 계산
+    lecture_dict_result, rest_total, test_lecture_check = ge_renew_2026(lecture_dict_result, user_GE_standard, rest_total)
 
     #일반선택 학점 및 교양 이수 학점 계산
     done_humanism_GE, done_basic_GE, done_fusion_GE, rest_total_topic = rest_and_done_calculate(GE_total, lecture_dict_result, rest_total)
@@ -1783,7 +1841,7 @@ def GE_trinity_calculate(user_id):
     lack_total_GE = lack_GE_humanism_total + lack_GE_basic_total + lack_GE_fusion_total
 
     #DB에 저장할 교양 세부 검사 과정
-    GE_lecture_check = GE_basic_lecture_check + GE_fusion_lecture_check + GE_humanism_lecture_check
+    GE_lecture_check = GE_basic_lecture_check + GE_fusion_lecture_check + GE_humanism_lecture_check + test_lecture_check
 
     #DB에 저장
     calculate_and_save_standard(done_GE, lack_total_GE, rest_total, user_id, GE_lecture_check)
