@@ -1714,7 +1714,7 @@ def GE_trinity_calculate(user_id):
 
 
     #26년도 교양 기초 대체과목 변경안 계산
-    lecture_dict_result, rest_total, test_lecture_check = ge_renew_2026(lecture_dict_result, user_GE_standard, rest_total)
+    lecture_dict_result, rest_total, renew_lecture_check = ge_renew_2026(lecture_dict_result, user_GE_standard, rest_total)
 
     #일반선택 학점 및 교양 이수 학점 계산
     done_humanism_GE, done_basic_GE, done_fusion_GE, rest_total_topic = rest_and_done_calculate(GE_total, lecture_dict_result, rest_total)
@@ -1841,7 +1841,7 @@ def GE_trinity_calculate(user_id):
     lack_total_GE = lack_GE_humanism_total + lack_GE_basic_total + lack_GE_fusion_total
 
     #DB에 저장할 교양 세부 검사 과정
-    GE_lecture_check = GE_basic_lecture_check + GE_fusion_lecture_check + GE_humanism_lecture_check + test_lecture_check
+    GE_lecture_check = GE_basic_lecture_check + GE_fusion_lecture_check + GE_humanism_lecture_check + renew_lecture_check
 
     #DB에 저장
     calculate_and_save_standard(done_GE, lack_total_GE, rest_total, user_id, GE_lecture_check)

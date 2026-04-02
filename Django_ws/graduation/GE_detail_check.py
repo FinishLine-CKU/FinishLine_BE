@@ -200,7 +200,6 @@ def GE_detail_check(user_id):
         for item in my_list:
             if item['matched_topic'] in ['소통', '논리적사고와글쓰기', '외국어', '자기관리', '진로탐색', '창의성', '창업', '계열기초', '디지털소통']:
                 for i in choiceTable:
-                    print("테이블 변환 확인", choiceTable)
                     if i['topic'] == item['matched_topic']:
 
                         if item['matched_topic'] == '논리적사고와글쓰기':
