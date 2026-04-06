@@ -56,10 +56,6 @@ def get_user_GE(user_id):
 
         elif lecture['주제'] == '디지털시대의사고와표현':
             lecture['주제'] = '논리적사고와글쓰기'
-
-        # 공통 적용 X - 대체 로직
-        # elif lecture['주제'] == '디지털소통':
-        #     lecture['주제'] = 'MSC교과군'
     
     # 23 ~ 25학번
     if (year > 2022):
@@ -180,7 +176,7 @@ def get_user_GE_standard(year, user_college):
         essential_GE_data = {'인간학', '봉사활동', 'VERUM캠프', '논리적사고와글쓰기', '창의적사고와코딩', '외국어', 'MSC교과군', '철학적인간학', '신학적인간학', 'VERUM인성'}
         
         # 교양선택 주제 (18 ~ 22년도 : 트리니티 이전)
-        choice_GE_data = {'고전탐구', '사유와지혜', '가치와실천', '상상력과표현', '인문융합', '균형1', '균형2', '균형3', '균형4', '계열기초'}
+        choice_GE_data = {'고전탐구', '사유와지혜', '가치와실천', '상상력과표현', '인문융합', '균형1', '균형2', '균형3', '균형4', '계열기초', '1영역', '2영역', '3영역', '4영역'}
         
         cleaned_data = [
             {key: value for key, value in item.items() if key not in ['GEStandard_id', '연도'] and value != 0}
@@ -1004,6 +1000,61 @@ def GE_all_calculate(user_id):
             if item in lectures_dict:
                 lectures_dict.remove(item)
 
+
+    ################################# 2026학년도 대체과목 로직 (교양선택에서 자유롭게 이수) ##################################
+
+    delete_items = []
+
+    choice_GE_topic = ['진로탐색', '창의성', '창업', '정치와경제', '심리와건강', '정보와기술', '인간과문학', '역사와사회', '철학과예술', '자연과환경', '수리와과학', '언어와문화', '고전탐구', '사유와지혜', '가치와실천', '상상력과표현', '인문융합', '균형1', '균형2', '균형3', '균형4', '계열기초', '1영역', '2영역', '3영역', '4영역']
+
+    choice_dict = chocie_GE_standard[0]
+
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        # 수강 과목이  교양 선택이라면
+        if lecture_topic in choice_GE_topic:
+            for choice_standard in [*(chocie_GE_standard[0])]:
+                if choice_dict[lecture_topic] > 0 and choice_dict[lecture_topic] > lecture_credit:
+                    lecture_update = needcheck
+                    choice_credit = choice_dict[lecture_topic]
+                    missing_credit = choice_credit - lecture_credit
+                    choice_dict[lecture_topic] = missing_credit
+                    choice_dict["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                    lecture_update['분류'] = lecture_topic
+                    lecture_check.append(lecture_update)
+
+                elif choice_dict[lecture_topic] > 0 and choice_dict[lecture_topic] == lecture_credit: 
+                    lecture_update = needcheck
+                    del choice_dict[lecture_topic]
+                    delete_items.append(needcheck)
+                    choice_dict["총합"] -= lecture_credit
+
+                    lecture_update['분류'] = lecture_topic
+                    lecture_check.append(lecture_update)
+
+                elif choice_dict[lecture_topic] > 0 and choice_dict[lecture_topic] < lecture_credit:
+                    lecture_update = needcheck
+                    choice_credit = choice_dict[lecture_topic]
+                    missing_credit = choice_credit - lecture_credit
+                    rest += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del choice_dict[lecture_topic]
+                    delete_items.append(needcheck)
+                    
+                    choice_dict['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                    lecture_update['분류'] = lecture_topic
+                    lecture_check.append(lecture_update)
+
+                else:
+                    break
+
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
 
     ################################################### 검사 알고리즘 종료 ####################################################
 
