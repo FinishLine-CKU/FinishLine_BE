@@ -56,6 +56,10 @@ def get_user_GE(user_id):
 
         elif lecture['주제'] == '디지털시대의사고와표현':
             lecture['주제'] = '논리적사고와글쓰기'
+
+        # 2018 ~ 2022
+        elif lecture['주제'] == '대학외국어1' or lecture['주제'] == '대학외국어2':
+            lecture['주제'] = '외국어'
     
     # 23 ~ 25학번
     if (year > 2022):
