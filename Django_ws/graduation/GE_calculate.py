@@ -1009,7 +1009,7 @@ def GE_all_calculate(user_id):
 
     delete_items = []
 
-    choice_GE_topic = ['진로탐색', '창의성', '창업', '정치와경제', '심리와건강', '정보와기술', '인간과문학', '역사와사회', '철학과예술', '자연과환경', '수리와과학', '언어와문화', '고전탐구', '사유와지혜', '가치와실천', '상상력과표현', '인문융합', '균형1', '균형2', '균형3', '균형4', '계열기초', '1영역', '2영역', '3영역', '4영역']
+    choice_GE_topic = ['진로탐색', '진로', '창의성', '창업', '정치와경제', '심리와건강', '정보와기술', '인간과문학', '역사와사회', '철학과예술', '자연과환경', '수리와과학', '언어와문화', '고전탐구', '사유와지혜', '가치와실천', '상상력과표현', '인문융합', '균형1', '균형2', '균형3', '균형4', '계열기초', '1영역', '2영역', '3영역', '4영역']
 
     choice_dict = chocie_GE_standard[0]
 
@@ -1017,44 +1017,46 @@ def GE_all_calculate(user_id):
         lecture_topic = needcheck['주제']
         lecture_credit = Decimal(needcheck['학점'])
 
-        # 수강 과목이  교양 선택이라면
-        if lecture_topic in choice_GE_topic and choice_dict.get(lecture_topic):
+        # 수강 과목이 교양 선택이라면
+        if lecture_topic in choice_GE_topic:
             for choice_standard in [*(choice_dict)]:
-                if choice_dict[lecture_topic] > 0 and choice_dict[lecture_topic] > lecture_credit:
+                if choice_standard == "총합":
+                    continue
+
+                elif choice_dict[choice_standard] > 0 and choice_dict[choice_standard] > lecture_credit:
                     lecture_update = needcheck
-                    choice_credit = choice_dict[lecture_topic]
+                    choice_credit = choice_dict[choice_standard]
                     missing_credit = choice_credit - lecture_credit
-                    choice_dict[lecture_topic] = missing_credit
+                    choice_dict[choice_standard] = missing_credit
                     choice_dict["총합"] -= lecture_credit
                     delete_items.append(needcheck)
 
-                    lecture_update['분류'] = lecture_topic
+                    lecture_update['분류'] = choice_standard
                     lecture_check.append(lecture_update)
 
-                elif choice_dict[lecture_topic] > 0 and choice_dict[lecture_topic] == lecture_credit: 
+                elif choice_dict[choice_standard] > 0 and choice_dict[choice_standard] == lecture_credit: 
                     lecture_update = needcheck
-                    del choice_dict[lecture_topic]
+                    del choice_dict[choice_standard]
                     delete_items.append(needcheck)
                     choice_dict["총합"] -= lecture_credit
 
-                    lecture_update['분류'] = lecture_topic
+                    lecture_update['분류'] = choice_standard
                     lecture_check.append(lecture_update)
 
-                elif choice_dict[lecture_topic] > 0 and choice_dict[lecture_topic] < lecture_credit:
+                elif choice_dict[choice_standard] > 0 and choice_dict[choice_standard] < lecture_credit:
                     lecture_update = needcheck
-                    choice_credit = choice_dict[lecture_topic]
+                    choice_credit = choice_dict[choice_standard]
                     missing_credit = choice_credit - lecture_credit
                     rest += abs(missing_credit) # 초과 학점 일반선택 학점 추가
-                    del choice_dict[lecture_topic]
+                    del choice_dict[choice_standard]
                     delete_items.append(needcheck)
                     
                     choice_dict['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
 
-                    lecture_update['분류'] = lecture_topic
+                    lecture_update['분류'] = choice_standard
                     lecture_check.append(lecture_update)
 
-                else:
-                    break
+                break
 
     for item in delete_items:
         if item in lectures_dict:
