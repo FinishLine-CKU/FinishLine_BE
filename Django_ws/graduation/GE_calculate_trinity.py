@@ -672,6 +672,53 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total, GE_humanism_
             lectures_dict.remove(item)
     delete_items = []
 
+
+    ######################################### 교양 융합 대체과목 로직 #########################################
+
+    TARGET_TOPICS = ['진로탐색', '창의성', '창업', '계열기초', "정치와경제", "심리와건강", "정보와기술", "인간과문학", 
+                    "역사와사회", "철학과예술", "자연과환경", "수리와과학", "언어와문화"]
+
+    COMPETENCIES = ["정보활용", "창의융합", "문제해결", "융합비고"]
+
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        if lecture_topic in TARGET_TOPICS:
+            
+            for comp in COMPETENCIES:
+                applied = False
+                
+                for GE_standard in user_GE_standard:
+                    if comp in GE_standard:
+                        ge_val = Decimal(GE_standard[comp])
+                        
+                        if ge_val > lecture_credit:
+                            GE_standard[comp] -= lecture_credit
+                            GE_standard["총합"] -= lecture_credit
+                        else:
+                            if ge_val < lecture_credit:
+                                diff = lecture_credit - ge_val
+                                rest_total += diff
+                                GE_standard["총합"] -= ge_val
+                            else:
+                                GE_standard["총합"] -= lecture_credit
+                            
+                            del GE_standard[comp]
+                        
+                        needcheck['분류'] = comp
+                        lecture_check.append(needcheck)
+                        delete_items.append(needcheck)
+                        applied = True
+                        break 
+                
+                if applied: 
+                    break
+
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+
     return lectures_dict, user_GE_standard, rest_total, GE_humanism_standard, lecture_check
 
 #23년도 교양 기초 계산
@@ -1197,6 +1244,57 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_t
                 lectures_dict.remove(item)
         delete_items = []
 
+    ############################################## 자기관리 대체과목 계산 ##############################################
+
+        for needcheck in lectures_dict[:]:
+            lecture_topic = needcheck['주제']
+            lecture_credit = Decimal(needcheck['학점'])
+
+            if lecture_topic in ["진로탐색", "창업", "창의성", "계열기초", "정치와경제", "심리와건강", "정보와기술", "인간과문학", "역사와사회", "철학과예술", "자연과환경", "수리와과학", "언어와문화"]:
+
+
+                for GE_standard in user_GE_standard:
+                    if "자기관리" in GE_standard and GE_standard["자기관리"] > lecture_credit:
+                        lecture_update = needcheck
+                        GE_credit = GE_standard["자기관리"]
+                        missing_credit = GE_credit - lecture_credit
+                        GE_standard["자기관리"] = missing_credit
+                        GE_standard["총합"] -= lecture_credit
+                        delete_items.append(needcheck)
+
+                        lecture_update['분류'] = '진로탐색'
+                        lecture_check.append(lecture_update)
+
+                    elif "자기관리" in GE_standard and GE_standard["자기관리"] == lecture_credit: 
+                        lecture_update = needcheck
+                        del GE_standard["자기관리"]
+                        delete_items.append(needcheck)
+                        GE_standard["총합"] -= lecture_credit
+
+                        lecture_update['분류'] = '진로탐색'
+                        lecture_check.append(lecture_update)
+
+                    elif "자기관리" in GE_standard and GE_standard["자기관리"] < lecture_credit: 
+                        lecture_update = needcheck
+                        GE_credit = GE_standard["자기관리"]
+                        missing_credit = GE_credit - lecture_credit
+                        rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                        del GE_standard["자기관리"]
+                        delete_items.append(needcheck)
+                        
+                        GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                        lecture_update['분류'] = '진로탐색'
+                        lecture_check.append(lecture_update)
+
+                    else:
+                        break
+                    
+        for item in delete_items:
+            if item in lectures_dict:
+                lectures_dict.remove(item)
+        delete_items = []
+
     return lectures_dict, user_GE_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search, lecture_check
 
 #24, 25년도 교양 기초 계산
@@ -1598,6 +1696,57 @@ def GE_basic_calculate_2025(lecture_dict, user_GE_standard, rest_total):
             lectures_dict.remove(item)
     delete_items = []
 
+    ############################################## 자기관리 대체과목 계산 ##############################################
+
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
+
+        if lecture_topic in ["진로탐색", "창업", "창의성", "계열기초", "정치와경제", "심리와건강", "정보와기술", "인간과문학", "역사와사회", "철학과예술", "자연과환경", "수리와과학", "언어와문화"]:
+
+
+            for GE_standard in user_GE_standard:
+                if "자기관리" in GE_standard and GE_standard["자기관리"] > lecture_credit:
+                    lecture_update = needcheck
+                    GE_credit = GE_standard["자기관리"]
+                    missing_credit = GE_credit - lecture_credit
+                    GE_standard["자기관리"] = missing_credit
+                    GE_standard["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
+
+                    lecture_update['분류'] = '진로탐색'
+                    lecture_check.append(lecture_update)
+
+                elif "자기관리" in GE_standard and GE_standard["자기관리"] == lecture_credit: 
+                    lecture_update = needcheck
+                    del GE_standard["자기관리"]
+                    delete_items.append(needcheck)
+                    GE_standard["총합"] -= lecture_credit
+
+                    lecture_update['분류'] = '진로탐색'
+                    lecture_check.append(lecture_update)
+
+                elif "자기관리" in GE_standard and GE_standard["자기관리"] < lecture_credit: 
+                    lecture_update = needcheck
+                    GE_credit = GE_standard["자기관리"]
+                    missing_credit = GE_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del GE_standard["자기관리"]
+                    delete_items.append(needcheck)
+                    
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                    lecture_update['분류'] = '진로탐색'
+                    lecture_check.append(lecture_update)
+
+                else:
+                    break
+                
+    for item in delete_items:
+        if item in lectures_dict:
+            lectures_dict.remove(item)
+    delete_items = []
+
     return lectures_dict, user_GE_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search, stack_write, lecture_check
 
 #일반선택 학점, 교양 이수 학점 계산 후 result로 전달
@@ -1624,7 +1773,7 @@ def lack_GE_calculate(GE_humanism_standard, GE_fusion_standard, GE_basic_standar
     return lack_GE_humanism_total, lack_GE_fusion_total, lack_GE_basic_total
 
 #26년도 교양 기초 대체과목 변경안 계산
-def ge_renew_2026(lecture_dict_result, user_GE_standard, rest_total):
+def ge_renew_2026(lecture_dict_result, user_GE_standard, rest_total, year):
     human_ge_standard = user_GE_standard['humanism_GE_standard'][0]
     basic_ge_standard = user_GE_standard['basic_GE_standard'][0]
     fusion_ge_standard = user_GE_standard['fusion_GE_standard'][0]
@@ -1633,8 +1782,13 @@ def ge_renew_2026(lecture_dict_result, user_GE_standard, rest_total):
     print("basic 잔여 요건", basic_ge_standard)
     print("fusion 잔여 요건", fusion_ge_standard)
 
+    if (year=='2023'):
+        foreign_standard = '외국어'
+    else:
+        foreign_standard = '소통'
+
     basic_topic_map = {
-        '언어와문화' : '소통',
+        '언어와문화' : foreign_standard,
     }
 
     lecture_check = []
@@ -1674,7 +1828,7 @@ def ge_renew_2026(lecture_dict_result, user_GE_standard, rest_total):
     for item in delete_items:
         if item in lecture_dict_result:
             lecture_dict_result.remove(item)
-
+    delete_items = []
 
     return lecture_dict_result, rest, lecture_check
 
@@ -1712,9 +1866,10 @@ def GE_trinity_calculate(user_id):
         #23년도가 아닐떄에는 기존 교양기초 함수 사용
         lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search, stack_write, GE_basic_lecture_check = GE_basic_calculate_2025(lecture_dict_result, user_GE_standard, rest_total)
 
-
+    
     #26년도 교양 기초 대체과목 변경안 계산
-    lecture_dict_result, rest_total, renew_lecture_check = ge_renew_2026(lecture_dict_result, user_GE_standard, rest_total)
+    lecture_dict_result, rest_total, renew_lecture_check = ge_renew_2026(lecture_dict_result, user_GE_standard, rest_total, year)
+
 
     #일반선택 학점 및 교양 이수 학점 계산
     done_humanism_GE, done_basic_GE, done_fusion_GE, rest_total_topic = rest_and_done_calculate(GE_total, lecture_dict_result, rest_total)
