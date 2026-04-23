@@ -1018,8 +1018,8 @@ def GE_all_calculate(user_id):
         lecture_credit = Decimal(needcheck['학점'])
 
         # 수강 과목이  교양 선택이라면
-        if lecture_topic in choice_GE_topic:
-            for choice_standard in [*(chocie_GE_standard[0])]:
+        if lecture_topic in choice_GE_topic and choice_dict.get(lecture_topic):
+            for choice_standard in [*(choice_dict)]:
                 if choice_dict[lecture_topic] > 0 and choice_dict[lecture_topic] > lecture_credit:
                     lecture_update = needcheck
                     choice_credit = choice_dict[lecture_topic]
