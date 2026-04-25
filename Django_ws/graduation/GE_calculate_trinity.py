@@ -1774,13 +1774,7 @@ def lack_GE_calculate(GE_humanism_standard, GE_fusion_standard, GE_basic_standar
 
 #26년도 교양 기초 대체과목 변경안 계산
 def ge_renew_2026(lecture_dict_result, user_GE_standard, rest_total, year):
-    human_ge_standard = user_GE_standard['humanism_GE_standard'][0]
     basic_ge_standard = user_GE_standard['basic_GE_standard'][0]
-    fusion_ge_standard = user_GE_standard['fusion_GE_standard'][0]
-
-    print("human 잔여 요건", human_ge_standard)
-    print("basic 잔여 요건", basic_ge_standard)
-    print("fusion 잔여 요건", fusion_ge_standard)
 
     if (year=='2023'):
         foreign_standard = '외국어'
@@ -1828,7 +1822,6 @@ def ge_renew_2026(lecture_dict_result, user_GE_standard, rest_total, year):
     for item in delete_items:
         if item in lecture_dict_result:
             lecture_dict_result.remove(item)
-    delete_items = []
 
     return lecture_dict_result, rest, lecture_check
 
