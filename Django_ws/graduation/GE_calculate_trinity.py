@@ -619,50 +619,49 @@ def GE_fusion_calculate(lecture_dict, user_GE_standard, rest_total, GE_humanism_
     delete_items = []
 
     #23년도 트리니티아카데미 대체과목 계산 로직 (트리니티아카데미가 있을 경우에만)
-    for GE_standard in GE_humanism_standard:
-        if '트리니티아카데미' in GE_standard:
-            for needcheck in lectures_dict[:]:
-                lecture_topic = needcheck['주제']
-                lecture_credit = Decimal(needcheck['학점'])
+    for needcheck in lectures_dict[:]:
+        lecture_topic = needcheck['주제']
+        lecture_credit = Decimal(needcheck['학점'])
 
-                #대체과목 영역이 사용자 교양 들은 과목에 존재한다면 트리니티아카데미를 계산한다
-                if lecture_topic in ["정치와경제", "심리와건강", "정보와기술", "인간과문학", "역사와사회", "철학과예술", "자연과환경", "수리와과학", "언어와문화"]:
-                    for GE_standard in user_GE_standard:
-                        if "트리니티아카데미" in GE_standard and GE_standard["트리니티아카데미"] > lecture_credit:
-                            lecture_update = needcheck
-                            GE_credit = GE_standard["트리니티아카데미"]
-                            missing_credit = GE_credit - lecture_credit
-                            GE_standard["트리니티아카데미"] = missing_credit
-                            GE_standard["총합"] -= lecture_credit
-                            delete_items.append(needcheck)
+        #대체과목 영역이 사용자 교양 들은 과목에 존재한다면 트리니티아카데미를 계산한다
+        if lecture_topic in ["정치와경제", "심리와건강", "정보와기술", "인간과문학", "역사와사회", "철학과예술", "자연과환경", "수리와과학", "언어와문화"]:
+            for GE_standard in GE_humanism_standard:
+                if "트리니티아카데미" in GE_standard and GE_standard["트리니티아카데미"] > lecture_credit:
+                    lecture_update = needcheck
+                    GE_credit = GE_standard["트리니티아카데미"]
+                    missing_credit = GE_credit - lecture_credit
+                    GE_standard["트리니티아카데미"] = missing_credit
+                    GE_standard["총합"] -= lecture_credit
+                    delete_items.append(needcheck)
 
-                            lecture_update['분류'] = '트리니티아카데미'
-                            lecture_check.append(lecture_update)                           
+                    lecture_update['분류'] = '트리니티아카데미'
+                    lecture_check.append(lecture_update)                           
 
-                        elif "트리니티아카데미" in GE_standard and GE_standard["트리니티아카데미"] == lecture_credit: 
-                            lecture_update = needcheck
-                            del GE_standard["트리니티아카데미"]
-                            delete_items.append(needcheck)
-                            GE_standard["총합"] -= lecture_credit
+                elif "트리니티아카데미" in GE_standard and GE_standard["트리니티아카데미"] == lecture_credit: 
+                    lecture_update = needcheck
+                    del GE_standard["트리니티아카데미"]
+                    delete_items.append(needcheck)
+                    GE_standard["총합"] -= lecture_credit
 
-                            lecture_update['분류'] = '트리니티아카데미'
-                            lecture_check.append(lecture_update)    
+                    lecture_update['분류'] = '트리니티아카데미'
+                    lecture_check.append(lecture_update)    
 
-                        elif "트리니티아카데미" in GE_standard and GE_standard["트리니티아카데미"] < lecture_credit: 
-                            lecture_update = needcheck
-                            GE_credit = GE_standard["트리니티아카데미"]
-                            missing_credit = GE_credit - lecture_credit
-                            rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
-                            del GE_standard["트리니티아카데미"]
-                            delete_items.append(needcheck)
-                            
-                            GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+                elif "트리니티아카데미" in GE_standard and GE_standard["트리니티아카데미"] < lecture_credit: 
+                    lecture_update = needcheck
+                    GE_credit = GE_standard["트리니티아카데미"]
+                    missing_credit = GE_credit - lecture_credit
+                    rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                    del GE_standard["트리니티아카데미"]
+                    delete_items.append(needcheck)
+                    
+                    GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
 
-                            lecture_update['분류'] = '트리니티아카데미'
-                            lecture_check.append(lecture_update)    
+                    lecture_update['분류'] = '트리니티아카데미'
+                    lecture_check.append(lecture_update)    
 
-                        else:
-                            break
+                else:
+
+                    break
         else:
             break
 
@@ -740,6 +739,8 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_t
     stack_startup = []
     #진로탐색
     stack_search = []
+    #진로,창업,창의성 대체과목
+    stack_all = []
 
     # 트리니티자유대학
     if (user_college == 'trinity'):
@@ -967,6 +968,184 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_t
                     else:
                         break
 
+        for item in delete_items:
+            if item in lectures_dict:
+                lectures_dict.remove(item)
+        delete_items = []
+
+    ############################################## 자기관리 대체과목 계산 ##############################################
+    ############################################## 자기관리 진로탐색 ###################################################
+
+        for needcheck in lectures_dict[:]:
+            lecture_topic = needcheck['주제']
+            lecture_credit = Decimal(needcheck['학점'])
+
+            if lecture_topic in ["진로탐색", "창업", "창의성", "계열기초", "정치와경제", "심리와건강", "정보와기술", "인간과문학", "역사와사회", "철학과예술", "자연과환경", "수리와과학", "언어와문화"]:
+
+                if len(stack_search) == 0:
+                    if lecture_credit == 2:
+                        stack_search.append(1)
+                        stack_search.append(1)
+                    else:
+                        stack_search.append(1)
+                elif len(stack_search) == 1:
+                    if lecture_credit == 2:
+                        stack_search.append(1)
+                        stack_search.append(1)
+                    else:
+                        stack_search.append(1)
+                elif len(stack_search) == 2:
+                    continue
+                else:
+                    continue
+
+                for GE_standard in user_GE_standard:
+                    if "자기관리" in GE_standard and GE_standard["자기관리"] > lecture_credit:
+                        lecture_update = needcheck
+                        GE_credit = GE_standard["자기관리"]
+                        missing_credit = GE_credit - lecture_credit
+                        GE_standard["자기관리"] = missing_credit
+                        GE_standard["총합"] -= lecture_credit
+                        delete_items.append(needcheck)
+
+                        lecture_update['분류'] = '진로탐색'
+                        lecture_check.append(lecture_update)
+
+                    elif "자기관리" in GE_standard and GE_standard["자기관리"] == lecture_credit: 
+                        lecture_update = needcheck
+                        del GE_standard["자기관리"]
+                        delete_items.append(needcheck)
+                        GE_standard["총합"] -= lecture_credit
+
+                        lecture_update['분류'] = '진로탐색'
+                        lecture_check.append(lecture_update)
+
+                    elif "자기관리" in GE_standard and GE_standard["자기관리"] < lecture_credit: 
+                        lecture_update = needcheck
+                        GE_credit = GE_standard["자기관리"]
+                        missing_credit = GE_credit - lecture_credit
+                        rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                        del GE_standard["자기관리"]
+                        delete_items.append(needcheck)
+                        
+                        GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                        lecture_update['분류'] = '진로탐색'
+                        lecture_check.append(lecture_update)
+
+                    else:
+                        break
+                    
+        for item in delete_items:
+            if item in lectures_dict:
+                lectures_dict.remove(item)
+        delete_items = []
+
+        ############################################## 자기관리 창의성 ###################################################
+
+        for needcheck in lectures_dict[:]:
+            lecture_topic = needcheck['주제']
+            lecture_credit = Decimal(needcheck['학점'])
+
+            if lecture_topic in ["진로탐색", "창업", "창의성", "계열기초", "정치와경제", "심리와건강", "정보와기술", "인간과문학", "역사와사회", "철학과예술", "자연과환경", "수리와과학", "언어와문화"]:
+
+                if len(stack_creative) == 0:
+                    stack_creative.append(1)
+                else:
+                    continue
+
+                for GE_standard in user_GE_standard:
+                    if "자기관리" in GE_standard and GE_standard["자기관리"] > lecture_credit:
+                        lecture_update = needcheck
+                        GE_credit = GE_standard["자기관리"]
+                        missing_credit = GE_credit - lecture_credit
+                        GE_standard["자기관리"] = missing_credit
+                        GE_standard["총합"] -= lecture_credit
+                        delete_items.append(needcheck)
+
+                        lecture_update['분류'] = '창의성'
+                        lecture_check.append(lecture_update)
+
+                    elif "자기관리" in GE_standard and GE_standard["자기관리"] == lecture_credit: 
+                        lecture_update = needcheck
+                        del GE_standard["자기관리"]
+                        delete_items.append(needcheck)
+                        GE_standard["총합"] -= lecture_credit
+
+                        lecture_update['분류'] = '창의성'
+                        lecture_check.append(lecture_update)
+
+                    elif "자기관리" in GE_standard and GE_standard["자기관리"] < lecture_credit: 
+                        lecture_update = needcheck
+                        GE_credit = GE_standard["자기관리"]
+                        missing_credit = GE_credit - lecture_credit
+                        rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                        del GE_standard["자기관리"]
+                        delete_items.append(needcheck)
+                        
+                        GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                        lecture_update['분류'] = '창의성'
+                        lecture_check.append(lecture_update)
+
+                    else:
+                        break
+                    
+        for item in delete_items:
+            if item in lectures_dict:
+                lectures_dict.remove(item)
+        delete_items = []
+
+        ############################################## 자기관리 창업 ###################################################
+
+        for needcheck in lectures_dict[:]:
+            lecture_topic = needcheck['주제']
+            lecture_credit = Decimal(needcheck['학점'])
+
+            if lecture_topic in ["진로탐색", "창업", "창의성", "계열기초", "정치와경제", "심리와건강", "정보와기술", "인간과문학", "역사와사회", "철학과예술", "자연과환경", "수리와과학", "언어와문화"]:
+
+                if len(stack_startup) == 0:
+                    stack_startup.append(1)
+                else:
+                    continue
+
+                for GE_standard in user_GE_standard:
+                    if "자기관리" in GE_standard and GE_standard["자기관리"] > lecture_credit:
+                        lecture_update = needcheck
+                        GE_credit = GE_standard["자기관리"]
+                        missing_credit = GE_credit - lecture_credit
+                        GE_standard["자기관리"] = missing_credit
+                        GE_standard["총합"] -= lecture_credit
+                        delete_items.append(needcheck)
+
+                        lecture_update['분류'] = '창업'
+                        lecture_check.append(lecture_update)
+
+                    elif "자기관리" in GE_standard and GE_standard["자기관리"] == lecture_credit: 
+                        lecture_update = needcheck
+                        del GE_standard["자기관리"]
+                        delete_items.append(needcheck)
+                        GE_standard["총합"] -= lecture_credit
+
+                        lecture_update['분류'] = '창업'
+                        lecture_check.append(lecture_update)
+
+                    elif "자기관리" in GE_standard and GE_standard["자기관리"] < lecture_credit: 
+                        lecture_update = needcheck
+                        GE_credit = GE_standard["자기관리"]
+                        missing_credit = GE_credit - lecture_credit
+                        rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                        del GE_standard["자기관리"]
+                        delete_items.append(needcheck)
+                        
+                        GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                        lecture_update['분류'] = '창업'
+                        lecture_check.append(lecture_update)
+
+                    else:
+                        break
+                    
         for item in delete_items:
             if item in lectures_dict:
                 lectures_dict.remove(item)
@@ -1244,14 +1423,18 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_t
                 lectures_dict.remove(item)
         delete_items = []
 
-    ############################################## 자기관리 대체과목 계산 ##############################################
+    ######################################23학년도 자기관리 대체과목 계산 ##############################################
+    ######################################23학년도 진로탐색,창업,창의성 대체과목 계산 ##################################
 
         for needcheck in lectures_dict[:]:
             lecture_topic = needcheck['주제']
             lecture_credit = Decimal(needcheck['학점'])
 
             if lecture_topic in ["진로탐색", "창업", "창의성", "계열기초", "정치와경제", "심리와건강", "정보와기술", "인간과문학", "역사와사회", "철학과예술", "자연과환경", "수리와과학", "언어와문화"]:
-
+                if len(stack_all) == 0:
+                    stack_all.append(1)
+                else:
+                    continue
 
                 for GE_standard in user_GE_standard:
                     if "자기관리" in GE_standard and GE_standard["자기관리"] > lecture_credit:
@@ -1285,6 +1468,63 @@ def GE_basic_calculate_2023(lecture_dict, user_GE_standard, user_college, rest_t
                         GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
 
                         lecture_update['분류'] = '진로탐색'
+                        lecture_check.append(lecture_update)
+
+                    else:
+                        break
+                    
+        for item in delete_items:
+            if item in lectures_dict:
+                lectures_dict.remove(item)
+        delete_items = []
+
+        ######################################23학년도 진로탐색,창업,창의성 대체과목 계산 ##################################
+
+        for needcheck in lectures_dict[:]:
+            lecture_topic = needcheck['주제']
+            lecture_credit = Decimal(needcheck['학점'])
+
+            if lecture_topic in ["진로탐색", "창업", "창의성", "계열기초", "정치와경제", "심리와건강", "정보와기술", "인간과문학", "역사와사회", "철학과예술", "자연과환경", "수리와과학", "언어와문화"]:
+
+                if len(stack_major_base) == 0:
+                    stack_major_base.append(1)
+                elif len(stack_major_base) == 1:
+                    stack_major_base.append(1)
+                else:
+                    continue
+
+                for GE_standard in user_GE_standard:
+                    if "계열기초" in GE_standard and GE_standard["계열기초"] > lecture_credit:
+                        lecture_update = needcheck
+                        GE_credit = GE_standard["계열기초"]
+                        missing_credit = GE_credit - lecture_credit
+                        GE_standard["계열기초"] = missing_credit
+                        GE_standard["총합"] -= lecture_credit
+                        delete_items.append(needcheck)
+
+                        lecture_update['분류'] = '계열기초'
+                        lecture_check.append(lecture_update)
+
+                    elif "계열기초" in GE_standard and GE_standard["계열기초"] == lecture_credit: 
+                        lecture_update = needcheck
+                        del GE_standard["계열기초"]
+                        delete_items.append(needcheck)
+                        GE_standard["총합"] -= lecture_credit
+
+                        lecture_update['분류'] = '계열기초'
+                        lecture_check.append(lecture_update)
+
+                    elif "계열기초" in GE_standard and GE_standard["계열기초"] < lecture_credit: 
+                        lecture_update = needcheck
+                        GE_credit = GE_standard["계열기초"]
+                        missing_credit = GE_credit - lecture_credit
+                        rest_total += abs(missing_credit) # 초과 학점 일반선택 학점 추가
+                        del GE_standard["계열기초"]
+                        delete_items.append(needcheck)
+                        
+                        GE_standard['총합'] -= (lecture_credit - abs(missing_credit))    # 학점 기준 초과 시 반영
+
+                        lecture_update['분류'] = '계열기초'
                         lecture_check.append(lecture_update)
 
                     else:
@@ -1847,10 +2087,6 @@ def GE_trinity_calculate(user_id):
         
     lecture_dict_result, GE_humanism_standard, rest_total, GE_humanism_lecture_check = GE_humanism_calculate(lecture_dict, user_GE_standard)
 
-
-    lecture_dict_result, GE_fusion_standard, rest_total, GE_humanism_standard, GE_fusion_lecture_check = GE_fusion_calculate(lecture_dict_result, user_GE_standard, rest_total, GE_humanism_standard)
-
-
     if (year == '2023'):
         #23년도 교양기초일때에만 다른 연도와 분리된 함수 사용
         lecture_dict_result, GE_basic_standard, rest_total, stack_major_base, stack_creative, stack_startup, stack_search, GE_basic_lecture_check = GE_basic_calculate_2023(lecture_dict_result, user_GE_standard, user_college, rest_total)
@@ -1862,6 +2098,9 @@ def GE_trinity_calculate(user_id):
     
     #26년도 교양 기초 대체과목 변경안 계산
     lecture_dict_result, rest_total, renew_lecture_check = ge_renew_2026(lecture_dict_result, user_GE_standard, rest_total, year)
+
+
+    lecture_dict_result, GE_fusion_standard, rest_total, GE_humanism_standard, GE_fusion_lecture_check = GE_fusion_calculate(lecture_dict_result, user_GE_standard, rest_total, GE_humanism_standard)
 
 
     #일반선택 학점 및 교양 이수 학점 계산
