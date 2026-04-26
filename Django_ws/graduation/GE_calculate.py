@@ -453,7 +453,7 @@ def GE_all_calculate(user_id):
         lecture_topic = needcheck['주제']
         lecture_credit = Decimal(needcheck['학점'])
 
-        if lecture_topic in ["철학적인간학"]:
+        if lecture_topic in ["인간학"]:
             for essential_stanadard in essential_GE_standard:
                 if "철학적인간학" in essential_stanadard and essential_stanadard["철학적인간학"] > lecture_credit:
                     lecture_update = needcheck
@@ -488,10 +488,7 @@ def GE_all_calculate(user_id):
                     lecture_update['분류'] = '철학적인간학'
                     lecture_check.append(lecture_update)
         
-        
-        elif lecture_topic in ["신학적인간학"]:
-            for essential_stanadard in essential_GE_standard:
-                if "신학적인간학" in essential_stanadard and essential_stanadard["신학적인간학"] > lecture_credit:
+                elif "신학적인간학" in essential_stanadard and essential_stanadard["신학적인간학"] > lecture_credit:
                     lecture_update = needcheck
                     essential_credit = essential_stanadard["신학적인간학"]
                     missing_credit = essential_credit - lecture_credit
@@ -527,7 +524,7 @@ def GE_all_calculate(user_id):
                     break
 
 
-        if lecture_topic in ["정보와기술", "디지털소통"]:
+        elif lecture_topic in ["정보와기술", "디지털소통"]:
             for essential_stanadard in essential_GE_standard:
                 if "창의적사고와코딩" in essential_stanadard and essential_stanadard["창의적사고와코딩"] > lecture_credit:
                     lecture_update = needcheck
@@ -1155,6 +1152,7 @@ def calculate_and_save_standard(done_GE, lack_total_GE, rest_total, student_id, 
         user.done_GE_rest = rest_total #교양 이수 일선 넘어가는 학점
 
         user.save()
+        MyDoneLecture.objects.filter(user_id=student_id).update(matched_topic=None)
 
         for item in lecture_check:
             check_name = item['교과목명']
