@@ -209,7 +209,7 @@ def GE_detail_check(user_id):
                         success_count_2 += item['credit']
 
                     if i['topic'] == '논리적사고와글쓰기,외국어':
-                        if item['matched_topic'] in ['논리적사고와글쓰기', '외국어']:
+                        if item['matched_topic'] in ['논리적사고와글쓰기', '외국어', '소통']:
 
                             if item['matched_topic'] == '논리적사고와글쓰기':
                                 item['lecture_topic'] = '논사글'
