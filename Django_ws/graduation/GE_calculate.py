@@ -46,15 +46,20 @@ def get_user_GE(user_id):
             }
         lectures_dict.append(lecture_data)
 
-    for changed_verum in lectures_dict:
-        if changed_verum['주제'] == 'VERUM인성':
-            changed_verum['주제'] = 'VERUM캠프'
+    # (2026학년도 기준) 교양 교육과정 대체 교과목 전처리 (주제 매핑)
+    for lecture in lectures_dict:
+        if lecture['주제'] == 'VERUM인간':
+            lecture['주제'] = '인간학'
 
-        elif changed_verum['주제'] == 'VERUM인간':
-            changed_verum['주제'] = '인간학'
+        elif lecture['주제'] == 'VERUM인성':
+            lecture['주제'] = 'VERUM캠프'
 
-        elif changed_verum['주제'] == '디지털시대의사고와표현':
-            changed_verum['주제'] = '논리적사고와글쓰기'
+        elif lecture['주제'] == '디지털시대의사고와표현':
+            lecture['주제'] = '논리적사고와글쓰기'
+
+        # 공통 적용 X - 대체 로직
+        # elif lecture['주제'] == '디지털소통':
+        #     lecture['주제'] = 'MSC교과군'
     
     # 23 ~ 25학번
     if (year > 2022):
