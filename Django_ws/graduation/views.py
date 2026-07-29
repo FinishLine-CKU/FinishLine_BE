@@ -31,6 +31,7 @@ from .micro_degree_calculate import calculate_lack_MD
 from .education_calculate import calculate_lack_education
 from .GE_detail_check import GE_detail_check
 from django.db.models import Q
+import time
 
 
 logger = logging.getLogger(__name__)
@@ -203,6 +204,9 @@ class NowLectureModelViewSet(ModelViewSet):
 #pdf에서 정보 추출
 @api_view(['POST'])
 def upload_pdf(request):
+
+    api_start = time.perf_counter()
+
     if 'files' not in request.FILES:
         return Response({'error': 'No file uploaded'}, status=400)
 
@@ -223,15 +227,22 @@ def upload_pdf(request):
                     print(f"Start Extract PDF! \n사용자 학번: {user_id}")
 
                     #학번과 전공을 추출
+                    request_start = time.perf_counter()
                     extracted_major, student_year = extract_major_from_pdf_table(uploaded_file)
+                    log_perf("PDF" ,"extract_major", request_start)
 
                     print(f"PDF 파일명: {uploaded_file}")
                     #pdf내부 과목목록을 추출
                     print(f"PDF 추출 내용: ")
+
+                    request_start = time.perf_counter()
                     extracted_table = extract_from_pdf_table(user_id, uploaded_file)
+                    log_perf("PDF", "extract_from", request_start)
 
                     #DB에 이수영역 변경 후 저장
+                    request_start = time.perf_counter()
                     saved_subjects, duplicate_subjects = save_pdf_data_to_db(extracted_table, student_year, extracted_major)
+                    log_perf("PDF", "save_db", request_start)
 
 
                     if duplicate_subjects: 
@@ -251,6 +262,7 @@ def upload_pdf(request):
             error_msg = str(e)
             if error_msg == "PDF 형식 오류: 이미지 기반 PDF":
                 image_files.append(uploaded_file.name)
+                logger.warning(f"[PERF][ERROR] pdf_img_file={uploaded_file.name}")
                 print(f'error: {user_id} {str(e)}')
             else:
                 error_files.append(uploaded_file.name)
@@ -258,6 +270,8 @@ def upload_pdf(request):
 
         except Exception as e:
             return Response({'error': f'Error processing file {uploaded_file.name}: {str(e)}'}, status=500)
+
+    log_perf("PDF", "total", api_start)
             
     return Response({
         'message': 'Files processed successfully',
@@ -378,11 +392,16 @@ def test_education(request):
 
 @api_view(['POST'])
 def oneclick_test(request):
+
+    api_start = time.perf_counter()
+
     data = request.data
     studentId = data.get('studentId')
     studentPW = data.get('studentPW')
 
+    request_start = time.perf_counter()
     result = auto_test(studentId, studentPW)
+    log_perf("ONECLICK", "auto_test", request_start)
 
     if isinstance(result, list):
 
@@ -390,7 +409,10 @@ def oneclick_test(request):
             print(original_subject)
         # 기이수과목 DB처리
         major = User.objects.filter(student_id=studentId).values_list('major', flat=True).first()
+
+        request_start = time.perf_counter()
         saved_subjects = save_pdf_data_to_db(result, studentId[:4], major)
+        log_perf("ONECLICK", "save_db", request_start)
 
         data = {'success' : True}
         print(f'Success OneClick Test! \n학번: {studentId}\n전공코드: {major}')
@@ -399,6 +421,8 @@ def oneclick_test(request):
         error = result
         data = {'error' : error}
         print(f'Fail OneClick Test.. \nError: {error} \n학번: {studentId}')
+
+    log_perf("ONECLICK", "total", api_start)
 
     return Response(data)
 
@@ -416,3 +440,7 @@ def ge_detail_view(request):
     }
 
     return Response(data)
+
+def log_perf(func, name, start):
+    elapsed = time.perf_counter() - start
+    logger.info(f"[PERF][{func}] {name}={elapsed:.3f}s")
