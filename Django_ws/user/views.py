@@ -13,16 +13,27 @@ from graduation.major_calculate import select_user_standard
 from rest_framework.response import Response
 from django.http import HttpResponse
 from datetime import timedelta, datetime, timezone
+import time
+import logging
+
+logger = logging.getLogger(__name__)
 
 education_college = ['030701*', '030704*', '030710*', '030709*', '030702*', '030705*', '030707*']
 
 @api_view(['POST'])
 def student_auth(request):    # 재학생인증
+
+    api_start = time.perf_counter()
+
     data = request.data
     studentId = data.get('studentId')
     studentPW = data.get('studentPW')
     isPasswordReset = data.get('isPasswordReset', False)    # 비밀번호 재설정
+
+    request_start = time.perf_counter()
     result = scraping(studentId, studentPW)
+    log_perf("AUTH", "scraping", request_start)
+
     if isinstance(result, tuple):
         student_id, name, major = result
         if User.objects.filter(student_id = student_id, name = name).exists() and not isPasswordReset:
@@ -34,7 +45,11 @@ def student_auth(request):    # 재학생인증
             data = {'error' : error}
             print(f'Fail Student Auth.. \nError: {error}')
         else:
+
+            request_start = time.perf_counter()
             mapping_result = mapping_major(major)
+            log_perf("AUTH", "mapping_major", request_start)
+
             if isinstance(mapping_result, tuple):
                 major, college = mapping_result
                 data = {'student_id': student_id, 'name' : name, 'major' : major, 'college' : college}
@@ -47,6 +62,9 @@ def student_auth(request):    # 재학생인증
         error = result
         data = {'error' : error}
         print(f'Fail Student Auth.. \nError: {error} \n사용자 학번: {studentId}')
+
+    log_perf("AUTH", "total", api_start)
+    
     return Response (data)
 
 @api_view(['POST'])
@@ -387,3 +405,7 @@ def get_visitor_info(request):
         })
     else:
         return Response({'error': 'Visitor data not found'}, status=404)
+
+def log_perf(func, name, start):
+    elapsed = time.perf_counter() - start
+    logger.info(f"[PERF][{func}] {name}={elapsed:.3f}s")
