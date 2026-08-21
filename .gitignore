@@ -4,4 +4,4 @@ venv/
 developments.py
 production.py
 *.pyc
-__pycache__/
+__pycache__/claude.md
