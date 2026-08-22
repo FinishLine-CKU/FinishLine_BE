@@ -19,6 +19,14 @@ CAREER_TOPICS = ['진로탐색', '창의성', '창업']
 # 융합비고로 묶이는 주제 (택1 제한 없이 자유 합산)
 FUSION_NOTE_TOPICS = ['정치와경제', '심리와건강', '정보와기술', '인간과문학', '역사와사회', '철학과예술', '자연과환경', '수리와과학', '언어와문화']
 
+# 계산용 내부 topic 명칭(GEStandard 컬럼명/matched_topic 매칭 키)과 2026 교육과정 화면 표시명이 달라
+# 부족 영역/상세보기 결과를 반환하기 직전에만 라벨을 치환한다(계산 로직에는 영향 없음).
+ESSENTIAL_DISPLAY_LABEL = {
+    'VERUM캠프': 'VERUM인성',
+    '인간학': 'VERUM인간',
+    '논리적사고와글쓰기': '디지털시대의사고와표현',
+}
+
 
 # 26년도 교양 이수학점 계산
 def get_user_GE_2026(user_id):
@@ -315,6 +323,12 @@ def GE_2026_calculate(user_id):
     lack_essential_topic.pop('총합')
     lack_choice_topic.pop('총합')
 
+    #교양필수 소분류 제목을 2026 교육과정 화면 표시명으로 치환 (GE_detail_check_2026과 동일한 표시명 적용)
+    lack_essential_topic = {
+        ESSENTIAL_DISPLAY_LABEL.get(key, key): value
+        for key, value in lack_essential_topic.items()
+    }
+
     #교양 선택 소분류 제목으로 변경 - 이미 이수한 주제는 표시에서 제외
     changed_lack_choice_topic = {}
     for key in lack_choice_topic:
@@ -409,16 +423,10 @@ def GE_detail_check_2026(user_id):
     else:
         essentialTable.append({"success": False})
 
-    # 계산용 내부 topic 명칭(GEStandard 컬럼명/matched_topic 매칭 키)과 2026 화면 표시명이 달라
     # 매칭이 끝난 뒤 표시용 라벨만 치환한다(계산 로직에는 영향 없음).
-    essential_display_label = {
-        'VERUM캠프': 'VERUM인성',
-        '인간학': 'VERUM인간',
-        '논리적사고와글쓰기': '디지털시대의사고와표현',
-    }
     for i in essentialTable:
-        if 'topic' in i and i['topic'] in essential_display_label:
-            i['topic'] = essential_display_label[i['topic']]
+        if 'topic' in i and i['topic'] in ESSENTIAL_DISPLAY_LABEL:
+            i['topic'] = ESSENTIAL_DISPLAY_LABEL[i['topic']]
 
     #####교양선택 (미래설계 : 자기관리 / 디지털융합·지역혁신·지속가능발전 : 융합비고)#####
     career_topic_label = ','.join(CAREER_TOPICS)
