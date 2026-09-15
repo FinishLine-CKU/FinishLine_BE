@@ -13,6 +13,8 @@ from .GE_calculate import GE_all_calculate
 from .GE_calculate import get_user_GE_standard
 from .GE_calculate import find_user_college
 from .GE_calculate_trinity import GE_trinity_calculate
+from .GE_calculate_2026 import GE_2026_calculate
+from .GE_calculate_2026 import GE_detail_check_2026
 from .auto_test import auto_test
 import logging
 from rest_framework.viewsets import ModelViewSet
@@ -293,13 +295,17 @@ def general_check(request):
 
     #졸업요건 검사로직
 
+    #26년도일 경우
+    if (year >= '2026'):
+        result = GE_2026_calculate(user_id)
+
     #트리니티일 경우
-    if (year > '2022'):
+    elif (year > '2022'):
         result = GE_trinity_calculate(user_id)
 
     #트리니티가 아닐 경우(기존 로직)
-    else:    
-        result = GE_all_calculate(user_id) 
+    else:
+        result = GE_all_calculate(user_id)
 
     data = {
             'lackEssentialGE': result.get("lackEssentialGE", []),
@@ -429,8 +435,13 @@ def oneclick_test(request):
 @api_view(['POST'])
 def ge_detail_view(request):
     user_id = request.data.get('student_id')
+    year = user_id[:4]
 
-    essentialTable, choiceTable, fusionTable, restTable = GE_detail_check(user_id)
+    if year >= '2026':
+        essentialTable, choiceTable, restTable = GE_detail_check_2026(user_id)
+        fusionTable = []
+    else:
+        essentialTable, choiceTable, fusionTable, restTable = GE_detail_check(user_id)
 
     data = {
         "essentialTable" : essentialTable,

@@ -116,6 +116,9 @@ def calculate_lack_MD(student_id):
             MD_standard = 15
             rest_standard -= 6
 
+        else:  # 신생 소단위 전공 또는 매핑되지 않은 MD (테스트 목적으로 9학점 기준 사용)
+            MD_standard = 9
+
         lack_MD = MD_standard - done_MD
 
         # 소단위 전공 이수학점 초과
