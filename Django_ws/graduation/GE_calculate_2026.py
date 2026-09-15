@@ -64,13 +64,13 @@ def get_user_GE_standard_2026():
     filtered_data = GEStandard.objects.filter(연도='2026').values()
 
     if not filtered_data:
-        print(f"GEStandard_id can not found")
+        raise ValueError("GEStandard(연도='2026') 기준 데이터가 존재하지 않습니다.")
 
     essential_GE_data = {'인간학', 'VERUM캠프', '논리적사고와글쓰기', '디지털소통'}
     choice_GE_data = {'자기관리', '융합비고'}
 
     cleaned_data = [
-        {key: value for key, value in item.items() if key not in ['GEStandard_id', '연도'] and value != 0}
+        {key: value for key, value in item.items() if key not in ['GEStandard_id', '연도'] and value not in (0, None)}
         for item in filtered_data
     ]
 
