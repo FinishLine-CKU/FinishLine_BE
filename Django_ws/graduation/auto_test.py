@@ -43,6 +43,9 @@ def auto_test(studentId, studentPW):
             if grade == 'N' or grade == 'F':
                 continue
             
+            # 이수영역/주제에서 '/' 뒤의 주제만 사용
+            topic = topic.split('/', 1)[-1].strip() if topic.strip() else ' '
+
 
             if area == '전공필수':
                 area = '전필'
@@ -75,7 +78,7 @@ def auto_test(studentId, studentPW):
                 '이수년도': year,
                 '학기': semester,
                 '이수구분': area,
-                '주제': topic if topic else ' ',
+                '주제': topic,
                 '교과목명': lecture_name,
                 '학점': credit,
                 '학번': studentId
