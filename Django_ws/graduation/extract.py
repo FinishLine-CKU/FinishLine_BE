@@ -2,8 +2,14 @@ from django.shortcuts import render
 from django.http import HttpResponse
 import pdfplumber
 import re
+import time
+import logging
+from django.db import connection
+from django.test.utils import CaptureQueriesContext
 from .models import MyDoneLecture
 from .models import AllLectureData
+
+logger = logging.getLogger(__name__)
 
 def extract_from_pdf_title(uploaded_file):
     with pdfplumber.open(uploaded_file) as pdf:
@@ -311,18 +317,36 @@ def extract_from_pdf_table(user_id, uploaded_file):
 
 #전체 과목 데이터에서 과목코드를 가져와 내 기이수 과목에 저장
 def save_pdf_data_to_db(subjects_data, student_year, major=None):
+    # 구간별 누적 시간 + 쿼리 수/시간 측정
+    perf = {'duplicate_check': 0.0, 'match_lecture': 0.0, 'topic_check': 0.0, 'save': 0.0}
+
+    with CaptureQueriesContext(connection) as queries:
+        result = _save_pdf_data_to_db(subjects_data, student_year, major, perf)
+
+    logger.info(f"[PERF][SAVE_DB] subjects={len(subjects_data)}")
+    for name, elapsed in perf.items():
+        logger.info(f"[PERF][SAVE_DB] {name}={elapsed:.3f}s")
+    logger.info(f"[PERF][SAVE_DB] query_count={len(queries)}")
+    logger.info(f"[PERF][SAVE_DB] query_time={sum(float(q['time']) for q in queries.captured_queries):.3f}s")
+
+    return result
+
+def _save_pdf_data_to_db(subjects_data, student_year, major, perf):
     saved_subjects = []
     duplicate_subjects = []
 
     for subject in subjects_data:
         # 중복 데이터 (lecture_name은 로마숫자/라틴 정규화 후 비교)
+        start = time.perf_counter()
         existing_lecture_names = MyDoneLecture.objects.filter(
             year=subject['이수년도'],
             semester=subject['학기'],
             user_id=subject['학번'],
         ).values_list('lecture_name', flat=True)
+        is_duplicate = lecture_name_matches_any(subject['교과목명'], existing_lecture_names)
+        perf['duplicate_check'] += time.perf_counter() - start
 
-        if lecture_name_matches_any(subject['교과목명'], existing_lecture_names):
+        if is_duplicate:
             print(f"Check Duplicate Subject: {subject['학번']} {major if major else '-'} 교과목명: {subject['교과목명']}")
             duplicate_subjects.append(subject)
             continue
@@ -330,6 +354,7 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
         # 학생 기이수과목 - 강의 DB 매칭 & 이수영역 전처리
         else:
             # 기이수과목 - 강의 DB 매칭 (lecture_name은 로마숫자/라틴 정규화 후 비교)
+            start = time.perf_counter()
             if "사제동행세미나" in subject['교과목명'] and major:
                 change_major_code = major[0] if isinstance(major, list) else major
 
@@ -383,6 +408,9 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
                     subject['교과목명']
                 )
 
+            perf['match_lecture'] += time.perf_counter() - start
+
+            start = time.perf_counter()
             if subject['이수구분'] in ['교필', '교양'] and subject['주제'] == ' ':
                 lecture_name = subject['교과목명']
                 if lecture_name_matches_any(lecture_name, AllLectureData.objects.filter(lecture_topic__icontains = '외국어').values_list('lecture_name', flat=True).distinct()):
@@ -408,6 +436,8 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
                 elif lecture_name_matches_any(lecture_name, AllLectureData.objects.filter(lecture_topic = 'MSC교과군').values_list('lecture_name', flat=True).distinct()):
                     subject['주제'] = 'MSC교과군'
 
+            perf['topic_check'] += time.perf_counter() - start
+
             #내 기이수 과목에 저장
             if matching_alllecture:
                 subject_instance = MyDoneLecture(
@@ -421,7 +451,9 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
                     alllecture=matching_alllecture,
                     user_id=subject['학번'],
                 )
+                start = time.perf_counter()
                 subject_instance.save()
+                perf['save'] += time.perf_counter() - start
                 saved_subjects.append(subject_instance)
                 print(f"Saved to DB: {subject['학번']} {major if major else '-'} 교과목명: {subject['교과목명']}")
             else:

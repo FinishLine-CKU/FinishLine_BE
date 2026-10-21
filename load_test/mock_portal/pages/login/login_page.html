@@ -1,0 +1,13 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head><meta charset="utf-8"><title>통합로그인 (Mock)</title></head>
+<body>
+  <form id="loginForm">
+    <input type="text" id="login_id" name="login_id">
+    <input type="password" id="login_pwd" name="login_pwd">
+    <!-- 학번별 성적 페이지를 주기 위해 입력한 학번을 쿠키로 남긴다 (server.py 참고) -->
+    <a class="login" href="/menu/menu_main.html"
+       onclick="document.cookie='mock_sid=' + document.getElementById('login_id').value + '; path=/'">로그인</a>
+  </form>
+</body>
+</html>
