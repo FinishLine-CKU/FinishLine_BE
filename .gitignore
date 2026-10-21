@@ -7,3 +7,10 @@ production.py
 __pycache__/
 claude.md
 CLAUDE.md
+
+# 부하 테스트 결과물 (locust --csv 등)
+load_test/result*
+load_test/*.log
+
+# 학번별 mock 성적 페이지 (실제 이수 이력 기반, 서버에서 생성)
+load_test/mock_portal/pages/grades/profiles/

@@ -1,6 +1,11 @@
+import os
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import UnexpectedAlertPresentException
+
+# 부하 테스트 시 load_test/mock_portal 서버로 대체하기 위한 환경변수.
+# 미설정 시 기존과 동일하게 실제 가톨릭관동대 포털을 사용한다. (docs/oneclick_load_test.md 참고)
+CKU_PORTAL_BASE_URL = os.environ.get('CKU_PORTAL_BASE_URL', 'https://info.cku.ac.kr')
 
 def auto_test(studentId, studentPW):
     try:
@@ -13,7 +18,7 @@ def auto_test(studentId, studentPW):
         options.add_experimental_option('excludeSwitches', ['disable-popup-blocking'])
 
         driver = webdriver.Chrome(options = options)
-        driver.get('https://info.cku.ac.kr/haksa/common/loginForm2.jsp')
+        driver.get(f'{CKU_PORTAL_BASE_URL}/haksa/common/loginForm2.jsp')
         driver.implicitly_wait(2)
         driver.find_element(By.XPATH, '//area[@title="통합로그인"]').click()
         driver.implicitly_wait(2)
