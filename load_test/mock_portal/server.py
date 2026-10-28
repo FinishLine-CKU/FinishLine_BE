@@ -11,9 +11,9 @@ graduation/auto_test.py(Selenium)가 요구하는 페이지 흐름
 
 환경변수:
     MOCK_PORTAL_PORT   서버 포트 (기본 8888)
-    MOCK_PORTAL_DELAY  페이지 1건당 인위적 지연(초, 기본 1.6)
-                        -> 5개 페이지 이동 기준 약 8s로, 운영에서 관측되는
-                           auto_test 평균 소요(8~10s)를 재현하기 위한 값
+    MOCK_PORTAL_DELAY  페이지 1건당 인위적 지연(초, 기본 0.2)
+                        -> 테스트 EC2에서 auto_test 약 9s로, 운영에서 관측되는
+                           auto_test 평균 소요(8~10s)를 재현하기 위한 값 (1.6에서 보정)
 
 auto_test.py가 이 서버를 보게 하려면:
     CKU_PORTAL_BASE_URL=http://127.0.0.1:8888
@@ -33,7 +33,7 @@ from pathlib import Path
 
 PAGES_DIR = Path(__file__).parent / "pages"
 PORT = int(os.environ.get("MOCK_PORTAL_PORT", "8888"))
-PAGE_DELAY_SECONDS = float(os.environ.get("MOCK_PORTAL_DELAY", "1.6"))
+PAGE_DELAY_SECONDS = float(os.environ.get("MOCK_PORTAL_DELAY", "0.2"))
 PROFILES_DIR = PAGES_DIR / "grades" / "profiles"
 PROFILE_PAGES = sorted(PROFILES_DIR.glob("*.html"))
 LOADTEST_ID = re.compile(r"^\d{4}90(\d{2})$")
