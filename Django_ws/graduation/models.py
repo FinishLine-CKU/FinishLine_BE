@@ -13,9 +13,13 @@ class AllLectureData(models.Model):
     credit = models.DecimalField(max_digits=3, decimal_places=1)
     major_code = models.CharField(max_length=100, blank=True, null=True)
 
+    class Meta:
+        # save_db 강의 매칭 조회(year, semester 조건)용
+        indexes = [models.Index(fields=['year', 'semester'])]
+
     def __str__(self):
         return f"{self.lecture_name} ({self.year}-{self.semester})"
-    
+
 #현재 과목 데이터(25년도)
 class NowLectureData(models.Model):
     nowlecture_id = models.AutoField(primary_key=True)
@@ -46,6 +50,10 @@ class MyDoneLecture(models.Model):
     matched_topic = models.CharField(max_length=200, blank=True, null=True, default='')
 
     alllecture = models.ForeignKey(AllLectureData, on_delete=models.CASCADE, null=True)
+
+    class Meta:
+        # save_db 중복 체크·기이수 과목 조회(user_id 조건)용
+        indexes = [models.Index(fields=['user_id'])]
 
     def __str__(self):
         return f"{self.lecture_name} ({self.lecture_topic}) ({self.credit})"
