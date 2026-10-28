@@ -4,7 +4,7 @@ import pdfplumber
 import re
 import time
 import logging
-from django.db import connection
+from django.db import connection, transaction
 from django.test.utils import CaptureQueriesContext
 from .models import MyDoneLecture
 from .models import AllLectureData
@@ -331,6 +331,8 @@ def save_pdf_data_to_db(subjects_data, student_year, major=None):
 
     return result
 
+# 과목 저장을 한 트랜잭션으로 묶어 커밋 1회 + 예외 시 전체 롤백
+@transaction.atomic
 def _save_pdf_data_to_db(subjects_data, student_year, major, perf):
     saved_subjects = []
     duplicate_subjects = []
