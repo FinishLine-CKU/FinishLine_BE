@@ -34,9 +34,15 @@ from .education_calculate import calculate_lack_education
 from .GE_detail_check import GE_detail_check
 from django.db.models import Q
 import time
+import os
+import fcntl
+import tempfile
 
 
 logger = logging.getLogger(__name__)
+
+# 원클릭 크롤링 동시 실행 1건 제한용 잠금 파일 (gunicorn 워커 간 공유)
+ONECLICK_LOCK_PATH = os.path.join(tempfile.gettempdir(), 'finishline_oneclick.lock')
 
 #내 기이수 과목 데이터 학번으로 조회
 class MyDoneLectureModelViewSet(ModelViewSet):
@@ -405,9 +411,22 @@ def oneclick_test(request):
     studentId = data.get('studentId')
     studentPW = data.get('studentPW')
 
-    request_start = time.perf_counter()
-    result = auto_test(studentId, studentPW)
-    log_perf("ONECLICK", "auto_test", request_start)
+    # 크롤링은 동시에 1건만 실행, 잠금을 못 얻으면 기다리지 않고 즉시 거절
+    lock_file = open(ONECLICK_LOCK_PATH, 'w')
+    try:
+        fcntl.flock(lock_file, fcntl.LOCK_EX | fcntl.LOCK_NB)
+    except BlockingIOError:
+        lock_file.close()
+        logger.info("[PERF][ONECLICK] rejected=lock_busy")
+        return Response({'error': '현재 원클릭 검사 이용자가 많습니다. 잠시 후 다시 시도해주세요.'})
+
+    try:
+        request_start = time.perf_counter()
+        result = auto_test(studentId, studentPW)
+        log_perf("ONECLICK", "auto_test", request_start)
+    finally:
+        fcntl.flock(lock_file, fcntl.LOCK_UN)
+        lock_file.close()
 
     if isinstance(result, list):
 
