@@ -45,12 +45,17 @@ export const options = {
       rate: 1,
       timeUnit: '2s',
       duration: `${PROBE_SECONDS}s`,
-      preAllocatedVUs: 10,
+      preAllocatedVUs: 30,                                 // 테스트 중 VU를 새로 만드느라 요청이 누락되지 않도록 미리 확보
       maxVUs: 100,                                         // probe가 워커 대기로 쌓여도 요청이 누락(dropped)되지 않도록
       exec: 'probe',
     },
   },
   summaryTrendStats: ['avg', 'med', 'p(95)', 'max'],
+  // 요약에 API별 응답시간을 따로 출력하기 위한 threshold (판정 목적 아님)
+  thresholds: {
+    'http_req_duration{name:oneclick_test}': ['max>=0'],
+    'http_req_duration{name:get_visitor_info}': ['max>=0'],
+  },
 };
 
 export function oneclick() {
