@@ -1,4 +1,6 @@
 import os
+import time
+import logging
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import UnexpectedAlertPresentException
@@ -6,6 +8,13 @@ from selenium.common.exceptions import UnexpectedAlertPresentException
 # 부하 테스트 시 load_test/mock_portal 서버로 대체하기 위한 환경변수.
 # 미설정 시 기존과 동일하게 실제 가톨릭관동대 포털을 사용한다. (docs/oneclick_load_test.md 참고)
 CKU_PORTAL_BASE_URL = os.environ.get('CKU_PORTAL_BASE_URL', 'https://info.cku.ac.kr')
+
+logger = logging.getLogger(__name__)
+
+# 크롤링 단계별 소요 시간 측정 (views.log_perf와 같은 형식)
+def log_step(name, start):
+    elapsed = time.perf_counter() - start
+    logger.info(f"[PERF][AUTO_TEST] {name}={elapsed:.3f}s")
 
 def auto_test(studentId, studentPW):
     try:
@@ -17,24 +26,34 @@ def auto_test(studentId, studentPW):
         options.add_experimental_option("detach", True)
         options.add_experimental_option('excludeSwitches', ['disable-popup-blocking'])
 
+        start = time.perf_counter()
         driver = webdriver.Chrome(options = options)
+        log_step("chrome_start", start)
+
+        start = time.perf_counter()
         driver.get(f'{CKU_PORTAL_BASE_URL}/haksa/common/loginForm2.jsp')
         driver.implicitly_wait(2)
         driver.find_element(By.XPATH, '//area[@title="통합로그인"]').click()
         driver.implicitly_wait(2)
+        log_step("login_page", start)
 
+        start = time.perf_counter()
         ckuID = driver.find_element(By.ID, 'login_id')
         ckuID.send_keys(studentId)
         ckuPW = driver.find_element(By.ID, 'login_pwd')
         ckuPW.send_keys(studentPW)
         driver.find_element(By.XPATH, '//a[@class="login"]').click()
         driver.implicitly_wait(2)
+        log_step("login", start)
 
+        start = time.perf_counter()
         driver.find_element(By.XPATH, '//a[@class="snbmenu1"]').click()
         driver.find_element(By.XPATH, '//a[text()="전체 성적조회"]').click()
 
         rows = driver.find_elements(By.XPATH, '//div[@class="dataArea"]/table[3]/tbody/tr')
+        log_step("grades_page", start)
 
+        start = time.perf_counter()
         lectures_data = []
 
         for row in rows:
@@ -91,7 +110,11 @@ def auto_test(studentId, studentPW):
 
             lectures_data.append(subject_data)
 
+        log_step(f"parse_rows(rows={len(rows)})", start)
+
+        start = time.perf_counter()
         driver.quit()
+        log_step("chrome_quit", start)
 
         return lectures_data
 
