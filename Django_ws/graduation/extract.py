@@ -4,8 +4,7 @@ import pdfplumber
 import re
 import time
 import logging
-from django.db import connection, transaction
-from django.test.utils import CaptureQueriesContext
+from django.db import transaction
 from .models import MyDoneLecture
 from .models import AllLectureData
 
@@ -317,17 +316,14 @@ def extract_from_pdf_table(user_id, uploaded_file):
 
 #전체 과목 데이터에서 과목코드를 가져와 내 기이수 과목에 저장
 def save_pdf_data_to_db(subjects_data, student_year, major=None):
-    # 구간별 누적 시간 + 쿼리 수/시간 측정
+    # 구간별 누적 시간 측정
     perf = {'duplicate_check': 0.0, 'match_lecture': 0.0, 'topic_check': 0.0, 'save': 0.0}
 
-    with CaptureQueriesContext(connection) as queries:
-        result = _save_pdf_data_to_db(subjects_data, student_year, major, perf)
+    result = _save_pdf_data_to_db(subjects_data, student_year, major, perf)
 
     logger.info(f"[PERF][SAVE_DB] subjects={len(subjects_data)}")
     for name, elapsed in perf.items():
         logger.info(f"[PERF][SAVE_DB] {name}={elapsed:.3f}s")
-    logger.info(f"[PERF][SAVE_DB] query_count={len(queries)}")
-    logger.info(f"[PERF][SAVE_DB] query_time={sum(float(q['time']) for q in queries.captured_queries):.3f}s")
 
     return result
 
